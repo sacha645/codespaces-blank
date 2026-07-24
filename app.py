@@ -1,7 +1,22 @@
 import streamlit as st
 
 # 1. Configuration de la page
-st.set_page_config(page_title="Mon App", layout="wide")
+st.set_page_config(page_title="Réviseur", layout="wide")
+
+# 1,5. Réduction de l'épaisseur du bandeau en CSS
+st.markdown("""
+    <style>
+    /* Réduit l'espace blanc en tout haut de la page */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+    }
+    /* Ajuste l'alignement vertical du titre et des boutons */
+    [data-testid="stHorizontalBlock"] {
+        align-items: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # 2. Gestion de l'état (Savoir si l'utilisateur veut se connecter ou s'inscrire)
 if "vue_authentification" not in st.session_state:
