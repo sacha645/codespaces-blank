@@ -1,34 +1,64 @@
-import random
 import streamlit as st
 
-st.title("🧠 Révision de Vocabulaire")
+# 1. CONFIGURATION DE LA PAGE
+st.set_page_config(page_title="VocabLearn", layout="wide")
 
-VOCABULAIRE = {
-    "Apple": "Pomme",
-    "Book": "Livre",
-    "Cat": "Chat",
-    "House": "Maison",
-    "Sun": "Soleil",
-}
+# 2. INJECTION CSS POUR LA BARRE DE NAVIGATION
+st.markdown("""
+    <style>
+    /* Style du bandeau de navigation */
+    .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 30px;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #005088;
+        font-family: 'Arial', sans-serif;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-if "mot_courant" not in st.session_state:
-    st.session_state.mot_courant = random.choice(list(VOCABULAIRE.keys()))
-if "score" not in st.session_state:
-    st.session_state.score = 0
+# 3. CRÉATION DE LA BARRE HORIZONTALE (Simulée avec des colonnes)
+# On utilise st.columns pour placer le titre à gauche et le bouton à droite
+nav_col1, nav_col2 = st.columns([4, 1])
 
-st.write(f"### Score : {st.session_state.score}")
-st.write(f"Traduis le mot suivant en français : **{st.session_state.mot_courant}**")
+with nav_col1:
+    st.markdown('<div class="logo">📘 VocabLearn</div>', unsafe_allow_html=True)
 
-reponse = st.text_input("Ta réponse :", key="saisie_utilisateur")
+with nav_col2:
+    if st.button("Se connecter", use_container_width=True):
+        st.info("La fonction de connexion sera bientôt disponible !")
 
-if st.button("Valider"):
-    traduction_exacte = VOCABULAIRE[st.session_state.mot_courant]
+st.markdown("---") # Une ligne de séparation propre
 
-    if reponse.strip().lower() == traduction_exacte.lower():
-        st.success("Bravo ! Bonne réponse. 🎉")
-        st.session_state.score += 1
-    else:
-        st.error(f"Dommage ! La réponse était : **{traduction_exacte}**")
+# 4. CONTENU PRINCIPAL DU SITE
+st.title("Prêt pour ta révision ?")
+st.write("Choisis une catégorie pour commencer à apprendre.")
 
-    st.session_state.mot_courant = random.choice(list(VOCABULAIRE.keys()))
-    st.button("Mot suivant ➡️")
+# Organisation en "tuiles" (cards)
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    with st.container(border=True):
+        st.subheader("🇬🇧 Anglais")
+        st.write("150 mots à réviser")
+        st.button("Démarrer", key="en")
+
+with col2:
+    with st.container(border=True):
+        st.subheader("🇪🇸 Espagnol")
+        st.write("85 mots à réviser")
+        st.button("Démarrer", key="es")
+
+with col3:
+    with st.container(border=True):
+        st.subheader("🇩🇪 Allemand")
+        st.write("42 mots à réviser")
+        st.button("Démarrer", key="de")
