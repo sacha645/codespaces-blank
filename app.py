@@ -715,7 +715,7 @@ elif st.session_state.etat == "connecte":
                                         st.rerun()
                                     else:
                                         st.error(f"Aucun élément n'a pu être extrait. Vérifie que ton fichier respecte bien le format indiqué ci-dessus.")
-                                        
+
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
@@ -795,6 +795,3 @@ elif st.session_state.etat == "connecte":
                                 st.rerun()
 
                         st.divider()
-
-listes = recuperer_listes_utilisateur(user_id)
-
