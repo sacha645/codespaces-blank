@@ -201,11 +201,7 @@ with col_title:
 if st.session_state.etat == "connecte":
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            user_id = st.session_state.user[1]
-            supprimer_compte(user_id)
-            st.session_state.user = None
-            st.session_state.etat = "none"
-            st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
+            st.session_state.confirmer_suppr_compte = True
             st.rerun()
 
     with col_signup:
@@ -294,6 +290,28 @@ elif st.session_state.etat == "connecte":
     _, col_centre, _ = st.columns([1, 3, 1])
 
     with col_centre:
+
+        # ----------------------------------------------------
+        # CONFIRMATION DE SUPPRESSION DE COMPTE
+        # ----------------------------------------------------
+        if st.session_state.confirmer_suppr_compte:
+            st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
+            
+            col_annuler_compte, col_confirmer_compte = st.columns(2)
+            
+            with col_annuler_compte:
+                if st.button("❌ Annuler", use_container_width=True):
+                    st.session_state.confirmer_suppr_compte = False
+                    st.rerun()
+
+            with col_confirmer_compte:
+                if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
+                    supprimer_compte(user_id)
+                    st.session_state.user = None
+                    st.session_state.etat = "none"
+                    st.session_state.confirmer_suppr_compte = False
+                    st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
+                    st.rerun()
         
         # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
         if st.session_state.action_liste == "creer":
