@@ -361,304 +361,279 @@ elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
     # Initialisation des sous-états
-    if "menu_connecte" not in st.session_state:
-        st.session_state.menu_connecte = "gerer"
     if "action_liste" not in st.session_state:
-        st.session_state.action_liste = "liste"  # "liste", "creer", "voir", "supprimer", "editer"
+        st.session_state.action_liste = "liste"  # "liste", "creer", "voir", "supprimer", "editer", "entrainer"
     if "liste_active_id" not in st.session_state:
         st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
         st.session_state.nb_lignes_mots = 2
 
-    # --- MENU DU HAUT (Masqué lors des actions secondaires) ---
-    if st.session_state.action_liste == "liste":
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            if st.button("📚 Gérer mes listes", type="primary" if st.session_state.menu_connecte == "gerer" else "secondary", use_container_width=True):
-                st.session_state.menu_connecte = "gerer"
-                st.rerun()
+    _, col_centre, _ = st.columns([1, 3, 1])
 
-        with col_btn2:
-            if st.button("🎯 Choisir une liste", type="primary" if st.session_state.menu_connecte == "choisir" else "secondary", use_container_width=True):
-                st.session_state.menu_connecte = "choisir"
-                st.rerun()
-
-        ligne_epaisse()
-
-    # --- 1. BOUTON : GÉRER MES LISTES ---
-    if st.session_state.menu_connecte == "gerer":
+    with col_centre:
         
-        _, col_centre, _ = st.columns([1, 3, 1])
-
-        with col_centre:
+        # ----------------------------------------------------
+        # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
+        # ----------------------------------------------------
+        if st.session_state.action_liste == "creer":
+            st.subheader("✨ Créer une nouvelle liste")
             
-            # ----------------------------------------------------
-            # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
-            # ----------------------------------------------------
-            if st.session_state.action_liste == "creer":
-                st.subheader("✨ Créer une nouvelle liste")
+            nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
+            st.divider()
+
+            mots_saisis = []
+            toutes_lignes_visibles_remplies = True
+
+            c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
+            with c_h1:
+                st.caption("Article *(ex: le, un)*")
+            with c_h2:
+                st.caption("Mot / Nom")
+            with c_h3:
+                st.caption("Traduction")
+
+            for i in range(st.session_state.nb_lignes_mots):
+                col_art, col_mot, col_trad = st.columns([1, 2, 2])
                 
-                nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
-                st.divider()
+                with col_art:
+                    art = st.text_input(f"Art {i+1}", key=f"art_{i}", placeholder="le / un", label_visibility="collapsed")
+                with col_mot:
+                    mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}", label_visibility="collapsed")
+                with col_trad:
+                    trad = st.text_input(f"Trad {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}", label_visibility="collapsed")
+                
+                mots_saisis.append((art, mot, trad))
 
-                mots_saisis = []
-                toutes_lignes_visibles_remplies = True
+                if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                    toutes_lignes_visibles_remplies = False
 
-                c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
-                with c_h1:
-                    st.caption("Article *(ex: le, un)*")
-                with c_h2:
-                    st.caption("Mot / Nom")
-                with c_h3:
-                    st.caption("Traduction")
+            if toutes_lignes_visibles_remplies:
+                st.session_state.nb_lignes_mots += 1
+                st.rerun()
 
-                for i in range(st.session_state.nb_lignes_mots):
-                    col_art, col_mot, col_trad = st.columns([1, 2, 2])
-                    
-                    with col_art:
-                        art = st.text_input(f"Art {i+1}", key=f"art_{i}", placeholder="le / un", label_visibility="collapsed")
-                    with col_mot:
-                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}", label_visibility="collapsed")
-                    with col_trad:
-                        trad = st.text_input(f"Trad {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}", label_visibility="collapsed")
-                    
-                    mots_saisis.append((art, mot, trad))
+            st.write("")
+            col_annuler, col_sauvegarder = st.columns(2)
 
-                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
-                        toutes_lignes_visibles_remplies = False
-
-                if toutes_lignes_visibles_remplies:
-                    st.session_state.nb_lignes_mots += 1
+            with col_annuler:
+                if st.button("❌ Annuler", use_container_width=True):
+                    st.session_state.action_liste = "liste"
+                    st.session_state.nb_lignes_mots = 2
                     st.rerun()
 
-                st.write("")
-                col_annuler, col_sauvegarder = st.columns(2)
+            with col_sauvegarder:
+                if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
+                    if not nom_liste.strip():
+                        st.warning("Veuillez donner un nom à la liste.")
+                    else:
+                        ajouter_liste(user_id, nom_liste.strip())
+                        
+                        listes_user = recuperer_listes_utilisateur(user_id)
+                        derniere_liste_id = listes_user[-1][0]
 
-                with col_annuler:
-                    if st.button("❌ Annuler", use_container_width=True):
+                        nb_mots_ajoutes = 0
+                        for a, m, t in mots_saisis:
+                            if m.strip() and t.strip():
+                                ajouter_mot(derniere_liste_id, a, m, t)
+                                nb_mots_ajoutes += 1
+
+                        st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
                         st.session_state.action_liste = "liste"
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-                with col_sauvegarder:
-                    if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
-                        if not nom_liste.strip():
-                            st.warning("Veuillez donner un nom à la liste.")
-                        else:
-                            ajouter_liste(user_id, nom_liste.strip())
-                            
-                            listes_user = recuperer_listes_utilisateur(user_id)
-                            derniere_liste_id = listes_user[-1][0]
+        # ----------------------------------------------------
+        # CAS B : VUE ÉDITER UNE LISTE (✏️)
+        # ----------------------------------------------------
+        elif st.session_state.action_liste == "editer":
+            liste_id = st.session_state.liste_active_id
+            
+            listes_user = recuperer_listes_utilisateur(user_id)
+            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "")
 
-                            nb_mots_ajoutes = 0
-                            for a, m, t in mots_saisis:
-                                if m.strip() and t.strip():
-                                    ajouter_mot(derniere_liste_id, a, m, t)
-                                    nb_mots_ajoutes += 1
+            st.subheader("✏️ Éditer la liste")
+            
+            nouveau_nom = st.text_input("Nom de la liste", value=nom_actuel)
+            st.divider()
 
-                            st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
-                            st.session_state.action_liste = "liste"
-                            st.session_state.nb_lignes_mots = 2
-                            st.rerun()
+            mots_existants = recuperer_mots_liste(liste_id)
+            
+            nb_lignes = max(len(mots_existants) + 1, st.session_state.nb_lignes_mots)
 
-            # ----------------------------------------------------
-            # CAS B : VUE ÉDITER UNE LISTE (✏️)
-            # ----------------------------------------------------
-            elif st.session_state.action_liste == "editer":
-                liste_id = st.session_state.liste_active_id
-                
-                listes_user = recuperer_listes_utilisateur(user_id)
-                nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "")
+            mots_modifies = []
+            toutes_lignes_visibles_remplies = True
+            
+            c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
+            with c_h1:
+                st.caption("Article")
+            with c_h2:
+                st.caption("Mot / Nom")
+            with c_h3:
+                st.caption("Traduction")
 
-                st.subheader("✏️ Éditer la liste")
-                
-                nouveau_nom = st.text_input("Nom de la liste", value=nom_actuel)
-                st.divider()
+            for i in range(nb_lignes):
+                art_val, mot_val, trad_val = "", "", ""
+                if i < len(mots_existants):
+                    mot_or, trad_val = mots_existants[i]
+                    parts = mot_or.split(" ", 1)
+                    if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
+                        art_val, mot_val = parts[0], parts[1]
+                    else:
+                        mot_val = mot_or
 
-                mots_existants = recuperer_mots_liste(liste_id)
-                
-                # Le nombre de lignes à afficher est au moins le nombre de mots existants + 1,
-                # ou la valeur contenue dans nb_lignes_mots si l'utilisateur a rajouté des lignes
-                nb_lignes = max(len(mots_existants) + 1, st.session_state.nb_lignes_mots)
+                col_art, col_mot, col_trad = st.columns([1, 2, 2])
+                with col_art:
+                    art = st.text_input(f"Art {i+1}", value=art_val, key=f"edit_art_{i}", label_visibility="collapsed")
+                with col_mot:
+                    mot = st.text_input(f"Mot {i+1}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
+                with col_trad:
+                    trad = st.text_input(f"Trad {i+1}", key=f"edit_trad_{i}", value=trad_val, label_visibility="collapsed")
 
-                mots_modifies = []
-                toutes_lignes_visibles_remplies = True
-                
-                c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
-                with c_h1:
-                    st.caption("Article")
-                with c_h2:
-                    st.caption("Mot / Nom")
-                with c_h3:
-                    st.caption("Traduction")
+                mots_modifies.append((art, mot, trad))
 
-                for i in range(nb_lignes):
-                    # Valeurs par défaut si le mot existe déjà
-                    art_val, mot_val, trad_val = "", "", ""
-                    if i < len(mots_existants):
-                        mot_or, trad_val = mots_existants[i]
-                        parts = mot_or.split(" ", 1)
-                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
-                            art_val, mot_val = parts[0], parts[1]
-                        else:
-                            mot_val = mot_or
+                if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                    toutes_lignes_visibles_remplies = False
 
-                    col_art, col_mot, col_trad = st.columns([1, 2, 2])
-                    with col_art:
-                        art = st.text_input(f"Art {i+1}", value=art_val, key=f"edit_art_{i}", label_visibility="collapsed")
-                    with col_mot:
-                        mot = st.text_input(f"Mot {i+1}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
-                    with col_trad:
-                        trad = st.text_input(f"Trad {i+1}", key=f"edit_trad_{i}", value=trad_val, label_visibility="collapsed")
+            if toutes_lignes_visibles_remplies:
+                st.session_state.nb_lignes_mots = nb_lignes + 1
+                st.rerun()
 
-                    mots_modifies.append((art, mot, trad))
+            st.write("")
+            col_annuler, col_sauvegarder = st.columns(2)
 
-                    # Vérification : si une ligne affichée n'a pas de mot ou de traduction remplie
-                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
-                        toutes_lignes_visibles_remplies = False
-
-                # Si TOUTES les lignes affichées (y compris la dernière) sont remplies, on ajoute une nouvelle ligne !
-                if toutes_lignes_visibles_remplies:
-                    st.session_state.nb_lignes_mots = nb_lignes + 1
+            with col_annuler:
+                if st.button("❌ Annuler", use_container_width=True):
+                    st.session_state.action_liste = "liste"
+                    st.session_state.liste_active_id = None
+                    st.session_state.nb_lignes_mots = 2
                     st.rerun()
 
-                st.write("")
-                col_annuler, col_sauvegarder = st.columns(2)
-
-                with col_annuler:
-                    if st.button("❌ Annuler", use_container_width=True):
+            with col_sauvegarder:
+                if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
+                    if not nouveau_nom.strip():
+                        st.warning("Le nom de la liste ne peut pas être vide.")
+                    else:
+                        renommer_liste(liste_id, nouveau_nom.strip())
+                        remplacer_mots_liste(liste_id, mots_modifies)
+                        
+                        st.toast("Modifications enregistrées !", icon="✅")
                         st.session_state.action_liste = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-                with col_sauvegarder:
-                    if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
-                        if not nouveau_nom.strip():
-                            st.warning("Le nom de la liste ne peut pas être vide.")
-                        else:
-                            renommer_liste(liste_id, nouveau_nom.strip())
-                            remplacer_mots_liste(liste_id, mots_modifies)
-                            
-                            st.toast("Modifications enregistrées !", icon="✅")
-                            st.session_state.action_liste = "liste"
-                            st.session_state.liste_active_id = None
-                            st.session_state.nb_lignes_mots = 2
-                            st.rerun()
+        # ----------------------------------------------------
+        # CAS C : VUE VOIR UNE LISTE (👁️)
+        # ----------------------------------------------------
+        elif st.session_state.action_liste == "voir":
+            liste_id = st.session_state.liste_active_id
+            
+            listes_user = recuperer_listes_utilisateur(user_id)
+            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
 
-            # ----------------------------------------------------
-            # CAS C : VUE VOIR UNE LISTE (👁️)
-            # ----------------------------------------------------
-            elif st.session_state.action_liste == "voir":
-                liste_id = st.session_state.liste_active_id
-                
-                listes_user = recuperer_listes_utilisateur(user_id)
-                nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
+            st.subheader(f"📖 {nom_actuel}")
+            ligne_epaisse()
 
-                st.subheader(f"📖 {nom_actuel}")
-                ligne_epaisse()
+            mots = recuperer_mots_liste(liste_id)
 
-                mots = recuperer_mots_liste(liste_id)
-
-                if not mots:
-                    st.info("Cette liste ne contient aucun mot.")
-                else:
-                    c_m1, c_m2 = st.columns(2)
-                    with c_m1:
-                        st.markdown("**Mot / Expression**")
-                    with c_m2:
-                        st.markdown("**Traduction**")
-                    st.divider()
-
-                    for mot_or, trad in mots:
-                        cm1, cm2 = st.columns(2)
-                        cm1.write(mot_or)
-                        cm2.write(trad)
-
+            if not mots:
+                st.info("Cette liste ne contient aucun mot.")
+            else:
+                c_m1, c_m2 = st.columns(2)
+                with c_m1:
+                    st.markdown("**Mot / Expression**")
+                with c_m2:
+                    st.markdown("**Traduction**")
                 st.divider()
-                if st.button("🔙 Retour", use_container_width=True):
+
+                for mot_or, trad in mots:
+                    cm1, cm2 = st.columns(2)
+                    cm1.write(mot_or)
+                    cm2.write(trad)
+
+            st.divider()
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action_liste = "liste"
+                st.session_state.liste_active_id = None
+                st.rerun()
+
+        # ----------------------------------------------------
+        # CAS D : CONFIRMATION DE SUPPRESSION (🗑️)
+        # ----------------------------------------------------
+        elif st.session_state.action_liste == "supprimer":
+            liste_id = st.session_state.liste_active_id
+            
+            listes_user = recuperer_listes_utilisateur(user_id)
+            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "cette liste")
+
+            st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
+            
+            col_non, col_oui = st.columns(2)
+            
+            with col_non:
+                if st.button("❌ Annuler", use_container_width=True):
                     st.session_state.action_liste = "liste"
                     st.session_state.liste_active_id = None
                     st.rerun()
 
-            # ----------------------------------------------------
-            # CAS D : CONFIRMATION DE SUPPRESSION (🗑️)
-            # ----------------------------------------------------
-            elif st.session_state.action_liste == "supprimer":
-                liste_id = st.session_state.liste_active_id
-                
-                listes_user = recuperer_listes_utilisateur(user_id)
-                nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "cette liste")
+            with col_oui:
+                if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
+                    supprimer_liste(liste_id)
+                    st.toast(f"La liste '{nom_actuel}' a été supprimée.", icon="🗑️")
+                    st.session_state.action_liste = "liste"
+                    st.session_state.liste_active_id = None
+                    st.rerun()
 
-                st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
-                
-                col_non, col_oui = st.columns(2)
-                
-                with col_non:
-                    if st.button("❌ Annuler", use_container_width=True):
-                        st.session_state.action_liste = "liste"
-                        st.session_state.liste_active_id = None
-                        st.rerun()
+        # ----------------------------------------------------
+        # CAS E : VUE NORMALE (AFFICHAGE DES LISTES)
+        # ----------------------------------------------------
+        else:
+            col_titre, col_ajout = st.columns([4, 1])
+            with col_titre:
+                st.subheader("📋 Mes listes")
+            with col_ajout:
+                if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
+                    st.session_state.action_liste = "creer"
+                    st.session_state.nb_lignes_mots = 2
+                    st.rerun()
 
-                with col_oui:
-                    if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
-                        supprimer_liste(liste_id)
-                        st.toast(f"La liste '{nom_actuel}' a été supprimée.", icon="🗑️")
-                        st.session_state.action_liste = "liste"
-                        st.session_state.liste_active_id = None
-                        st.rerun()
+            st.write("")
+            ligne_epaisse()
 
-            # ----------------------------------------------------
-            # CAS E : VUE NORMALE (AFFICHAGE DES LISTES)
-            # ----------------------------------------------------
+            listes = recuperer_listes_utilisateur(user_id)
+
+            if not listes:
+                st.info("Tu n'as aucune liste pour l me/instants. Clique sur ➕ pour en créer une !")
             else:
-                col_titre, col_ajout = st.columns([4, 1])
-                with col_titre:
-                    st.subheader("📋 Mes listes")
-                with col_ajout:
-                    if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
-                        st.session_state.action_liste = "creer"
-                        st.session_state.nb_lignes_mots = 2
-                        st.rerun()
+                for liste_id, nom_liste in listes:
+                    col_nom, col_train, col_voir, col_edit, col_del = st.columns([4, 1, 1, 1, 1])
+                    
+                    with col_nom:
+                        st.markdown(f"### 📄 {nom_liste}")
 
-                st.write("")
+                    # NOUVEAU BOUTON : S'ENTRAÎNER (🎯)
+                    with col_train:
+                        if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
+                            st.session_state.action_liste = "entrainer"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
 
-                ligne_epaisse()
+                    with col_voir:
+                        if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
+                            st.session_state.action_liste = "voir"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
 
-                listes = recuperer_listes_utilisateur(user_id)
+                    with col_edit:
+                        if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
+                            st.session_state.action_liste = "editer"
+                            st.session_state.liste_active_id = liste_id
+                            st.session_state.nb_lignes_mots = 2
+                            st.rerun()
 
-                if not listes:
-                    st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
-                else:
-                    for liste_id, nom_liste in listes:
-                        col_nom, col_voir, col_edit, col_del = st.columns([5, 1, 1, 1])
-                        
-                        with col_nom:
-                            st.markdown(f"### 📄 {nom_liste}")
+                    with col_del:
+                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                            st.session_state.action_liste = "supprimer"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
 
-                        with col_voir:
-                            if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                                st.session_state.action_liste = "voir"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-                        # ACTION ÉDITER (✏️)
-                        with col_edit:
-                            if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
-                                st.session_state.action_liste = "editer"
-                                st.session_state.liste_active_id = liste_id
-                                st.session_state.nb_lignes_mots = 2
-                                st.rerun()
-
-                        with col_del:
-                            if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                                st.session_state.action_liste = "supprimer"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-                        st.divider()
-
-    # --- 2. BOUTON : CHOISIR UNE LISTE ---
-    elif st.session_state.menu_connecte == "choisir" and st.session_state.action_liste == "liste":
-        st.subheader("🎯 Choisir une liste pour réviser")
-        st.write("*(On verra cette partie plus tard !)*")
+                    st.divider()
