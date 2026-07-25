@@ -1,54 +1,20 @@
 import sqlite3
 import bcrypt
-import random
-import smtplib
-from email.mime.text import MIMEText
 import streamlit as st
 
 st.set_page_config(page_title="Réviseur", layout="wide")
-
-
-# --- CONFIGURATION EMAIL ---
-EMAIL_EXPEDITEUR = "sachapollpay@gmail.com"
-MOT_DE_PASSE_APP = "vjlf efer eagd lsvq"
-
-def envoyer_code_email(email_destinataire, code):
-    msg = MIMEText(f"Bonjour,\n\nVoici ton code de vérification : {code}")
-    msg['Subject'] = "Ton code de vérification"
-    msg['From'] = EMAIL_EXPEDITEUR
-    msg['To'] = email_destinataire
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(EMAIL_EXPEDITEUR, MOT_DE_PASSE_APP)
-            server.sendmail(EMAIL_EXPEDITEUR, email_destinataire, msg.as_string())
-        return True
-    except Exception as e:
-        st.error(f"Erreur d'envoi d'e-mail : {e}")
-        return False
-
-def renvoyer_code(email):
-    nouveau_code = str(random.randint(100000, 999999))
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    c.execute("UPDATE users SET code_verification = ? WHERE email = ?", (nouveau_code, email))
-    conn.commit()
-    conn.close()
-    return nouveau_code
 
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
-    # 1. Table Utilisateurs
+    # 1. Table Utilisateurs (connexion par nom d'utilisateur unique)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            code_verification TEXT,
-            est_verifie INTEGER DEFAULT 0
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
         )
     ''')
     
@@ -76,49 +42,33 @@ def init_db():
     conn.commit()
     conn.close()
 
-def pre_inscrire_utilisateur(email, username, password):
+def inscrire_utilisateur(username, password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
-    code = str(random.randint(100000, 999999))
     try:
         conn = sqlite3.connect("utilisateurs.db")
         c = conn.cursor()
         c.execute("""
-            INSERT INTO users (email, username, password, code_verification, est_verifie) 
-            VALUES (?, ?, ?, ?, 0)
-        """, (email, username, hashed_password, code))
-        conn.commit()
-        conn.close()
-        return code
-    except sqlite3.IntegrityError:
-        return None
-
-def valider_code(email, code_saisi):
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    c.execute("SELECT code_verification FROM users WHERE email = ?", (email,))
-    res = c.fetchone()
-    if res and res[0] == code_saisi:
-        c.execute("UPDATE users SET est_verifie = 1, code_verification = NULL WHERE email = ?", (email,))
+            INSERT INTO users (username, password) 
+            VALUES (?, ?)
+        """, (username, hashed_password))
         conn.commit()
         conn.close()
         return True
-    conn.close()
-    return False
+    except sqlite3.IntegrityError:
+        return False  # Nom d'utilisateur déjà pris
 
-def verifier_connexion(email, password):
+def verifier_connexion(username, password):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute("SELECT id, username, password, est_verifie FROM users WHERE email = ?", (email,))
+    c.execute("SELECT id, username, password FROM users WHERE username = ?", (username,))
     user = c.fetchone()
     conn.close()
 
     if user:
-        user_id, username, db_password, est_verifie = user
-        if not est_verifie:
-            return "NON_VERIFIE", None, None
+        user_id, db_username, db_password = user
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return "OK", username, user_id
+            return "OK", db_username, user_id
     return "ERREUR", None, None
 
 def supprimer_compte(user_id):
@@ -131,7 +81,7 @@ def supprimer_compte(user_id):
 init_db()
 
 
-# --- FONCTIONS BDD REQUISES ( À placer au-dessus de l'État 5 ) ---
+# --- FONCTIONS BDD LISTES ET MOTS ---
 def recuperer_listes_utilisateur(user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
@@ -147,18 +97,7 @@ def ajouter_liste(user_id, nom_liste):
     conn.commit()
     conn.close()
 
-def verifier_et_ajouter_ligne():
-    """Vérifie si la dernière ligne affichée est remplie pour ajouter la suivante"""
-    dernier_index = st.session_state.nb_lignes_mots - 1
-    mot = st.session_state.get(f"mot_{dernier_index}", "").strip()
-    trad = st.session_state.get(f"trad_{dernier_index}", "").strip()
-    
-    # Si le mot et la traduction de la dernière ligne ne sont pas vides
-    if mot and trad:
-        st.session_state.nb_lignes_mots += 1
-
 def ajouter_mot(liste_id, article, mot_original, traduction):
-    # Si un article est renseigné, on combine l'article et le mot
     if article.strip():
         mot_complet = f"{article.strip()} {mot_original.strip()}"
     else:
@@ -184,7 +123,6 @@ def recuperer_mots_liste(liste_id):
 def supprimer_liste(liste_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    # Active la suppression en cascade des mots liés à cette liste
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
     conn.commit()
@@ -198,7 +136,6 @@ def renommer_liste(liste_id, nouveau_nom):
     conn.close()
 
 def remplacer_mots_liste(liste_id, nouveaux_mots):
-    """Efface les anciens mots de la liste et insère les nouveaux"""
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
@@ -214,7 +151,6 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
-    # 1. On récupère le nom de la liste d'origine
     c.execute("SELECT nom_liste FROM listes WHERE id = ?", (liste_id_origine,))
     res = c.fetchone()
     
@@ -225,15 +161,12 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     nom_liste_origine = res[0]
     nouveau_nom = f"{nom_liste_origine} (copie)"
     
-    # 2. On crée la nouvelle liste pour le nouvel utilisateur
     c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (nouvel_user_id, nouveau_nom))
     nouvelle_liste_id = c.lastrowid
     
-    # 3. On récupère les mots de la liste d'origine
     c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
     mots = c.fetchall()
     
-    # 4. On copie tous les mots dans la nouvelle liste
     for mot_or, trad in mots:
         c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
                   (nouvelle_liste_id, mot_or, trad))
@@ -253,28 +186,21 @@ def ligne_epaisse():
     )
 
             
-# --- INITIALISATION UNIQUE DU STATE ---
+# --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
-    st.session_state.etat = "none"  # État par défaut
+    st.session_state.etat = "none"
 
 if "user" not in st.session_state:
     st.session_state.user = None
 
-if "email_verif" not in st.session_state:
-    st.session_state.email_verif = None
-
 
 # --- BARRE DE NAVIGATION ---
-# On ajuste le ratio des colonnes : 5 pour le titre, 2 pour la suppression, 1 pour la déconnexion
 col_title, col_action, col_signup = st.columns([6, 1, 1])
 
 with col_title:
     st.markdown("### 📘 Reviseur")
 
-# Si l'utilisateur est connecté
 if st.session_state.etat == "connecte":
-    
-    # Bouton Supprimer mon compte
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
             user_id = st.session_state.user[1]
@@ -284,14 +210,12 @@ if st.session_state.etat == "connecte":
             st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
             st.rerun()
 
-    # Bouton Déconnexion
     with col_signup:
         if st.button("Déconnexion", use_container_width=True):
             st.session_state.user = None
             st.session_state.etat = "none"
             st.rerun()
 
-# Si l'utilisateur N'EST PAS connecté
 else:
     with col_action:
         if st.button("Se connecter", use_container_width=True):
@@ -306,7 +230,7 @@ else:
 ligne_epaisse()
 
 
-# --- AFFICHAGE SELON L'ÉTAT (MACHINE À ÉTATS) ---
+# --- AFFICHAGE SELON L'ÉTAT ---
 
 # 1. ÉTAT : NONE (Accueil public)
 if st.session_state.etat == "none":
@@ -320,81 +244,50 @@ elif st.session_state.etat == "nouveau":
         with st.form("form_inscription"):
             st.subheader("📝 Créer un compte")
             nom = st.text_input("Nom d'utilisateur")
-            email = st.text_input("Adresse e-mail")
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
             valider = st.form_submit_button("S'inscrire", type="primary")
 
             if valider:
-                if not nom or not email or not mot_de_passe:
+                if not nom or not mot_de_passe:
                     st.warning("Remplis tous les champs.")
                 elif mot_de_passe != mot_de_passe_conf:
                     st.error("Les mots de passe ne correspondent pas.")
                 else:
-                    code = pre_inscrire_utilisateur(email, nom, mot_de_passe)
-                    if code and envoyer_code_email(email, code):
-                        st.session_state.email_verif = email
-                        st.session_state.etat = "verif"  # Passage à l'état de vérification
+                    succes = inscrire_utilisateur(nom, mot_de_passe)
+                    if succes:
+                        st.success("Compte créé avec succès ! Connecte-toi maintenant.")
+                        st.session_state.etat = "connect"
                         st.rerun()
-                    elif not code:
-                        st.error("Cet e-mail est déjà utilisé.")
+                    else:
+                        st.error("Ce nom d'utilisateur est déjà pris.")
 
-# 3. ÉTAT : VERIF (Saisie du code e-mail)
-elif st.session_state.etat == "verif":
-    _, col_centre, _ = st.columns([1, 2, 1])
-    with col_centre:
-        st.subheader("📩 Vérification de ton e-mail")
-        st.write(f"Un code à 6 chiffres a été envoyé à **{st.session_state.email_verif}**.")
-        with st.form("form_code"):
-            code_saisi = st.text_input("Code de confirmation", max_chars=6)
-            valider_code_btn = st.form_submit_button("Valider mon compte", type="primary")
-            
-            if valider_code_btn:
-                if valider_code(st.session_state.email_verif, code_saisi.strip()):
-                    st.success("Compte validé ! Connecte-toi maintenant.")
-                    st.session_state.etat = "connect"  # Passage à l'état de connexion
-                    st.rerun()
-                else:
-                    st.error("Code incorrect.")
-
-        # --- BOUTON DE RENVOI DU CODE (En dehors du formulaire principal) ---
-        if st.button("🔄 Renvoyer un nouveau code", use_container_width=True):
-            nouveau_code = renvoyer_code(st.session_state.email_verif)
-            if envoyer_code_email(st.session_state.email_verif, nouveau_code):
-                st.toast("Un nouveau code vient d'être envoyé !", icon="📩")
-
-# 4. ÉTAT : CONNECT (Formulaire de connexion)
+# 3. ÉTAT : CONNECT (Formulaire de connexion)
 elif st.session_state.etat == "connect":
     _, col_centre, _ = st.columns([1, 2, 1])
     with col_centre:
         with st.form("form_connexion"):
             st.subheader("🔑 Connexion")
-            email = st.text_input("Adresse e-mail")
+            nom = st.text_input("Nom d'utilisateur")
             mot_de_passe = st.text_input("Mot de passe", type="password")
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                statut, username, user_id = verifier_connexion(email, mot_de_passe)
-                if statut == "NON_VERIFIE":
-                    st.warning("E-mail non vérifié. Saisis le code envoyé.")
-                    st.session_state.email_verif = email
-                    st.session_state.etat = "verif"
-                    st.rerun()
-                elif statut == "OK":
+                statut, username, user_id = verifier_connexion(nom, mot_de_passe)
+                if statut == "OK":
                     st.session_state.user = (username, user_id)
                     st.session_state.etat = "connecte"
                     st.rerun()
                 else:
-                    st.error("E-mail ou mot de passe incorrect.")
+                    st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
 
-# --- 5. ÉTAT : CONNECTE (Espace utilisateur) ---
+# --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
-    # Initialisation des sous-états
     if "action_liste" not in st.session_state:
-        st.session_state.action_liste = "liste"  # "liste", "creer", "voir", "supprimer", "editer", "entrainer"
+        st.session_state.action_liste = "liste"
     if "liste_active_id" not in st.session_state:
         st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
@@ -404,9 +297,7 @@ elif st.session_state.etat == "connecte":
 
     with col_centre:
         
-        # ----------------------------------------------------
         # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
-        # ----------------------------------------------------
         if st.session_state.action_liste == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             
@@ -473,9 +364,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-        # ----------------------------------------------------
         # CAS B : VUE ÉDITER UNE LISTE (✏️)
-        # ----------------------------------------------------
         elif st.session_state.action_liste == "editer":
             liste_id = st.session_state.liste_active_id
             
@@ -553,9 +442,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-        # ----------------------------------------------------
         # CAS C : VUE VOIR UNE LISTE (👁️)
-        # ----------------------------------------------------
         elif st.session_state.action_liste == "voir":
             liste_id = st.session_state.liste_active_id
             
@@ -588,9 +475,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # ----------------------------------------------------
         # CAS D : CONFIRMATION DE SUPPRESSION (🗑️)
-        # ----------------------------------------------------
         elif st.session_state.action_liste == "supprimer":
             liste_id = st.session_state.liste_active_id
             
@@ -615,16 +500,13 @@ elif st.session_state.etat == "connecte":
                     st.session_state.liste_active_id = None
                     st.rerun()
 
-        # ----------------------------------------------------
         # CAS E : VUE PARTAGER UNE LISTE (🔗)
-        # ----------------------------------------------------
         elif st.session_state.action_liste == "partager":
             liste_id = st.session_state.liste_active_id
             st.subheader("🔗 Partager la liste")
             
             st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer dans son compte :")
             
-            # Affichage du code en gros
             st.code(str(liste_id), language="text")
             
             st.divider()
@@ -633,9 +515,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # ----------------------------------------------------
         # CAS F : VUE IMPORTER UNE LISTE (📥)
-        # ----------------------------------------------------
         elif st.session_state.action_liste == "importer":
             st.subheader("📥 Importer une liste")
             
@@ -661,9 +541,7 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un chiffre/ID valide.")
 
-        # ----------------------------------------------------
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
-        # ----------------------------------------------------
         else:
             col_titre, col_import, col_ajout = st.columns([3, 1, 1])
             with col_titre:
@@ -684,20 +562,13 @@ elif st.session_state.etat == "connecte":
             listes = recuperer_listes_utilisateur(user_id)
 
             if not listes:
-                st.info("Tu n'as aucune liste pour l me/instants. Clique sur ➕ pour en créer une !")
+                st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
             else:
                 for liste_id, nom_liste in listes:
                     col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
                     
                     with col_nom:
                         st.markdown(f"### 📄 {nom_liste}")
-
-                    # NOUVEAU BOUTON : S'ENTRAÎNER (🎯)
-                    with col_train:
-                        if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
-                            st.session_state.action_liste = "entrainer"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
 
                     with col_voir:
                         if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
@@ -712,15 +583,21 @@ elif st.session_state.etat == "connecte":
                             st.session_state.nb_lignes_mots = 2
                             st.rerun()
 
-                    with col_del:
-                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                            st.session_state.action_liste = "supprimer"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
-
                     with col_share:
                         if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
                             st.session_state.action_liste = "partager"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+                    with col_train:
+                        if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
+                            st.session_state.action_liste = "entrainer"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+                    with col_del:
+                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                            st.session_state.action_liste = "supprimer"
                             st.session_state.liste_active_id = liste_id
                             st.rerun()
 
