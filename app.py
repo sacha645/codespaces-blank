@@ -5,7 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 import streamlit as st
 
-st.set_page_config(page_title="Mon App", layout="wide")
+st.set_page_config(page_title="Réviseur", layout="wide")
 
 # --- CONFIGURATION EMAIL ---
 EMAIL_EXPEDITEUR = "sachapollpay@gmail.com"
@@ -24,6 +24,15 @@ def envoyer_code_email(email_destinataire, code):
     except Exception as e:
         st.error(f"Erreur d'envoi d'e-mail : {e}")
         return False
+
+def renvoyer_code(email):
+    nouveau_code = str(random.randint(100000, 999999))
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("UPDATE users SET code_verification = ? WHERE email = ?", (nouveau_code, email))
+    conn.commit()
+    conn.close()
+    return nouveau_code
 
 # --- BASE DE DONNÉES ---
 def init_db():
@@ -102,7 +111,7 @@ if "email_verif" not in st.session_state:
 col_title, col_login, col_signup = st.columns([6, 1, 1])
 
 with col_title:
-    st.markdown("### 📘 Mon Application")
+    st.markdown("### 📘 Reviseur")
 
 # Boutons conditionnels selon l'état
 if st.session_state.etat == "connecte":
@@ -173,6 +182,12 @@ elif st.session_state.etat == "verif":
                     st.rerun()
                 else:
                     st.error("Code incorrect.")
+
+        # --- BOUTON DE RENVOI DU CODE (En dehors du formulaire principal) ---
+        if st.button("🔄 Renvoyer un nouveau code", use_container_width=True):
+            nouveau_code = renvoyer_code(st.session_state.email_verif)
+            if envoyer_code_email(st.session_state.email_verif, nouveau_code):
+                st.toast("Un nouveau code vient d'être envoyé !", icon="📩")
 
 # 4. ÉTAT : CONNECT (Formulaire de connexion)
 elif st.session_state.etat == "connect":
