@@ -266,7 +266,7 @@ elif st.session_state.etat == "connect":
                     st.error("E-mail ou mot de passe incorrect.")
 
 # 5. ÉTAT : CONNECTE (Espace utilisateur)
-elif st.session_state.etat == "connecte":
+elif st.session_state.etat == "connecte":*
     username, user_id = st.session_state.user
 
     # Initialisation de la sous-navigation si elle n'existe pas
@@ -290,52 +290,126 @@ elif st.session_state.etat == "connecte":
     # --- 1. BOUTON : GÉRER MES LISTES ---
     if st.session_state.menu_connecte == "gerer":
         
-        # Centrage de la section au milieu de la page
+        # Initialisation des états pour la création de liste
+        if "action_liste" not in st.session_state:
+            st.session_state.action_liste = "liste"
+        if "nb_lignes_mots" not in st.session_state:
+            st.session_state.nb_lignes_mots = 2
+
         _, col_centre, _ = st.columns([1, 3, 1])
 
         with col_centre:
-            # En-tête : Titre à gauche, Bouton "+" à droite
-            col_titre, col_ajout = st.columns([4, 1])
-            with col_titre:
-                st.subheader("📋 Mes listes")
-            with col_ajout:
-                # Bouton de création rapide avec icône +
-                if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
-                    # On verra le comportement au clic plus tard
-                    pass
+            
+            # ----------------------------------------------------
+            # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
+            # ----------------------------------------------------
+            if st.session_state.action_liste == "creer":
+                st.subheader("✨ Créer une nouvelle liste")
+                
+                # Nom de la liste (le placeholder disparaît dès qu'on tape)
+                nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
+                st.divider()
 
-            st.write("") # Petit espacement visuel
+                mots_saisis = []
+                toutes_lignes_remplies = True
 
-            # Récupération des listes de l'utilisateur
-            listes = recuperer_listes_utilisateur(user_id)
-
-            if not listes:
-                st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
-            else:
-                # Affichage vertical de chaque liste
-                for liste_id, nom_liste in listes:
-                    col_nom, col_voir, col_edit, col_del = st.columns([5, 1, 1, 1])
+                # Affichage dynamique des lignes de mots
+                for i in range(st.session_state.nb_lignes_mots):
+                    col_mot, col_trad = st.columns(2)
+                    with col_mot:
+                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}")
+                    with col_trad:
+                        trad = st.text_input(f"Traduction {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}")
                     
-                    # Nom de la liste à gauche
-                    with col_nom:
-                        st.markdown(f"### 📄 {nom_liste}")
+                    # On conserve les mots saisis
+                    mots_saisis.append((mot.strip(), trad.strip()))
 
-                    # Bouton VOIR (👁️)
-                    with col_voir:
-                        if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                            pass
+                    # On vérifie si la ligne courante est vide
+                    if not mot.strip() or not trad.strip():
+                        toutes_lignes_remplies = False
 
-                    # Bouton ÉDITER (✏️)
-                    with col_edit:
-                        if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
-                            pass
+                # Si toutes les lignes visibles sont remplies, on ajoute automatiquement une nouvelle ligne !
+                if toutes_lignes_remplies:
+                    st.session_state.nb_lignes_mots += 1
+                    st.rerun()
 
-                    # Bouton SUPPRIMER (🗑️)
-                    with col_del:
-                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                            pass
+                st.write("")
+                col_annuler, col_sauvegarder = st.columns(2)
 
-                    st.divider()
+                # BOUTON ANNULER
+                with col_annuler:
+                    if st.button("❌ Annuler", use_container_width=True):
+                        st.session_state.action_liste = "liste"
+                        st.session_state.nb_lignes_mots = 2
+                        st.rerun()
+
+                # BOUTON SAUVEGARDER
+                with col_sauvegarder:
+                    if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
+                        if not nom_liste.strip():
+                            st.warning("Veuillez donner un nom à la liste.")
+                        else:
+                            # 1. Création de la liste en BDD
+                            ajouter_liste(user_id, nom_liste.strip())
+                            
+                            # Récupération de l'ID de la liste qu'on vient de créer
+                            listes_user = recuperer_listes_utilisateur(user_id)
+                            derniere_liste_id = listes_user[-1][0]
+
+                            # 2. Ajout des mots valides en BDD
+                            nb_mots_ajoutes = 0
+                            for m, t in mots_saisis:
+                                if m and t: # Si les deux champs sont remplis
+                                    ajouter_mot(derniere_liste_id, m, t)
+                                    nb_mots_ajoutes += 1
+
+                            st.toast(f"Liste '{nom_liste}' enregistrée avec {nb_mots_ajoutes} mot(s) !", icon="✅")
+                            
+                            # Réinitialisation de l'affichage
+                            st.session_state.action_liste = "liste"
+                            st.session_state.nb_lignes_mots = 2
+                            st.rerun()
+
+            # ----------------------------------------------------
+            # CAS B : VUE NORMALE (AFFICHAGE DE MES LISTES)
+            # ----------------------------------------------------
+            else:
+                col_titre, col_ajout = st.columns([4, 1])
+                with col_titre:
+                    st.subheader("📋 Mes listes")
+                with col_ajout:
+                    # Le bouton + passe à l'écran de création
+                    if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
+                        st.session_state.action_liste = "creer"
+                        st.session_state.nb_lignes_mots = 2
+                        st.rerun()
+
+                st.write("")
+
+                listes = recuperer_listes_utilisateur(user_id)
+
+                if not listes:
+                    st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+                else:
+                    for liste_id, nom_liste in listes:
+                        col_nom, col_voir, col_edit, col_del = st.columns([5, 1, 1, 1])
+                        
+                        with col_nom:
+                            st.markdown(f"### 📄 {nom_liste}")
+
+                        with col_voir:
+                            if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
+                                pass
+
+                        with col_edit:
+                            if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
+                                pass
+
+                        with col_del:
+                            if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                                pass
+
+                        st.divider()
 
     # --- 2. BOUTON : CHOISIR UNE LISTE ---
     elif st.session_state.menu_connecte == "choisir":
