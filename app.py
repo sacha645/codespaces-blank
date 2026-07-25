@@ -229,16 +229,10 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
 def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichier):
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    
-    c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
-              (user_id, nom_liste, type_liste))
-    nouvelle_liste_id = c.lastrowid
-    
-    nb_mots = 0
     lignes = contenu_fichier.splitlines()
+    mots_a_inserer = []
     
+    # 1. Analyse et validation préalable du fichier
     for ligne in lignes:
         ligne = ligne.strip()
         if not ligne:
@@ -246,21 +240,35 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         
         parts = [p.strip() for p in ligne.split(",")]
         
-        if type_liste == "vocabulaire" and len(parts) >= 2:
-            c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
-                      (nouvelle_liste_id, parts[0], parts[1]))
-            nb_mots += 1
+        # Vérification stricte : exactement 2 colonnes pour vocabulaire, 5 pour verbes
+        if type_liste == "vocabulaire" and len(parts) == 2:
+            mots_a_inserer.append((parts[0], "", "", "", parts[1]))
             
-        elif type_liste == "verbe" and len(parts) >= 5:
-            c.execute("""
-                INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (nouvelle_liste_id, parts[0], parts[1], parts[2], parts[3], parts[4]))
-            nb_mots += 1
+        elif type_liste == "verbe" and len(parts) == 5:
+            mots_a_inserer.append((parts[0], parts[1], parts[2], parts[3], parts[4]))
+
+    # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
+    if not mots_a_inserer:
+        return 0
+
+    # 3. Insertion en BDD uniquement si le format est correct
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    
+    c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
+              (user_id, nom_liste, type_liste))
+    nouvelle_liste_id = c.lastrowid
+    
+    for mot_or, pres, pret, pp, trad in mots_a_inserer:
+        c.execute("""
+            INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
 
     conn.commit()
     conn.close()
-    return nb_mots
+    
+    return len(mots_a_inserer)
 
 
 # --- APPARENCE ---
@@ -785,12 +793,9 @@ elif st.session_state.etat == "connecte":
                         
                         with col_nom:
                             if type_liste == "verbe":
-                                st.markdown(
-                                    f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", 
-                                    unsafe_allow_html=True
-                                )
+                                st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
                             else:
-                                st.markdown(f"### 📄 {nom_liste}")
+                                st.markdown(f"<h3 style='color: #1E90FF; margin:0;'>📖 {nom_liste} <span style='font-size:12px; background-color:#1E90FF; color:white; padding:2px 8px; border-radius:10px;'>VOCABULAIRE</span></h3>", unsafe_allow_html=True)
 
                         with col_voir:
                             if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
