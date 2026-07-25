@@ -175,6 +175,43 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn.close()
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
+def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    
+    # Vérifie que l'ami existe
+    c.execute("SELECT id, username FROM users WHERE id = ?", (ami_user_id,))
+    ami = c.fetchone()
+    if not ami:
+        conn.close()
+        return False, "Aucun utilisateur trouvé avec cet ID."
+    
+    # Récupère la liste d'origine
+    c.execute("SELECT nom_liste FROM listes WHERE id = ?", (liste_id_origine,))
+    res = c.fetchone()
+    if not res:
+        conn.close()
+        return False, "La liste d'origine n'existe plus."
+    
+    nom_liste = res[0]
+    nouveau_nom = f"{nom_liste} (partagée)"
+    
+    # Crée la copie pour l'ami
+    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (ami_user_id, nouveau_nom))
+    nouvelle_liste_id = c.lastrowid
+    
+    # Copie les mots
+    c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
+    mots = c.fetchall()
+    
+    for mot_or, trad in mots:
+        c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
+                  (nouvelle_liste_id, mot_or, trad))
+        
+    conn.commit()
+    conn.close()
+    return True, f"Liste partagée avec succès à {ami[1]} !"
+
     
 # --- Apparence ---
 def ligne_epaisse():
@@ -196,8 +233,14 @@ if "user" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 col_title, col_action, col_signup = st.columns([6, 1, 1])
+
 with col_title:
     st.markdown("### 📘 Reviseur")
+    if st.session_state.etat == "connecte":
+        # Affiche l'ID de l'utilisateur de manière discrète mais claire
+        username, user_id = st.session_state.user
+        st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
+
 if st.session_state.etat == "connecte":
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
@@ -209,6 +252,7 @@ if st.session_state.etat == "connecte":
             st.session_state.user = None
             st.session_state.etat = "none"
             st.rerun()
+
 else:
     with col_action:
         if st.button("Se connecter", use_container_width=True):
@@ -521,10 +565,31 @@ elif st.session_state.etat == "connecte":
             liste_id = st.session_state.liste_active_id
             st.subheader("🔗 Partager la liste")
             
-            st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer dans son compte :")
+            tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
             
-            st.code(str(liste_id), language="text")
+            # --- OPTION 1 : Obtenir l'ID de la liste ---
+            with tab_id:
+                st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
+                st.code(str(liste_id), language="text")
             
+            # --- OPTION 2 : Envoyer directement via l'ID de l'utilisateur ---
+            with tab_direct:
+                st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
+                id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
+                
+                if st.button("📤 Envoyer la liste", type="primary", use_container_width=True):
+                    if id_ami.isdigit():
+                        succes, msg = partager_liste_a_utilisateur(liste_id, int(id_ami))
+                        if succes:
+                            st.toast(msg, icon="✅")
+                            st.session_state.action_liste = "liste"
+                            st.session_state.liste_active_id = None
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                    else:
+                        st.warning("Veuillez entrer un ID d'utilisateur valide.")
+
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
