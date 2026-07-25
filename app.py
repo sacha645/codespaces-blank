@@ -212,7 +212,47 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     conn.close()
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
+def importer_liste_depuis_fichier(user_id, nom_liste, contenu_fichier):
+    """
+    Lit un fichier texte ligne par ligne.
+    Chaque ligne doit contenir : mot, traduction (séparés par une virgule, un tiret ou une tabulation)
+    """
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
     
+    # Crée la nouvelle liste
+    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (user_id, nom_liste))
+    nouvelle_liste_id = c.lastrowid
+    
+    nb_mots = 0
+    lignes = contenu_fichier.splitlines()
+    
+    for ligne in lignes:
+        ligne = ligne.strip()
+        if not ligne:
+            continue
+        
+        # Détection du séparateur (virgule, point-virgule, tiret ou tabulation)
+        separateur = None
+        for sep in [",", ";", "\t", "-"]:
+            if sep in ligne:
+                separateur = sep
+                break
+        
+        if separateur:
+            parts = ligne.split(separateur, 1)
+            mot = parts[0].strip()
+            trad = parts[1].strip()
+            if mot and trad:
+                c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
+                          (nouvelle_liste_id, mot, trad))
+                nb_mots += 1
+
+    conn.commit()
+    conn.close()
+    return nb_mots
+
+        
 # --- Apparence ---
 def ligne_epaisse():
     st.markdown(
@@ -600,17 +640,14 @@ elif st.session_state.etat == "connecte":
         elif st.session_state.action_liste == "importer":
             st.subheader("📥 Importer une liste")
             
-            id_saisi = st.text_input("Entre l'ID de la liste à importer :", placeholder="Ex: 12")
+            tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
             
-            col_annuler, col_valider = st.columns(2)
-            
-            with col_annuler:
-                if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action_liste = "liste"
-                    st.rerun()
-                    
-            with col_valider:
-                if st.button("📥 Copier la liste", type="primary", use_container_width=True):
+            # --- OPTION 1 : Importer par ID ---
+            with tab_id:
+                st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
+                id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
+                
+                if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
                     if id_saisi.isdigit():
                         succes, msg = importer_liste_par_id(int(id_saisi), user_id)
                         if succes:
@@ -620,7 +657,36 @@ elif st.session_state.etat == "connecte":
                         else:
                             st.error(msg)
                     else:
-                        st.warning("Veuillez entrer un chiffre/ID valide.")
+                        st.warning("Veuillez entrer un ID valide.")
+
+            # --- OPTION 2 : Importer depuis un fichier texte ---
+            with tab_fichier:
+                st.write("Téléverse un fichier texte (`.txt`) contenant tes mots.")
+                st.caption("💡 Format attendu dans le fichier : `mot, traduction` (un par ligne)")
+                
+                nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Vocabulaire Anglais")
+                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
+                
+                if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
+                    if not nom_nouvelle_liste.strip():
+                        st.warning("Donne un nom à la nouvelle liste.")
+                    elif fichier_uploade is None:
+                        st.warning("Veuillez sélectionner un fichier.")
+                    else:
+                        contenu = fichier_uploade.getvalue().decode("utf-8")
+                        nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), contenu)
+                        
+                        if nb_mots > 0:
+                            st.toast(f"Liste '{nom_nouvelle_liste}' créée avec {nb_mots} mots !", icon="✅")
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
+                        else:
+                            st.error("Aucun mot n'a pu être extrait du fichier. Vérifie le format (ex: `apple, pomme`).")
+
+            st.divider()
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action_liste = "liste"
+                st.rerun()
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
