@@ -266,7 +266,7 @@ elif st.session_state.etat == "connect":
                     st.error("E-mail ou mot de passe incorrect.")
 
 # 5. ÉTAT : CONNECTE (Espace utilisateur)
-elif st.session_state.etat == "connecte":*
+elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
     # Initialisation de la sous-navigation si elle n'existe pas
