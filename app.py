@@ -116,7 +116,7 @@ if "email_verif" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 # On ajuste le ratio des colonnes : 5 pour le titre, 2 pour la suppression, 1 pour la déconnexion
-col_title, col_action, col_signup = st.columns([5, 2, 1])
+col_title, col_action, col_signup = st.columns([6, 1, 1])
 
 with col_title:
     st.markdown("### 📘 Mon Application")
