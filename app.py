@@ -556,6 +556,7 @@ elif st.session_state.etat == "connecte":
                 nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
 
                 st.subheader(f"📖 {nom_actuel}")
+                ligne_epaisse()
 
                 mots = recuperer_mots_liste(liste_id)
 
