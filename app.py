@@ -487,7 +487,7 @@ elif st.session_state.etat == "connecte":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "")
+            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "")
 
             st.subheader("✏️ Éditer la liste")
             
@@ -565,7 +565,9 @@ elif st.session_state.etat == "connecte":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
+            # Fix : on récupère aussi type_l (3 éléments)
+            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
+            nom_actuel, type_liste = info_liste
 
             st.subheader(f"📖 {nom_actuel}")
             ligne_epaisse()
@@ -573,19 +575,36 @@ elif st.session_state.etat == "connecte":
             mots = recuperer_mots_liste(liste_id)
 
             if not mots:
-                st.info("Cette liste ne contient aucun mot.")
+                st.info("Cette liste ne contient aucun élément.")
             else:
-                c_m1, c_m2 = st.columns(2)
-                with c_m1:
-                    st.markdown("**Mot / Expression**")
-                with c_m2:
-                    st.markdown("**Traduction**")
-                st.divider()
+                if type_liste == "verbe":
+                    # Affichage à 5 colonnes pour les verbes
+                    c1, c2, c3, c4, c5 = st.columns(5)
+                    c1.markdown("**Infinitif**")
+                    c2.markdown("**Présent**")
+                    c3.markdown("**Prétérit**")
+                    c4.markdown("**Participe Passé**")
+                    c5.markdown("**Traduction**")
+                    st.divider()
 
-                for mot_or, trad in mots:
-                    cm1, cm2 = st.columns(2)
-                    cm1.write(mot_or)
-                    cm2.write(trad)
+                    for inf, pres, pret, pp, trad in mots:
+                        col1, col2, col3, col4, col5 = st.columns(5)
+                        col1.write(inf)
+                        col2.write(pres)
+                        col3.write(pret)
+                        col4.write(pp)
+                        col5.write(trad)
+                else:
+                    # Affichage à 2 colonnes pour le vocabulaire
+                    c_m1, c_m2 = st.columns(2)
+                    c_m1.markdown("**Mot / Expression**")
+                    c_m2.markdown("**Traduction**")
+                    st.divider()
+
+                    for mot_or, pres, pret, pp, trad in mots:
+                        cm1, cm2 = st.columns(2)
+                        cm1.write(mot_or)
+                        cm2.write(trad)
 
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
@@ -598,7 +617,7 @@ elif st.session_state.etat == "connecte":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "cette liste")
+            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
 
             st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
             
