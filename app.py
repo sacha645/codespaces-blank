@@ -210,7 +210,17 @@ def remplacer_mots_liste(liste_id, nouveaux_mots):
     conn.commit()
     conn.close()
 
-        
+
+# --- Apparence ---
+def ligne_epaisse():
+    st.markdown(
+        """
+        <hr style="border: none; height: 3px; background-color: #4A4A4A; margin: 20px 0;">
+        """,
+        unsafe_allow_html=True
+    )
+
+            
 # --- INITIALISATION UNIQUE DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"  # État par défaut
@@ -261,7 +271,7 @@ else:
             st.session_state.etat = "nouveau"
             st.rerun()
 
-st.divider()
+ligne_epaisse()
 
 
 # --- AFFICHAGE SELON L'ÉTAT (MACHINE À ÉTATS) ---
@@ -373,7 +383,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.menu_connecte = "choisir"
                 st.rerun()
 
-        st.divider()
+        ligne_epaisse()
 
     # --- 1. BOUTON : GÉRER MES LISTES ---
     if st.session_state.menu_connecte == "gerer":
@@ -546,7 +556,6 @@ elif st.session_state.etat == "connecte":
                 nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
 
                 st.subheader(f"📖 {nom_actuel}")
-                st.divider()
 
                 mots = recuperer_mots_liste(liste_id)
 
@@ -612,6 +621,8 @@ elif st.session_state.etat == "connecte":
                         st.rerun()
 
                 st.write("")
+
+                ligne_epaisse()
 
                 listes = recuperer_listes_utilisateur(user_id)
 
