@@ -467,10 +467,12 @@ elif st.session_state.etat == "connecte":
 
                 mots_existants = recuperer_mots_liste(liste_id)
                 
-                # Ajuste le nombre de lignes au nombre de mots existants + 1 ligne vide
+                # Le nombre de lignes à afficher est au moins le nombre de mots existants + 1,
+                # ou la valeur contenue dans nb_lignes_mots si l'utilisateur a rajouté des lignes
                 nb_lignes = max(len(mots_existants) + 1, st.session_state.nb_lignes_mots)
 
                 mots_modifies = []
+                toutes_lignes_visibles_remplies = True
                 
                 c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
                 with c_h1:
@@ -481,12 +483,12 @@ elif st.session_state.etat == "connecte":
                     st.caption("Traduction")
 
                 for i in range(nb_lignes):
-                    # Valeurs par défaut si le mot existe
+                    # Valeurs par défaut si le mot existe déjà
                     art_val, mot_val, trad_val = "", "", ""
                     if i < len(mots_existants):
                         mot_or, trad_val = mots_existants[i]
                         parts = mot_or.split(" ", 1)
-                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "la", "los", "las", "der", "die", "das"]:
+                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
                             art_val, mot_val = parts[0], parts[1]
                         else:
                             mot_val = mot_or
@@ -497,9 +499,18 @@ elif st.session_state.etat == "connecte":
                     with col_mot:
                         mot = st.text_input(f"Mot {i+1}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
                     with col_trad:
-                        trad = st.text_input(f"Trad {i+1}", value=trad_val, key=f"edit_trad_{i}", label_visibility="collapsed")
+                        trad = st.text_input(f"Trad {i+1}", key=f"edit_trad_{i}", value=trad_val, label_visibility="collapsed")
 
                     mots_modifies.append((art, mot, trad))
+
+                    # Vérification : si une ligne affichée n'a pas de mot ou de traduction remplie
+                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                        toutes_lignes_visibles_remplies = False
+
+                # Si TOUTES les lignes affichées (y compris la dernière) sont remplies, on ajoute une nouvelle ligne !
+                if toutes_lignes_visibles_remplies:
+                    st.session_state.nb_lignes_mots = nb_lignes + 1
+                    st.rerun()
 
                 st.write("")
                 col_annuler, col_sauvegarder = st.columns(2)
@@ -508,6 +519,7 @@ elif st.session_state.etat == "connecte":
                     if st.button("❌ Annuler", use_container_width=True):
                         st.session_state.action_liste = "liste"
                         st.session_state.liste_active_id = None
+                        st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
                 with col_sauvegarder:
@@ -521,6 +533,7 @@ elif st.session_state.etat == "connecte":
                             st.toast("Modifications enregistrées !", icon="✅")
                             st.session_state.action_liste = "liste"
                             st.session_state.liste_active_id = None
+                            st.session_state.nb_lignes_mots = 2
                             st.rerun()
 
             # ----------------------------------------------------
@@ -622,6 +635,7 @@ elif st.session_state.etat == "connecte":
                             if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
                                 st.session_state.action_liste = "editer"
                                 st.session_state.liste_active_id = liste_id
+                                st.session_state.nb_lignes_mots = 2
                                 st.rerun()
 
                         with col_del:
