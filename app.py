@@ -7,6 +7,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
+
 # --- CONFIGURATION EMAIL ---
 EMAIL_EXPEDITEUR = "sachapollpay@gmail.com"
 MOT_DE_PASSE_APP = "vjlf efer eagd lsvq"
@@ -84,25 +85,27 @@ def valider_code(email, code_saisi):
 def verifier_connexion(email, password):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute("SELECT username, password, est_verifie FROM users WHERE email = ?", (email,))
+    c.execute("SELECT id, username, password, est_verifie FROM users WHERE email = ?", (email,))
     user = c.fetchone()
     conn.close()
-    if user:
-        username, db_password, est_verifie = user
-        if not est_verifie:
-            return "NON_VERIFIE", None
-        if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return "OK", username
-    return "ERREUR", None
 
-def supprimer_compte(username):
+    if user:
+        user_id, username, db_password, est_verifie = user
+        if not est_verifie:
+            return "NON_VERIFIE", None, None
+        if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
+            return "OK", username, user_id
+    return "ERREUR", None, None
+
+def supprimer_compte(user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute("DELETE FROM users WHERE username = ?", (username,))
+    c.execute("DELETE FROM users WHERE id = ?", (user_id,))
     conn.commit()
     conn.close()
 
 init_db()
+
 
 # --- INITIALISATION UNIQUE DU STATE ---
 if "etat" not in st.session_state:
@@ -114,12 +117,13 @@ if "user" not in st.session_state:
 if "email_verif" not in st.session_state:
     st.session_state.email_verif = None
 
+
 # --- BARRE DE NAVIGATION ---
 # On ajuste le ratio des colonnes : 5 pour le titre, 2 pour la suppression, 1 pour la déconnexion
 col_title, col_action, col_signup = st.columns([6, 1, 1])
 
 with col_title:
-    st.markdown("### 📘 Mon Application")
+    st.markdown("### 📘 Reviseur")
 
 # Si l'utilisateur est connecté
 if st.session_state.etat == "connecte":
@@ -127,8 +131,8 @@ if st.session_state.etat == "connecte":
     # Bouton Supprimer mon compte
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            supprimer_compte(st.session_state.user)
-            # Réinitialisation de la session
+            user_id = st.session_state.user[1]
+            supprimer_compte(user_id)
             st.session_state.user = None
             st.session_state.etat = "none"
             st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
@@ -154,6 +158,7 @@ else:
             st.rerun()
 
 st.divider()
+
 
 # --- AFFICHAGE SELON L'ÉTAT (MACHINE À ÉTATS) ---
 
@@ -223,20 +228,25 @@ elif st.session_state.etat == "connect":
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                statut, username = verifier_connexion(email, mot_de_passe)
+                statut, username, user_id = verifier_connexion(email, mot_de_passe)
                 if statut == "NON_VERIFIE":
                     st.warning("E-mail non vérifié. Saisis le code envoyé.")
                     st.session_state.email_verif = email
                     st.session_state.etat = "verif"
                     st.rerun()
                 elif statut == "OK":
-                    st.session_state.user = username
-                    st.session_state.etat = "connecte"  # Passage à l'état connecté !
+                    st.session_state.user = (username, user_id)
+                    st.session_state.etat = "connecte"
                     st.rerun()
                 else:
                     st.error("E-mail ou mot de passe incorrect.")
 
 # 5. ÉTAT : CONNECTE (Espace utilisateur connecté)
 elif st.session_state.etat == "connecte":
-    st.title(f"Bienvenue, {st.session_state.user} ! 👋")
-    st.write("Tu es connecté à ton espace membre.")
+    username = st.session_state.user[0]
+    user_id = st.session_state.user[1]
+
+    st.title(f"Bienvenue, {username} ! 👋")
+    
+    # On peut directement utiliser user_id pour charger les listes !
+    #listes = recuperer_listes_utilisateur(user_id)
