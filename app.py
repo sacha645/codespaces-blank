@@ -241,12 +241,79 @@ elif st.session_state.etat == "connect":
                 else:
                     st.error("E-mail ou mot de passe incorrect.")
 
-# 5. ÉTAT : CONNECTE (Espace utilisateur connecté)
+# 5. ÉTAT : CONNECTE (Espace utilisateur)
 elif st.session_state.etat == "connecte":
-    username = st.session_state.user[0]
-    user_id = st.session_state.user[1]
+    username, user_id = st.session_state.user
 
-    st.title(f"Bienvenue, {username} ! 👋")
-    
-    # On peut directement utiliser user_id pour charger les listes !
-    #listes = recuperer_listes_utilisateur(user_id)
+    # Initialisation de la sous-navigation si elle n'existe pas
+    if "menu_connecte" not in st.session_state:
+        st.session_state.menu_connecte = "gerer"  # Vue par défaut
+
+    # --- LES 2 BOUTONS PRINCIPAUX DE L'ACCUEIL CONNECTÉ ---
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("📚 Gérer mes listes", type="primary" if st.session_state.menu_connecte == "gerer" else "secondary", use_container_width=True):
+            st.session_state.menu_connecte = "gerer"
+            st.rerun()
+
+    with col_btn2:
+        if st.button("🎯 Choisir une liste", type="primary" if st.session_state.menu_connecte == "choisir" else "secondary", use_container_width=True):
+            st.session_state.menu_connecte = "choisir"
+            st.rerun()
+
+    st.divider()
+
+    # --- 1. BOUTON : GÉRER MES LISTES ---
+    if st.session_state.menu_connecte == "gerer":
+        
+        # Centrage de la section au milieu de la page
+        _, col_centre, _ = st.columns([1, 3, 1])
+
+        with col_centre:
+            # En-tête : Titre à gauche, Bouton "+" à droite
+            col_titre, col_ajout = st.columns([4, 1])
+            with col_titre:
+                st.subheader("📋 Mes listes")
+            with col_ajout:
+                # Bouton de création rapide avec icône +
+                if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
+                    # On verra le comportement au clic plus tard
+                    pass
+
+            st.write("") # Petit espacement visuel
+
+            # Récupération des listes de l'utilisateur
+            listes = recuperer_listes_utilisateur(user_id)
+
+            if not listes:
+                st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+            else:
+                # Affichage vertical de chaque liste
+                for liste_id, nom_liste in listes:
+                    col_nom, col_voir, col_edit, col_del = st.columns([5, 1, 1, 1])
+                    
+                    # Nom de la liste à gauche
+                    with col_nom:
+                        st.markdown(f"### 📄 {nom_liste}")
+
+                    # Bouton VOIR (👁️)
+                    with col_voir:
+                        if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
+                            pass
+
+                    # Bouton ÉDITER (✏️)
+                    with col_edit:
+                        if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
+                            pass
+
+                    # Bouton SUPPRIMER (🗑️)
+                    with col_del:
+                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                            pass
+
+                    st.divider()
+
+    # --- 2. BOUTON : CHOISIR UNE LISTE ---
+    elif st.session_state.menu_connecte == "choisir":
+        st.subheader("🎯 Choisir une liste pour réviser")
+        st.write("*(On verra cette partie plus tard !)*")
