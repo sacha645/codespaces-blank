@@ -8,8 +8,8 @@ import streamlit as st
 st.set_page_config(page_title="Mon App", layout="wide")
 
 # --- CONFIGURATION EMAIL ---
-EMAIL_EXPEDITEUR = "ton.email@gmail.com"
-MOT_DE_PASSE_APP = "xxxx xxxx xxxx xxxx"
+EMAIL_EXPEDITEUR = "sachapollpay@gmail.com"
+MOT_DE_PASSE_APP = "vjlf efer eagd lsvq"
 
 def envoyer_code_email(email_destinataire, code):
     msg = MIMEText(f"Bonjour,\n\nVoici ton code de vérification : {code}")
