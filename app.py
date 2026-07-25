@@ -39,6 +39,8 @@ def renvoyer_code(email):
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
+    
+    # 1. Table Utilisateurs
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,6 +51,28 @@ def init_db():
             est_verifie INTEGER DEFAULT 0
         )
     ''')
+    
+    # 2. Table Listes
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS listes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            nom_liste TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+    ''')
+    
+    # 3. Table Mots
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS mots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            liste_id INTEGER NOT NULL,
+            mot_original TEXT NOT NULL,
+            traduction TEXT NOT NULL,
+            FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
