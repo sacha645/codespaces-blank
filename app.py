@@ -196,10 +196,8 @@ if "user" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 col_title, col_action, col_signup = st.columns([6, 1, 1])
-
 with col_title:
     st.markdown("### 📘 Reviseur")
-
 if st.session_state.etat == "connecte":
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
@@ -215,7 +213,6 @@ if st.session_state.etat == "connecte":
             st.session_state.user = None
             st.session_state.etat = "none"
             st.rerun()
-
 else:
     with col_action:
         if st.button("Se connecter", use_container_width=True):
@@ -226,7 +223,6 @@ else:
         if st.button("S'inscrire", type="primary", use_container_width=True):
             st.session_state.etat = "nouveau"
             st.rerun()
-
 ligne_epaisse()
 
 
@@ -292,6 +288,8 @@ elif st.session_state.etat == "connecte":
         st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
         st.session_state.nb_lignes_mots = 2
+    if "confirmer_suppr_compte" not in st.session_state:
+        st.session_state.confirmer_suppr_compte = False
 
     _, col_centre, _ = st.columns([1, 3, 1])
 
