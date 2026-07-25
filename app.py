@@ -325,12 +325,14 @@ elif st.session_state.etat == "connecte":
     if "menu_connecte" not in st.session_state:
         st.session_state.menu_connecte = "gerer"
     if "action_liste" not in st.session_state:
-        st.session_state.action_liste = "liste"
+        st.session_state.action_liste = "liste"  # Valeurs : "liste", "creer", "voir"
+    if "liste_active_id" not in st.session_state:
+        st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
         st.session_state.nb_lignes_mots = 2
 
-    # --- MENU DU HAUT (Masqué lors de la création de liste) ---
-    if st.session_state.action_liste != "creer":
+    # --- MENU DU HAUT (Masqué lors de 'creer' ou 'voir') ---
+    if st.session_state.action_liste == "liste":
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
             if st.button("📚 Gérer mes listes", type="primary" if st.session_state.menu_connecte == "gerer" else "secondary", use_container_width=True):
@@ -361,47 +363,42 @@ elif st.session_state.etat == "connecte":
                 st.divider()
 
                 mots_saisis = []
+                toutes_lignes_visibles_remplies = True
 
+                # En-têtes facultatifs pour clarifier l'organisation
                 c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
                 with c_h1:
-                    st.caption("Article (ex: le)")
+                    st.caption("Article *(ex: le, un)*")
                 with c_h2:
                     st.caption("Mot / Nom")
                 with c_h3:
                     st.caption("Traduction")
 
-                # Affichage des lignes de formulaire
+                # Affichage dynamique des 3 colonnes par ligne
                 for i in range(st.session_state.nb_lignes_mots):
                     col_art, col_mot, col_trad = st.columns([1, 2, 2])
                     
                     with col_art:
-                        art = st.text_input(
-                            f"Art {i+1}", 
-                            key=f"art_{i}", 
-                            placeholder="le", 
-                            label_visibility="collapsed"
-                        )
+                        art = st.text_input(f"Art {i+1}", key=f"art_{i}", placeholder="le / un", label_visibility="collapsed")
                     with col_mot:
-                        mot = st.text_input(
-                            f"Mot {i+1}", 
-                            key=f"mot_{i}", 
-                            placeholder=f"Mot {i+1}", 
-                            label_visibility="collapsed"
-                        )
+                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}", label_visibility="collapsed")
                     with col_trad:
-                        # ⚡ L'argument on_change déclenche l'ajout automatique de ligne
-                        trad = st.text_input(
-                            f"Trad {i+1}", 
-                            key=f"trad_{i}", 
-                            placeholder=f"Traduction {i+1}", 
-                            label_visibility="collapsed",
-                            on_change=verifier_et_ajouter_ligne
-                        )
+                        trad = st.text_input(f"Trad {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}", label_visibility="collapsed")
                     
+                    # On garde les 3 éléments en mémoire
                     mots_saisis.append((art, mot, trad))
 
+                    # Condition de déclenchement : il faut AU MOINS 1 caractère dans "mot" ET dans "traduction"
+                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                        toutes_lignes_visibles_remplies = False
+
+                # Dès que chaque ligne affichée a au moins 1 caractère dans mot ET traduction,
+                # on débloque automatiquement la ligne suivante
+                if toutes_lignes_visibles_remplies:
+                    st.session_state.nb_lignes_mots += 1
+                    st.rerun()
+
                 st.write("")
-                st.divider()
                 col_annuler, col_sauvegarder = st.columns(2)
 
                 # BOUTON ANNULER
@@ -417,25 +414,64 @@ elif st.session_state.etat == "connecte":
                         if not nom_liste.strip():
                             st.warning("Veuillez donner un nom à la liste.")
                         else:
+                            # 1. Sauvegarde de la liste en BDD
                             ajouter_liste(user_id, nom_liste.strip())
                             
                             listes_user = recuperer_listes_utilisateur(user_id)
                             derniere_liste_id = listes_user[-1][0]
 
+                            # 2. Ajout des mots valides
                             nb_mots_ajoutes = 0
                             for a, m, t in mots_saisis:
-                                if m.strip() and t.strip():
+                                if m.strip() and t.strip(): # On s'assure que le mot et la traduction existent
                                     ajouter_mot(derniere_liste_id, a, m, t)
                                     nb_mots_ajoutes += 1
 
-                            st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
+                            st.toast(f"Liste '{nom_liste}' enregistrée avec {nb_mots_ajoutes} mot(s) !", icon="✅")
                             
+                            # Réinitialisation et retour à l'affichage des listes
                             st.session_state.action_liste = "liste"
                             st.session_state.nb_lignes_mots = 2
                             st.rerun()
 
             # ----------------------------------------------------
-            # CAS B : VUE NORMALE (AFFICHAGE DES LISTES)
+            # CAS B : VUE VOIR UNE LISTE (👁️)
+            # ----------------------------------------------------
+            elif st.session_state.action_liste == "voir":
+                liste_id = st.session_state.liste_active_id
+                
+                # Récupération du nom de la liste active
+                listes_user = recuperer_listes_utilisateur(user_id)
+                nom_actuel = next((nom for lid, nom in listes_user if lid == liste_id), "Liste")
+
+                st.subheader(f"📖 {nom_actuel}")
+                st.divider()
+
+                mots = recuperer_mots_liste(liste_id)
+
+                if not mots:
+                    st.info("Cette liste ne contient aucun mot.")
+                else:
+                    c_m1, c_m2 = st.columns(2)
+                    with c_m1:
+                        st.markdown("**Mot / Expression**")
+                    with c_m2:
+                        st.markdown("**Traduction**")
+                    st.divider()
+
+                    for mot_or, trad in mots:
+                        cm1, cm2 = st.columns(2)
+                        cm1.write(mot_or)
+                        cm2.write(trad)
+
+                st.divider()
+                if st.button("🔙 Retour", use_container_width=True):
+                    st.session_state.action_liste = "liste"
+                    st.session_state.liste_active_id = None
+                    st.rerun()
+
+            # ----------------------------------------------------
+            # CAS C : VUE NORMALE (AFFICHAGE DES LISTES)
             # ----------------------------------------------------
             else:
                 col_titre, col_ajout = st.columns([4, 1])
@@ -462,7 +498,9 @@ elif st.session_state.etat == "connecte":
 
                         with col_voir:
                             if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                                pass
+                                st.session_state.action_liste = "voir"
+                                st.session_state.liste_active_id = liste_id
+                                st.rerun()
 
                         with col_edit:
                             if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
@@ -475,6 +513,6 @@ elif st.session_state.etat == "connecte":
                         st.divider()
 
     # --- 2. BOUTON : CHOISIR UNE LISTE ---
-    elif st.session_state.menu_connecte == "choisir" and st.session_state.action_liste != "creer":
+    elif st.session_state.menu_connecte == "choisir" and st.session_state.action_liste == "liste":
         st.subheader("🎯 Choisir une liste pour réviser")
         st.write("*(On verra cette partie plus tard !)*")
