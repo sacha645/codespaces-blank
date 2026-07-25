@@ -29,6 +29,8 @@ def envoyer_code_email(email_destinataire, code):
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
+    # ⚠️ AJOUTE CETTE LIGNE POUR REMETTRE À ZÉRO :
+    c.execute("DROP TABLE IF EXISTS users")
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
