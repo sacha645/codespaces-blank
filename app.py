@@ -131,6 +131,32 @@ def supprimer_compte(user_id):
 init_db()
 
 
+# --- FONCTIONS BDD REQUISES ( À placer au-dessus de l'État 5 ) ---
+
+def ajouter_liste(user_id, nom_liste):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (user_id, nom_liste))
+    conn.commit()
+    conn.close()
+
+def recuperer_listes_utilisateur(user_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT id, nom_liste FROM listes WHERE user_id = ?", (user_id,))
+    listes = c.fetchall()
+    conn.close()
+    return listes
+
+def ajouter_mot(liste_id, mot_original, traduction):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)", 
+              (liste_id, mot_original, traduction))
+    conn.commit()
+    conn.close()
+    
+
 # --- INITIALISATION UNIQUE DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"  # État par défaut
@@ -265,37 +291,37 @@ elif st.session_state.etat == "connect":
                 else:
                     st.error("E-mail ou mot de passe incorrect.")
 
-# 5. ÉTAT : CONNECTE (Espace utilisateur)
+
+# --- 5. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
-    # Initialisation de la sous-navigation si elle n'existe pas
+    # Initialisation des sous-états
     if "menu_connecte" not in st.session_state:
-        st.session_state.menu_connecte = "gerer"  # Vue par défaut
+        st.session_state.menu_connecte = "gerer"
+    if "action_liste" not in st.session_state:
+        st.session_state.action_liste = "liste"
+    if "nb_lignes_mots" not in st.session_state:
+        st.session_state.nb_lignes_mots = 2
 
-    # --- LES 2 BOUTONS PRINCIPAUX DE L'ACCUEIL CONNECTÉ ---
-    col_btn1, col_btn2 = st.columns(2)
-    with col_btn1:
-        if st.button("📚 Gérer mes listes", type="primary" if st.session_state.menu_connecte == "gerer" else "secondary", use_container_width=True):
-            st.session_state.menu_connecte = "gerer"
-            st.rerun()
+    # --- MENU DU HAUT (Masqué lors de la création de liste) ---
+    if st.session_state.action_liste != "creer":
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            if st.button("📚 Gérer mes listes", type="primary" if st.session_state.menu_connecte == "gerer" else "secondary", use_container_width=True):
+                st.session_state.menu_connecte = "gerer"
+                st.rerun()
 
-    with col_btn2:
-        if st.button("🎯 Choisir une liste", type="primary" if st.session_state.menu_connecte == "choisir" else "secondary", use_container_width=True):
-            st.session_state.menu_connecte = "choisir"
-            st.rerun()
+        with col_btn2:
+            if st.button("🎯 Choisir une liste", type="primary" if st.session_state.menu_connecte == "choisir" else "secondary", use_container_width=True):
+                st.session_state.menu_connecte = "choisir"
+                st.rerun()
 
-    st.divider()
+        st.divider()
 
     # --- 1. BOUTON : GÉRER MES LISTES ---
     if st.session_state.menu_connecte == "gerer":
         
-        # Initialisation des états pour la création de liste
-        if "action_liste" not in st.session_state:
-            st.session_state.action_liste = "liste"
-        if "nb_lignes_mots" not in st.session_state:
-            st.session_state.nb_lignes_mots = 2
-
         _, col_centre, _ = st.columns([1, 3, 1])
 
         with col_centre:
@@ -306,14 +332,13 @@ elif st.session_state.etat == "connecte":
             if st.session_state.action_liste == "creer":
                 st.subheader("✨ Créer une nouvelle liste")
                 
-                # Nom de la liste (le placeholder disparaît dès qu'on tape)
                 nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
                 st.divider()
 
                 mots_saisis = []
                 toutes_lignes_remplies = True
 
-                # Affichage dynamique des lignes de mots
+                # Lignes dynamiques
                 for i in range(st.session_state.nb_lignes_mots):
                     col_mot, col_trad = st.columns(2)
                     with col_mot:
@@ -321,14 +346,12 @@ elif st.session_state.etat == "connecte":
                     with col_trad:
                         trad = st.text_input(f"Traduction {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}")
                     
-                    # On conserve les mots saisis
                     mots_saisis.append((mot.strip(), trad.strip()))
 
-                    # On vérifie si la ligne courante est vide
                     if not mot.strip() or not trad.strip():
                         toutes_lignes_remplies = False
 
-                # Si toutes les lignes visibles sont remplies, on ajoute automatiquement une nouvelle ligne !
+                # Ajout automatique d'une ligne
                 if toutes_lignes_remplies:
                     st.session_state.nb_lignes_mots += 1
                     st.rerun()
@@ -349,36 +372,33 @@ elif st.session_state.etat == "connecte":
                         if not nom_liste.strip():
                             st.warning("Veuillez donner un nom à la liste.")
                         else:
-                            # 1. Création de la liste en BDD
+                            # Sauvegarde BDD
                             ajouter_liste(user_id, nom_liste.strip())
                             
-                            # Récupération de l'ID de la liste qu'on vient de créer
                             listes_user = recuperer_listes_utilisateur(user_id)
                             derniere_liste_id = listes_user[-1][0]
 
-                            # 2. Ajout des mots valides en BDD
                             nb_mots_ajoutes = 0
                             for m, t in mots_saisis:
-                                if m and t: # Si les deux champs sont remplis
+                                if m and t:
                                     ajouter_mot(derniere_liste_id, m, t)
                                     nb_mots_ajoutes += 1
 
-                            st.toast(f"Liste '{nom_liste}' enregistrée avec {nb_mots_ajoutes} mot(s) !", icon="✅")
+                            st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
                             
-                            # Réinitialisation de l'affichage
+                            # Retour à la vue normale
                             st.session_state.action_liste = "liste"
                             st.session_state.nb_lignes_mots = 2
                             st.rerun()
 
             # ----------------------------------------------------
-            # CAS B : VUE NORMALE (AFFICHAGE DE MES LISTES)
+            # CAS B : VUE NORMALE (AFFICHAGE DES LISTES)
             # ----------------------------------------------------
             else:
                 col_titre, col_ajout = st.columns([4, 1])
                 with col_titre:
                     st.subheader("📋 Mes listes")
                 with col_ajout:
-                    # Le bouton + passe à l'écran de création
                     if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
                         st.session_state.action_liste = "creer"
                         st.session_state.nb_lignes_mots = 2
@@ -412,6 +432,6 @@ elif st.session_state.etat == "connecte":
                         st.divider()
 
     # --- 2. BOUTON : CHOISIR UNE LISTE ---
-    elif st.session_state.menu_connecte == "choisir":
+    elif st.session_state.menu_connecte == "choisir" and st.session_state.action_liste != "creer":
         st.subheader("🎯 Choisir une liste pour réviser")
         st.write("*(On verra cette partie plus tard !)*")
