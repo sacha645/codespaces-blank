@@ -559,62 +559,68 @@ elif st.session_state.etat == "connecte":
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
-            col_titre, col_import, col_ajout = st.columns([3, 1, 1])
-            with col_titre:
-                st.subheader("📋 Mes listes")
-            with col_import:
-                if st.button("📥", use_container_width=True, help="Importer une liste via un ID"):
-                    st.session_state.action_liste = "importer"
-                    st.rerun()
-            with col_ajout:
-                if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
-                    st.session_state.action_liste = "creer"
-                    st.session_state.nb_lignes_mots = 2
-                    st.rerun()
-
-            st.write("")
-            ligne_epaisse()
-
-            listes = recuperer_listes_utilisateur(user_id)
-
-            if not listes:
-                st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+            # Si on est en train de demander la confirmation de suppression de compte,
+            # on N'AFFICHE PAS le reste de la page
+            if st.session_state.confirmer_suppr_compte:
+                pass  # Le message de confirmation s'affiche déjà tout seul au-dessus !
+                
             else:
-                for liste_id, nom_liste in listes:
-                    col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
-                    
-                    with col_nom:
-                        st.markdown(f"### 📄 {nom_liste}")
+                col_titre, col_import, col_ajout = st.columns([3, 1, 1])
+                with col_titre:
+                    st.subheader("📋 Mes listes")
+                with col_import:
+                    if st.button("📥", use_container_width=True, help="Importer une liste via un ID"):
+                        st.session_state.action_liste = "importer"
+                        st.rerun()
+                with col_ajout:
+                    if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
+                        st.session_state.action_liste = "creer"
+                        st.session_state.nb_lignes_mots = 2
+                        st.rerun()
 
-                    with col_voir:
-                        if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                            st.session_state.action_liste = "voir"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
+                st.write("")
+                ligne_epaisse()
 
-                    with col_edit:
-                        if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
-                            st.session_state.action_liste = "editer"
-                            st.session_state.liste_active_id = liste_id
-                            st.session_state.nb_lignes_mots = 2
-                            st.rerun()
+                listes = recuperer_listes_utilisateur(user_id)
 
-                    with col_share:
-                        if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
-                            st.session_state.action_liste = "partager"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
+                if not listes:
+                    st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+                else:
+                    for liste_id, nom_liste in listes:
+                        col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
+                        
+                        with col_nom:
+                            st.markdown(f"### 📄 {nom_liste}")
 
-                    with col_train:
-                        if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
-                            st.session_state.action_liste = "entrainer"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
+                        with col_voir:
+                            if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
+                                st.session_state.action_liste = "voir"
+                                st.session_state.liste_active_id = liste_id
+                                st.rerun()
 
-                    with col_del:
-                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                            st.session_state.action_liste = "supprimer"
-                            st.session_state.liste_active_id = liste_id
-                            st.rerun()
+                        with col_edit:
+                            if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
+                                st.session_state.action_liste = "editer"
+                                st.session_state.liste_active_id = liste_id
+                                st.session_state.nb_lignes_mots = 2
+                                st.rerun()
 
-                    st.divider()
+                        with col_share:
+                            if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
+                                st.session_state.action_liste = "partager"
+                                st.session_state.liste_active_id = liste_id
+                                st.rerun()
+
+                        with col_train:
+                            if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
+                                st.session_state.action_liste = "entrainer"
+                                st.session_state.liste_active_id = liste_id
+                                st.rerun()
+
+                        with col_del:
+                            if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                                st.session_state.action_liste = "supprimer"
+                                st.session_state.liste_active_id = liste_id
+                                st.rerun()
+
+                        st.divider()
