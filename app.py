@@ -95,6 +95,13 @@ def verifier_connexion(email, password):
             return "OK", username
     return "ERREUR", None
 
+def supprimer_compte(username):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE username = ?", (username,))
+    conn.commit()
+    conn.close()
+
 init_db()
 
 # --- INITIALISATION UNIQUE DU STATE ---
@@ -108,23 +115,39 @@ if "email_verif" not in st.session_state:
     st.session_state.email_verif = None
 
 # --- BARRE DE NAVIGATION ---
-col_title, col_login, col_signup = st.columns([6, 1, 1])
+# On ajuste le ratio des colonnes : 5 pour le titre, 2 pour la suppression, 1 pour la déconnexion
+col_title, col_action, col_signup = st.columns([5, 2, 1])
 
 with col_title:
-    st.markdown("### 📘 Reviseur")
+    st.markdown("### 📘 Mon Application")
 
-# Boutons conditionnels selon l'état
+# Si l'utilisateur est connecté
 if st.session_state.etat == "connecte":
+    
+    # Bouton Supprimer mon compte
+    with col_action:
+        if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
+            supprimer_compte(st.session_state.user)
+            # Réinitialisation de la session
+            st.session_state.user = None
+            st.session_state.etat = "none"
+            st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
+            st.rerun()
+
+    # Bouton Déconnexion
     with col_signup:
         if st.button("Déconnexion", use_container_width=True):
-            st.session_state.etat = "none"
             st.session_state.user = None
+            st.session_state.etat = "none"
             st.rerun()
+
+# Si l'utilisateur N'EST PAS connecté
 else:
-    with col_login:
+    with col_action:
         if st.button("Se connecter", use_container_width=True):
             st.session_state.etat = "connect"
             st.rerun()
+            
     with col_signup:
         if st.button("S'inscrire", type="primary", use_container_width=True):
             st.session_state.etat = "nouveau"
