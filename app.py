@@ -148,14 +148,22 @@ def recuperer_listes_utilisateur(user_id):
     conn.close()
     return listes
 
-def ajouter_mot(liste_id, mot_original, traduction):
+def ajouter_mot(liste_id, article, mot_original, traduction):
+    # Si un article est renseigné, on combine l'article et le mot
+    if article.strip():
+        mot_complet = f"{article.strip()} {mot_original.strip()}"
+    else:
+        mot_complet = mot_original.strip()
+
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)", 
-              (liste_id, mot_original, traduction))
+    c.execute(
+        "INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
+        (liste_id, mot_complet, traduction.strip())
+    )
     conn.commit()
     conn.close()
-    
+
 
 # --- INITIALISATION UNIQUE DU STATE ---
 if "etat" not in st.session_state:
@@ -336,23 +344,39 @@ elif st.session_state.etat == "connecte":
                 st.divider()
 
                 mots_saisis = []
-                toutes_lignes_remplies = True
+                toutes_lignes_visibles_remplies = True
 
-                # Lignes dynamiques
+                # En-têtes facultatifs pour clarifier l'organisation
+                c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
+                with c_h1:
+                    st.caption("Article *(ex: le, un)*")
+                with c_h2:
+                    st.caption("Mot / Nom")
+                with c_h3:
+                    st.caption("Traduction")
+
+                # Affichage dynamique des 3 colonnes par ligne
                 for i in range(st.session_state.nb_lignes_mots):
-                    col_mot, col_trad = st.columns(2)
-                    with col_mot:
-                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}")
-                    with col_trad:
-                        trad = st.text_input(f"Traduction {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}")
+                    col_art, col_mot, col_trad = st.columns([1, 2, 2])
                     
-                    mots_saisis.append((mot.strip(), trad.strip()))
+                    with col_art:
+                        art = st.text_input(f"Art {i+1}", key=f"art_{i}", placeholder="le / un", label_visibility="collapsed")
+                    with col_mot:
+                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}", label_visibility="collapsed")
+                    with col_trad:
+                        trad = st.text_input(f"Trad {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}", label_visibility="collapsed")
+                    
+                    # On garde les 3 éléments en mémoire
+                    mots_saisis.append((art, mot, trad))
 
-                    if not mot.strip() or not trad.strip():
-                        toutes_lignes_remplies = False
+                    # Condition de déclenchement : il faut AU MOINS 1 caractère dans "mot" ET dans "traduction"
+                    # (L'article reste optionnel car un adjectif/verbe n'en a pas)
+                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                        toutes_lignes_visibles_remplies = False
 
-                # Ajout automatique d'une ligne
-                if toutes_lignes_remplies:
+                # Dès que chaque ligne affichée a au moins 1 caractère dans mot ET traduction,
+                # on débloque automatiquement la ligne suivante
+                if toutes_lignes_visibles_remplies:
                     st.session_state.nb_lignes_mots += 1
                     st.rerun()
 
@@ -372,21 +396,22 @@ elif st.session_state.etat == "connecte":
                         if not nom_liste.strip():
                             st.warning("Veuillez donner un nom à la liste.")
                         else:
-                            # Sauvegarde BDD
+                            # 1. Sauvegarde de la liste en BDD
                             ajouter_liste(user_id, nom_liste.strip())
                             
                             listes_user = recuperer_listes_utilisateur(user_id)
                             derniere_liste_id = listes_user[-1][0]
 
+                            # 2. Ajout des mots valides
                             nb_mots_ajoutes = 0
-                            for m, t in mots_saisis:
-                                if m and t:
-                                    ajouter_mot(derniere_liste_id, m, t)
+                            for a, m, t in mots_saisis:
+                                if m.strip() and t.strip(): # On s'assure que le mot et la traduction existent
+                                    ajouter_mot(derniere_liste_id, a, m, t)
                                     nb_mots_ajoutes += 1
 
-                            st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
+                            st.toast(f"Liste '{nom_liste}' enregistrée avec {nb_mots_ajoutes} mot(s) !", icon="✅")
                             
-                            # Retour à la vue normale
+                            # Réinitialisation et retour à l'affichage des listes
                             st.session_state.action_liste = "liste"
                             st.session_state.nb_lignes_mots = 2
                             st.rerun()
