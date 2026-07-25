@@ -210,7 +210,39 @@ def remplacer_mots_liste(liste_id, nouveaux_mots):
     conn.commit()
     conn.close()
 
+def importer_liste_par_id(liste_id_origine, nouvel_user_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    
+    # 1. On récupère le nom de la liste d'origine
+    c.execute("SELECT nom_liste FROM listes WHERE id = ?", (liste_id_origine,))
+    res = c.fetchone()
+    
+    if not res:
+        conn.close()
+        return False, "Aucune liste trouvée avec cet ID."
+    
+    nom_liste_origine = res[0]
+    nouveau_nom = f"{nom_liste_origine} (copie)"
+    
+    # 2. On crée la nouvelle liste pour le nouvel utilisateur
+    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (nouvel_user_id, nouveau_nom))
+    nouvelle_liste_id = c.lastrowid
+    
+    # 3. On récupère les mots de la liste d'origine
+    c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
+    mots = c.fetchall()
+    
+    # 4. On copie tous les mots dans la nouvelle liste
+    for mot_or, trad in mots:
+        c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
+                  (nouvelle_liste_id, mot_or, trad))
+        
+    conn.commit()
+    conn.close()
+    return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
+    
 # --- Apparence ---
 def ligne_epaisse():
     st.markdown(
@@ -584,12 +616,62 @@ elif st.session_state.etat == "connecte":
                     st.rerun()
 
         # ----------------------------------------------------
-        # CAS E : VUE NORMALE (AFFICHAGE DES LISTES)
+        # CAS E : VUE PARTAGER UNE LISTE (🔗)
+        # ----------------------------------------------------
+        elif st.session_state.action_liste == "partager":
+            liste_id = st.session_state.liste_active_id
+            st.subheader("🔗 Partager la liste")
+            
+            st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer dans son compte :")
+            
+            # Affichage du code en gros
+            st.code(str(liste_id), language="text")
+            
+            st.divider()
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action_liste = "liste"
+                st.session_state.liste_active_id = None
+                st.rerun()
+
+        # ----------------------------------------------------
+        # CAS F : VUE IMPORTER UNE LISTE (📥)
+        # ----------------------------------------------------
+        elif st.session_state.action_liste == "importer":
+            st.subheader("📥 Importer une liste")
+            
+            id_saisi = st.text_input("Entre l'ID de la liste à importer :", placeholder="Ex: 12")
+            
+            col_annuler, col_valider = st.columns(2)
+            
+            with col_annuler:
+                if st.button("❌ Annuler", use_container_width=True):
+                    st.session_state.action_liste = "liste"
+                    st.rerun()
+                    
+            with col_valider:
+                if st.button("📥 Copier la liste", type="primary", use_container_width=True):
+                    if id_saisi.isdigit():
+                        succes, msg = importer_liste_par_id(int(id_saisi), user_id)
+                        if succes:
+                            st.toast(msg, icon="✅")
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                    else:
+                        st.warning("Veuillez entrer un chiffre/ID valide.")
+
+        # ----------------------------------------------------
+        # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         # ----------------------------------------------------
         else:
-            col_titre, col_ajout = st.columns([4, 1])
+            col_titre, col_import, col_ajout = st.columns([3, 1, 1])
             with col_titre:
                 st.subheader("📋 Mes listes")
+            with col_import:
+                if st.button("📥", use_container_width=True, help="Importer une liste via un ID"):
+                    st.session_state.action_liste = "importer"
+                    st.rerun()
             with col_ajout:
                 if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
                     st.session_state.action_liste = "creer"
@@ -605,7 +687,7 @@ elif st.session_state.etat == "connecte":
                 st.info("Tu n'as aucune liste pour l me/instants. Clique sur ➕ pour en créer une !")
             else:
                 for liste_id, nom_liste in listes:
-                    col_nom, col_voir, col_edit, col_train, col_del = st.columns([4, 1, 1, 1, 1])
+                    col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
                     
                     with col_nom:
                         st.markdown(f"### 📄 {nom_liste}")
@@ -633,6 +715,12 @@ elif st.session_state.etat == "connecte":
                     with col_del:
                         if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
                             st.session_state.action_liste = "supprimer"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+                    with col_share:
+                        if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
+                            st.session_state.action_liste = "partager"
                             st.session_state.liste_active_id = liste_id
                             st.rerun()
 
