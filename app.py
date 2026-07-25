@@ -3,18 +3,7 @@ import bcrypt
 import streamlit as st
 
 st.set_page_config(page_title="Réviseur", layout="wide")
-def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    # Supprime les 3 tables
-    c.execute("DROP TABLE IF EXISTS mots")
-    c.execute("DROP TABLE IF EXISTS listes")
-    c.execute("DROP TABLE IF EXISTS users")
-    conn.commit()
-    conn.close()
 
-# Décommente cette ligne, lance l'application une fois, puis recommente-la :
-reinitialiser_toutes_les_bdd()
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
