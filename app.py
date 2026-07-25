@@ -605,7 +605,7 @@ elif st.session_state.etat == "connecte":
                 st.info("Tu n'as aucune liste pour l me/instants. Clique sur ➕ pour en créer une !")
             else:
                 for liste_id, nom_liste in listes:
-                    col_nom, col_train, col_voir, col_edit, col_del = st.columns([4, 1, 1, 1, 1])
+                    col_nom, col_voir, col_edit, col_train, col_del = st.columns([4, 1, 1, 1, 1])
                     
                     with col_nom:
                         st.markdown(f"### 📄 {nom_liste}")
