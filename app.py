@@ -3,18 +3,7 @@ import bcrypt
 import streamlit as st
 
 st.set_page_config(page_title="Réviseur", layout="wide")
-def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    # Supprime les 3 tables
-    c.execute("DROP TABLE IF EXISTS mots")
-    c.execute("DROP TABLE IF EXISTS listes")
-    c.execute("DROP TABLE IF EXISTS users")
-    conn.commit()
-    conn.close()
 
-# Décommente cette ligne, lance l'application une fois, puis recommente-la :
-reinitialiser_toutes_les_bdd()
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
@@ -688,34 +677,45 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un ID valide.")
 
+            
             # --- OPTION 2 : Importer depuis un fichier texte ---
-            with tab_fichier:
-                st.write("Téléverse un fichier texte (`.txt`) contenant tes mots.")
-                st.caption("💡 Format attendu dans le fichier : `mot, traduction` (un par ligne)")
-                
-                type_import = st.radio(
-                    "Type de contenu dans le fichier :", 
-                    ["Vocabulaire (mot, traduction)", "Verbes (infinitif, présent, prétérit, participe passé, traduction)"],
-                    key="type_import_file"
-                )
-                type_import_code = "verbe" if "Verbes" in type_import else "vocabulaire"
+                        with tab_fichier:
+                            st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
+                            
+                            # Sélection du type de liste
+                            type_import = st.radio(
+                                "Type de liste à importer :", 
+                                ["Vocabulaire", "Verbes"],
+                                horizontal=True,
+                                key="type_import_file"
+                            )
+                            type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
 
-                nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers Anglais")
-                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
-
-                if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
-                    if not nom_nouvelle_liste.strip() or fichier_uploade is None:
-                        st.warning("Remplis le nom et choisis un fichier.")
-                    else:
-                        contenu = fichier_uploade.getvalue().decode("utf-8")
-                        nb = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
-                        if nb > 0:
-                            st.toast(f"Liste importée avec {nb} éléments !", icon="✅")
-                            st.session_state.action_liste = "liste"
-                            st.rerun()
-                        else:
-                            st.error("Impossible de lire les éléments. Vérifie le séparateur (virgules) et le nombre de colonnes.")
-
+                            # Explication dynamique selon le type choisi
+                            if type_import_code == "verbe":
+                                st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction` (un verbe par ligne)")
+                            else:
+                                st.info("💡 **Format attendu :** `mot, traduction` (un mot par ligne)")
+                            
+                            nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
+                            fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
+                            
+                            if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
+                                if not nom_nouvelle_liste.strip():
+                                    st.warning("Donne un nom à la nouvelle liste.")
+                                elif fichier_uploade is None:
+                                    st.warning("Veuillez sélectionner un fichier.")
+                                else:
+                                    contenu = fichier_uploade.getvalue().decode("utf-8")
+                                    nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
+                                    
+                                    if nb_mots > 0:
+                                        st.toast(f"Liste '{nom_nouvelle_liste}' créée avec {nb_mots} éléments !", icon="✅")
+                                        st.session_state.action_liste = "liste"
+                                        st.rerun()
+                                    else:
+                                        st.error(f"Aucun élément n'a pu être extrait. Vérifie que ton fichier respecte bien le format indiqué ci-dessus.")
+                                        
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
