@@ -132,6 +132,13 @@ init_db()
 
 
 # --- FONCTIONS BDD REQUISES ( À placer au-dessus de l'État 5 ) ---
+def recuperer_listes_utilisateur(user_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT id, nom_liste FROM listes WHERE user_id = ?", (user_id,))
+    listes = c.fetchall()
+    conn.close()
+    return listes
 
 def ajouter_liste(user_id, nom_liste):
     conn = sqlite3.connect("utilisateurs.db")
@@ -140,13 +147,15 @@ def ajouter_liste(user_id, nom_liste):
     conn.commit()
     conn.close()
 
-def recuperer_listes_utilisateur(user_id):
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    c.execute("SELECT id, nom_liste FROM listes WHERE user_id = ?", (user_id,))
-    listes = c.fetchall()
-    conn.close()
-    return listes
+def verifier_et_ajouter_ligne():
+    """Vérifie si la dernière ligne affichée est remplie pour ajouter la suivante"""
+    dernier_index = st.session_state.nb_lignes_mots - 1
+    mot = st.session_state.get(f"mot_{dernier_index}", "").strip()
+    trad = st.session_state.get(f"trad_{dernier_index}", "").strip()
+    
+    # Si le mot et la traduction de la dernière ligne ne sont pas vides
+    if mot and trad:
+        st.session_state.nb_lignes_mots += 1
 
 def ajouter_mot(liste_id, article, mot_original, traduction):
     # Si un article est renseigné, on combine l'article et le mot
@@ -163,6 +172,14 @@ def ajouter_mot(liste_id, article, mot_original, traduction):
     )
     conn.commit()
     conn.close()
+
+def recuperer_mots_liste(liste_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id,))
+    mots = c.fetchall()
+    conn.close()
+    return mots
 
 
 # --- INITIALISATION UNIQUE DU STATE ---
@@ -344,43 +361,47 @@ elif st.session_state.etat == "connecte":
                 st.divider()
 
                 mots_saisis = []
-                toutes_lignes_visibles_remplies = True
 
-                # En-têtes facultatifs pour clarifier l'organisation
                 c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
                 with c_h1:
-                    st.caption("Article *(ex: le, un)*")
+                    st.caption("Article (ex: le)")
                 with c_h2:
                     st.caption("Mot / Nom")
                 with c_h3:
                     st.caption("Traduction")
 
-                # Affichage dynamique des 3 colonnes par ligne
+                # Affichage des lignes de formulaire
                 for i in range(st.session_state.nb_lignes_mots):
                     col_art, col_mot, col_trad = st.columns([1, 2, 2])
                     
                     with col_art:
-                        art = st.text_input(f"Art {i+1}", key=f"art_{i}", placeholder="le / un", label_visibility="collapsed")
+                        art = st.text_input(
+                            f"Art {i+1}", 
+                            key=f"art_{i}", 
+                            placeholder="le", 
+                            label_visibility="collapsed"
+                        )
                     with col_mot:
-                        mot = st.text_input(f"Mot {i+1}", key=f"mot_{i}", placeholder=f"Mot {i+1}", label_visibility="collapsed")
+                        mot = st.text_input(
+                            f"Mot {i+1}", 
+                            key=f"mot_{i}", 
+                            placeholder=f"Mot {i+1}", 
+                            label_visibility="collapsed"
+                        )
                     with col_trad:
-                        trad = st.text_input(f"Trad {i+1}", key=f"trad_{i}", placeholder=f"Traduction {i+1}", label_visibility="collapsed")
+                        # ⚡ L'argument on_change déclenche l'ajout automatique de ligne
+                        trad = st.text_input(
+                            f"Trad {i+1}", 
+                            key=f"trad_{i}", 
+                            placeholder=f"Traduction {i+1}", 
+                            label_visibility="collapsed",
+                            on_change=verifier_et_ajouter_ligne
+                        )
                     
-                    # On garde les 3 éléments en mémoire
                     mots_saisis.append((art, mot, trad))
 
-                    # Condition de déclenchement : il faut AU MOINS 1 caractère dans "mot" ET dans "traduction"
-                    # (L'article reste optionnel car un adjectif/verbe n'en a pas)
-                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
-                        toutes_lignes_visibles_remplies = False
-
-                # Dès que chaque ligne affichée a au moins 1 caractère dans mot ET traduction,
-                # on débloque automatiquement la ligne suivante
-                if toutes_lignes_visibles_remplies:
-                    st.session_state.nb_lignes_mots += 1
-                    st.rerun()
-
                 st.write("")
+                st.divider()
                 col_annuler, col_sauvegarder = st.columns(2)
 
                 # BOUTON ANNULER
@@ -396,22 +417,19 @@ elif st.session_state.etat == "connecte":
                         if not nom_liste.strip():
                             st.warning("Veuillez donner un nom à la liste.")
                         else:
-                            # 1. Sauvegarde de la liste en BDD
                             ajouter_liste(user_id, nom_liste.strip())
                             
                             listes_user = recuperer_listes_utilisateur(user_id)
                             derniere_liste_id = listes_user[-1][0]
 
-                            # 2. Ajout des mots valides
                             nb_mots_ajoutes = 0
                             for a, m, t in mots_saisis:
-                                if m.strip() and t.strip(): # On s'assure que le mot et la traduction existent
+                                if m.strip() and t.strip():
                                     ajouter_mot(derniere_liste_id, a, m, t)
                                     nb_mots_ajoutes += 1
 
-                            st.toast(f"Liste '{nom_liste}' enregistrée avec {nb_mots_ajoutes} mot(s) !", icon="✅")
+                            st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
                             
-                            # Réinitialisation et retour à l'affichage des listes
                             st.session_state.action_liste = "liste"
                             st.session_state.nb_lignes_mots = 2
                             st.rerun()
