@@ -9,6 +9,7 @@ def init_db():
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
+    # 1. Table Utilisateurs
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,7 +18,7 @@ def init_db():
         )
     ''')
     
-    # Ajout de 'type_liste' ('vocabulaire' ou 'verbe')
+    # 2. Table Listes (avec type_liste : 'vocabulaire' ou 'verbe')
     c.execute('''
         CREATE TABLE IF NOT EXISTS listes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,7 +29,7 @@ def init_db():
         )
     ''')
     
-    # Ajout des colonnes pour les verbes : present, preterit, participe_passe
+    # 3. Table Mots (avec colonnes pour verbes)
     c.execute('''
         CREATE TABLE IF NOT EXISTS mots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,7 +60,7 @@ def inscrire_utilisateur(username, password):
         conn.close()
         return True
     except sqlite3.IntegrityError:
-        return False  # Nom d'utilisateur déjà pris
+        return False
 
 def verifier_connexion(username, password):
     conn = sqlite3.connect("utilisateurs.db")
@@ -77,6 +78,7 @@ def verifier_connexion(username, password):
 def supprimer_compte(user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
+    c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM users WHERE id = ?", (user_id,))
     conn.commit()
     conn.close()
@@ -101,18 +103,13 @@ def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
     conn.commit()
     conn.close()
 
-def ajouter_mot(liste_id, article, mot_original, traduction):
-    if article.strip():
-        mot_complet = f"{article.strip()} {mot_original.strip()}"
-    else:
-        mot_complet = mot_original.strip()
-
+def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute(
-        "INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
-        (liste_id, mot_complet, traduction.strip())
-    )
+    c.execute("""
+        INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (liste_id, inf_ou_mot.strip(), present.strip(), preterit.strip(), pp.strip(), traduction.strip()))
     conn.commit()
     conn.close()
 
@@ -139,15 +136,28 @@ def renommer_liste(liste_id, nouveau_nom):
     conn.commit()
     conn.close()
 
-def remplacer_mots_liste(liste_id, nouveaux_mots):
+def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
-    for art, mot, trad in nouveaux_mots:
-        if mot.strip() and trad.strip():
-            mot_complet = f"{art.strip()} {mot.strip()}" if art.strip() else mot.strip()
-            c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
-                      (liste_id, mot_complet, trad.strip()))
+    
+    for item in nouveaux_mots:
+        if type_liste == "verbe":
+            inf, pres, pret, pp, trad = item
+            if inf.strip() and trad.strip():
+                c.execute("""
+                    INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (liste_id, inf.strip(), pres.strip(), pret.strip(), pp.strip(), trad.strip()))
+        else:
+            art, mot, trad = item
+            if mot.strip() and trad.strip():
+                mot_complet = f"{art.strip()} {mot.strip()}" if art.strip() else mot.strip()
+                c.execute("""
+                    INSERT INTO mots (liste_id, mot_original, traduction) 
+                    VALUES (?, ?, ?)
+                """, (liste_id, mot_complet, trad.strip()))
+                
     conn.commit()
     conn.close()
 
@@ -155,25 +165,28 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
-    c.execute("SELECT nom_liste FROM listes WHERE id = ?", (liste_id_origine,))
+    c.execute("SELECT nom_liste, type_liste FROM listes WHERE id = ?", (liste_id_origine,))
     res = c.fetchone()
     
     if not res:
         conn.close()
         return False, "Aucune liste trouvée avec cet ID."
     
-    nom_liste_origine = res[0]
+    nom_liste_origine, type_liste = res
     nouveau_nom = f"{nom_liste_origine} (copie)"
     
-    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (nouvel_user_id, nouveau_nom))
+    c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
+              (nouvel_user_id, nouveau_nom, type_liste))
     nouvelle_liste_id = c.lastrowid
     
-    c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
+    c.execute("SELECT mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
     mots = c.fetchall()
     
-    for mot_or, trad in mots:
-        c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
-                  (nouvelle_liste_id, mot_or, trad))
+    for mot_or, pres, pret, pp, trad in mots:
+        c.execute("""
+            INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
     conn.close()
@@ -183,34 +196,33 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
-    # Vérifie que l'ami existe
     c.execute("SELECT id, username FROM users WHERE id = ?", (ami_user_id,))
     ami = c.fetchone()
     if not ami:
         conn.close()
         return False, "Aucun utilisateur trouvé avec cet ID."
     
-    # Récupère la liste d'origine
-    c.execute("SELECT nom_liste FROM listes WHERE id = ?", (liste_id_origine,))
+    c.execute("SELECT nom_liste, type_liste FROM listes WHERE id = ?", (liste_id_origine,))
     res = c.fetchone()
     if not res:
         conn.close()
         return False, "La liste d'origine n'existe plus."
     
-    nom_liste = res[0]
+    nom_liste, type_liste = res
     nouveau_nom = f"{nom_liste} (partagée)"
     
-    # Crée la copie pour l'ami
-    c.execute("INSERT INTO listes (user_id, nom_liste) VALUES (?, ?)", (ami_user_id, nouveau_nom))
+    c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
+              (ami_user_id, nouveau_nom, type_liste))
     nouvelle_liste_id = c.lastrowid
     
-    # Copie les mots
-    c.execute("SELECT mot_original, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
+    c.execute("SELECT mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id_origine,))
     mots = c.fetchall()
     
-    for mot_or, trad in mots:
-        c.execute("INSERT INTO mots (liste_id, mot_original, traduction) VALUES (?, ?, ?)",
-                  (nouvelle_liste_id, mot_or, trad))
+    for mot_or, pres, pret, pp, trad in mots:
+        c.execute("""
+            INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
     conn.close()
@@ -240,7 +252,6 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
             nb_mots += 1
             
         elif type_liste == "verbe" and len(parts) >= 5:
-            # Infinitif, Présent, Prétérit, Participe Passé, Traduction
             c.execute("""
                 INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -251,8 +262,8 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     conn.close()
     return nb_mots
 
-        
-# --- Apparence ---
+
+# --- APPARENCE ---
 def ligne_epaisse():
     st.markdown(
         """
@@ -261,7 +272,7 @@ def ligne_epaisse():
         unsafe_allow_html=True
     )
 
-            
+
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
@@ -276,7 +287,6 @@ col_title, col_action, col_signup = st.columns([6, 1, 1])
 with col_title:
     st.markdown("### 📘 Reviseur")
     if st.session_state.etat == "connecte":
-        # Affiche l'ID de l'utilisateur de manière discrète mais claire
         username, user_id = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
 
@@ -337,7 +347,7 @@ elif st.session_state.etat == "nouveau":
                     else:
                         st.error("Ce nom d'utilisateur est déjà pris.")
 
-# 3. ÉTAT : CONNECT (Formulaire de connexion)
+# 3. ÉTAT : CONNECT (Connexion)
 elif st.session_state.etat == "connect":
     _, col_centre, _ = st.columns([1, 2, 1])
     with col_centre:
@@ -374,12 +384,9 @@ elif st.session_state.etat == "connecte":
 
     with col_centre:
 
-        # ----------------------------------------------------
         # CONFIRMATION DE SUPPRESSION DE COMPTE
-        # ----------------------------------------------------
         if st.session_state.confirmer_suppr_compte:
             st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
-            
             col_annuler_compte, col_confirmer_compte = st.columns(2)
             
             with col_annuler_compte:
@@ -397,13 +404,13 @@ elif st.session_state.etat == "connecte":
                     st.rerun()
         
         # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
-        if st.session_state.action_liste == "creer":
+        elif st.session_state.action_liste == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             
             nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
             type_liste_choisi = st.radio(
                 "Type de liste :", 
-                ["Vocabulaire (Mot, Traduction)", "Verbes irréguliers (5 formes)"],
+                ["Vocabulaire (Article, Mot, Traduction)", "Verbes (5 formes)"],
                 horizontal=True
             )
             
@@ -415,7 +422,6 @@ elif st.session_state.etat == "connecte":
             mots_saisis = []
             toutes_lignes_visibles_remplies = True
 
-            # Entêtes dynamiques
             if is_verbe:
                 cols_h = st.columns([2, 2, 2, 2, 2])
                 headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction"]
@@ -436,7 +442,7 @@ elif st.session_state.etat == "connecte":
                     pp = c4.text_input(f"pp_{i}", key=f"pp_{i}", label_visibility="collapsed")
                     trad = c5.text_input(f"trad_{i}", key=f"vtrad_{i}", label_visibility="collapsed")
                     
-                    mots_saisis.append((inf, pres, pret, pp, trad))
+                    mots_saisis.append(("", inf, pres, pret, pp, trad))
                     if not (inf.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
                 else:
@@ -445,8 +451,7 @@ elif st.session_state.etat == "connecte":
                     mot = c2.text_input(f"mot_{i}", key=f"mot_{i}", label_visibility="collapsed")
                     trad = c3.text_input(f"trad_{i}", key=f"trad_{i}", label_visibility="collapsed")
                     
-                    mot_complet = f"{art.strip()} {mot.strip()}".strip()
-                    mots_saisis.append((mot_complet, "", "", "", trad))
+                    mots_saisis.append((art, mot, "", "", "", trad))
                     if not (mot.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
 
@@ -472,22 +477,27 @@ elif st.session_state.etat == "connecte":
                         listes_user = recuperer_listes_utilisateur(user_id)
                         derniere_liste_id = listes_user[-1][0]
 
-                        for item in mots_saisis:
-                            inf_mot, pres, pret, pp, trad = item
-                            if inf_mot.strip() and trad.strip():
-                                ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
+                        for art, inf_mot, pres, pret, pp, trad in mots_saisis:
+                            if is_verbe:
+                                if inf_mot.strip() and trad.strip():
+                                    ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
+                            else:
+                                if inf_mot.strip() and trad.strip():
+                                    mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
+                                    ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
                         st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
                         st.session_state.action_liste = "liste"
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
-        
+
         # CAS B : VUE ÉDITER UNE LISTE (✏️)
         elif st.session_state.action_liste == "editer":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "")
+            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("", "vocabulaire"))
+            nom_actuel, type_liste = info_liste
 
             st.subheader("✏️ Éditer la liste")
             
@@ -495,42 +505,59 @@ elif st.session_state.etat == "connecte":
             st.divider()
 
             mots_existants = recuperer_mots_liste(liste_id)
-            
             nb_lignes = max(len(mots_existants) + 1, st.session_state.nb_lignes_mots)
 
             mots_modifies = []
             toutes_lignes_visibles_remplies = True
             
-            c_h1, c_h2, c_h3 = st.columns([1, 2, 2])
-            with c_h1:
-                st.caption("Article")
-            with c_h2:
-                st.caption("Mot / Nom")
-            with c_h3:
-                st.caption("Traduction")
+            if type_liste == "verbe":
+                cols_h = st.columns([2, 2, 2, 2, 2])
+                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction"]
+                for col, h in zip(cols_h, headers):
+                    col.caption(h)
 
-            for i in range(nb_lignes):
-                art_val, mot_val, trad_val = "", "", ""
-                if i < len(mots_existants):
-                    mot_or, trad_val = mots_existants[i]
-                    parts = mot_or.split(" ", 1)
-                    if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
-                        art_val, mot_val = parts[0], parts[1]
-                    else:
-                        mot_val = mot_or
+                for i in range(nb_lignes):
+                    inf_v, pres_v, pret_v, pp_v, trad_v = "", "", "", "", ""
+                    if i < len(mots_existants):
+                        inf_v, pres_v, pret_v, pp_v, trad_v = mots_existants[i]
 
-                col_art, col_mot, col_trad = st.columns([1, 2, 2])
-                with col_art:
-                    art = st.text_input(f"Art {i+1}", value=art_val, key=f"edit_art_{i}", label_visibility="collapsed")
-                with col_mot:
-                    mot = st.text_input(f"Mot {i+1}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
-                with col_trad:
-                    trad = st.text_input(f"Trad {i+1}", key=f"edit_trad_{i}", value=trad_val, label_visibility="collapsed")
+                    c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
+                    inf = c1.text_input(f"edit_inf_{i}", value=inf_v, key=f"edit_inf_{i}", label_visibility="collapsed")
+                    pres = c2.text_input(f"edit_pres_{i}", value=pres_v, key=f"edit_pres_{i}", label_visibility="collapsed")
+                    pret = c3.text_input(f"edit_pret_{i}", value=pret_v, key=f"edit_pret_{i}", label_visibility="collapsed")
+                    pp = c4.text_input(f"edit_pp_{i}", value=pp_v, key=f"edit_pp_{i}", label_visibility="collapsed")
+                    trad = c5.text_input(f"edit_vtrad_{i}", value=trad_v, key=f"edit_vtrad_{i}", label_visibility="collapsed")
 
-                mots_modifies.append((art, mot, trad))
+                    mots_modifies.append((inf, pres, pret, pp, trad))
 
-                if len(mot.strip()) < 1 or len(trad.strip()) < 1:
-                    toutes_lignes_visibles_remplies = False
+                    if len(inf.strip()) < 1 or len(trad.strip()) < 1:
+                        toutes_lignes_visibles_remplies = False
+
+            else:
+                cols_h = st.columns([1, 2, 2])
+                headers = ["Article", "Mot / Nom", "Traduction"]
+                for col, h in zip(cols_h, headers):
+                    col.caption(h)
+
+                for i in range(nb_lignes):
+                    art_val, mot_val, trad_val = "", "", ""
+                    if i < len(mots_existants):
+                        mot_or, _, _, _, trad_val = mots_existants[i]
+                        parts = mot_or.split(" ", 1)
+                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
+                            art_val, mot_val = parts[0], parts[1]
+                        else:
+                            mot_val = mot_or
+
+                    c1, c2, c3 = st.columns([1, 2, 2])
+                    art = c1.text_input(f"edit_art_{i}", value=art_val, key=f"edit_art_{i}", label_visibility="collapsed")
+                    mot = c2.text_input(f"edit_mot_{i}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
+                    trad = c3.text_input(f"edit_trad_{i}", value=trad_val, key=f"edit_trad_{i}", label_visibility="collapsed")
+
+                    mots_modifies.append((art, mot, trad))
+
+                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                        toutes_lignes_visibles_remplies = False
 
             if toutes_lignes_visibles_remplies:
                 st.session_state.nb_lignes_mots = nb_lignes + 1
@@ -552,7 +579,7 @@ elif st.session_state.etat == "connecte":
                         st.warning("Le nom de la liste ne peut pas être vide.")
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
-                        remplacer_mots_liste(liste_id, mots_modifies)
+                        remplacer_mots_liste(liste_id, mots_modifies, type_liste)
                         
                         st.toast("Modifications enregistrées !", icon="✅")
                         st.session_state.action_liste = "liste"
@@ -565,7 +592,6 @@ elif st.session_state.etat == "connecte":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
-            # Fix : on récupère aussi type_l (3 éléments)
             info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
             nom_actuel, type_liste = info_liste
 
@@ -578,7 +604,6 @@ elif st.session_state.etat == "connecte":
                 st.info("Cette liste ne contient aucun élément.")
             else:
                 if type_liste == "verbe":
-                    # Affichage à 5 colonnes pour les verbes
                     c1, c2, c3, c4, c5 = st.columns(5)
                     c1.markdown("**Infinitif**")
                     c2.markdown("**Présent**")
@@ -595,13 +620,12 @@ elif st.session_state.etat == "connecte":
                         col4.write(pp)
                         col5.write(trad)
                 else:
-                    # Affichage à 2 colonnes pour le vocabulaire
                     c_m1, c_m2 = st.columns(2)
                     c_m1.markdown("**Mot / Expression**")
                     c_m2.markdown("**Traduction**")
                     st.divider()
 
-                    for mot_or, pres, pret, pp, trad in mots:
+                    for mot_or, _, _, _, trad in mots:
                         cm1, cm2 = st.columns(2)
                         cm1.write(mot_or)
                         cm2.write(trad)
@@ -620,7 +644,6 @@ elif st.session_state.etat == "connecte":
             nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
 
             st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
-            
             col_non, col_oui = st.columns(2)
             
             with col_non:
@@ -644,12 +667,10 @@ elif st.session_state.etat == "connecte":
             
             tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
             
-            # --- OPTION 1 : Obtenir l'ID de la liste ---
             with tab_id:
                 st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
                 st.code(str(liste_id), language="text")
             
-            # --- OPTION 2 : Envoyer directement via l'ID de l'utilisateur ---
             with tab_direct:
                 st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
                 id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
@@ -679,7 +700,6 @@ elif st.session_state.etat == "connecte":
             
             tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
             
-            # --- OPTION 1 : Importer par ID ---
             with tab_id:
                 st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
                 id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
@@ -696,12 +716,9 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un ID valide.")
 
-            
-            # --- OPTION 2 : Importer depuis un fichier texte ---
             with tab_fichier:
                 st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
                 
-                # Sélection du type de liste
                 type_import = st.radio(
                     "Type de liste à importer :", 
                     ["Vocabulaire", "Verbes"],
@@ -710,7 +727,6 @@ elif st.session_state.etat == "connecte":
                 )
                 type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
 
-                # Explication dynamique selon le type choisi
                 if type_import_code == "verbe":
                     st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction` (un verbe par ligne)")
                 else:
@@ -733,7 +749,7 @@ elif st.session_state.etat == "connecte":
                             st.session_state.action_liste = "liste"
                             st.rerun()
                         else:
-                            st.error(f"Aucun élément n'a pu être extrait. Vérifie que ton fichier respecte bien le format indiqué ci-dessus.")
+                            st.error("Aucun élément n'a pu être extrait. Vérifie que le format correspond bien aux consignes.")
 
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
@@ -742,17 +758,12 @@ elif st.session_state.etat == "connecte":
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
-            # Si on est en train de demander la confirmation de suppression de compte,
-            # on N'AFFICHE PAS le reste de la page
-            if st.session_state.confirmer_suppr_compte:
-                pass  # Le message de confirmation s'affiche déjà tout seul au-dessus !
-                
-            else:
+            if not st.session_state.confirmer_suppr_compte:
                 col_titre, col_import, col_ajout = st.columns([3, 1, 1])
                 with col_titre:
                     st.subheader("📋 Mes listes")
                 with col_import:
-                    if st.button("📥", use_container_width=True, help="Importer une liste via un ID"):
+                    if st.button("📥", use_container_width=True, help="Importer une liste"):
                         st.session_state.action_liste = "importer"
                         st.rerun()
                 with col_ajout:
@@ -774,7 +785,6 @@ elif st.session_state.etat == "connecte":
                         
                         with col_nom:
                             if type_liste == "verbe":
-                                # Affichage en violet pour les verbes
                                 st.markdown(
                                     f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", 
                                     unsafe_allow_html=True
