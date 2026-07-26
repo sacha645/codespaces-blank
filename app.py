@@ -990,7 +990,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-                st.divider()
+                ligne_epaisse()
 
                 listes = recuperer_listes_utilisateur(user_id)
 
@@ -1038,4 +1038,3 @@ elif st.session_state.etat == "connecte":
                                 st.rerun()
 
                         st.divider()
-                    ligne_epaisse()
