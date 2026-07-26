@@ -985,13 +985,12 @@ elif st.session_state.etat == "connecte":
             # --- S'IL S'AGIT D'UNE LISTE DE VOCABULAIRE ---
             if type_liste == "vocabulaire":
 
-                # 1. INITIALISATION DE LA SESSION DE RÉVISION
+                # 1. INITIALISATION / REPRISE DU QUIZ VOCABULAIRE
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
-                    # On vérifie si une sauvegarde existe en BDD
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
 
+                    # Demande si une sauvegarde existe
                     if partie_sauvee and "choix_reprise" not in st.session_state:
-                        # Demande de confirmation à l'utilisateur
                         st.info("💾 Une sauvegarde d'entraînement existe pour cette liste.")
                         col_c1, col_c2 = st.columns(2)
                         
@@ -1006,9 +1005,9 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.choix_reprise = "nouveau"
                                 st.rerun()
 
-                        st.stop()  # Stoppe l'affichage tant que l'utilisateur n'a pas choisi
+                        st.stop()
 
-                    # Applique le choix fait par l'utilisateur
+                    # Chargement ou Création
                     if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
                         st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
                         st.session_state.quiz_index = partie_sauvee["quiz_index"]
@@ -1021,7 +1020,7 @@ elif st.session_state.etat == "connecte":
                         st.toast("⚡ Sauvegarde chargée !")
                     else:
                         mots_bruts = recuperer_mots_liste(liste_id)
-                        articles_connus = ["der", "die", "das", "the", "le", "la", "l'", "les", "un", "une", "des", "a", "an"]
+                        articles_connus = ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]
                         
                         mots_traites = []
                         for id_m, mot_or, _, _, _, trad in mots_bruts:
@@ -1037,8 +1036,21 @@ elif st.session_state.etat == "connecte":
                                 "mot": mot,
                                 "traduction": trad.strip()
                             })
+
+                        # On crée la liste de questions avec les 2 sens (exactement comme dans ton code d'origine)
+                        questions = []
+                        for item in mots_traites:
+                            questions.append({"item": item, "sens": "vers_francais"})
+                            questions.append({"item": item, "sens": "depuis_francais"})
                         
-                        st.session_state.quiz_mots = demeler_questions(mots_traites)
+                        # Mélange 1 : Aléatoire
+                        random.shuffle(questions)
+
+                        # Mélange 2 : Démêlage (qui reçoit maintenant la bonne structure avec 'item')
+                        questions = demeler_questions(questions)
+
+                        # Enregistrement dans la session
+                        st.session_state.quiz_mots = questions
                         st.session_state.quiz_index = 0
                         st.session_state.score_vers_fr = 0.0
                         st.session_state.total_vers_fr = 0.0
@@ -1047,7 +1059,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.erreurs_commises = []
                         st.session_state.quiz_liste_id = liste_id
 
-                    # Nettoyage de la variable de choix temporaire
+                    # Nettoyage du choix temporaire
                     if "choix_reprise" in st.session_state:
                         del st.session_state.choix_reprise
 
@@ -1061,7 +1073,6 @@ elif st.session_state.etat == "connecte":
                     s_d = st.session_state.score_depuis_fr
                     t_d = st.session_state.total_depuis_fr
 
-                    # 1. Vérification si un record a été battu AVANT la mise à jour
                     score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
                     est_nouveau_record = False
 
@@ -1069,17 +1080,12 @@ elif st.session_state.etat == "connecte":
                         est_nouveau_record = True
                     else:
                         anc_v, _, anc_d, _ = score_actuel_bdd
-                        # Record battu si au moins un des deux scores est strictement supérieur
                         if s_v > anc_v or s_d > anc_d:
                             est_nouveau_record = True
 
-                    # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
-
-                    # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    # Sauvegarde ciblée des erreurs selon le sens (vers_fr vs depuis_fr)
                     mots_err = {}
                     for err in st.session_state.erreurs_commises:
                         if "id_mot" in err:
@@ -1095,7 +1101,6 @@ elif st.session_state.etat == "connecte":
 
                     st.session_state[f"erreurs_liste_{liste_id}"] = mots_err
 
-                    # 3. Affichage des résultats
                     st.write("### 📊 Tes résultats :")
 
                     if est_nouveau_record:
@@ -1117,7 +1122,6 @@ elif st.session_state.etat == "connecte":
                         tot_d = st.session_state.total_depuis_fr
                         st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
-                    # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
                     st.divider()
 
@@ -1145,12 +1149,14 @@ elif st.session_state.etat == "connecte":
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
-                            del st.session_state.quiz_mots
+                            if "quiz_mots" in st.session_state:
+                                del st.session_state.quiz_mots
                             st.session_state.action_liste = "liste"
                             st.rerun()
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
-                            del st.session_state.quiz_mots
+                            if "quiz_mots" in st.session_state:
+                                del st.session_state.quiz_mots
                             st.rerun()
 
                 # 3. VUE DE QUESTION EN COURS
@@ -1158,24 +1164,27 @@ elif st.session_state.etat == "connecte":
                     q = questions[index]
                     item = q["item"]
                     sens = q["sens"]
-                    has_article = bool(item["article"])
+                    has_article = bool(item["article"].strip())
 
-                    # Barre de progression
                     st.progress(index / len(questions), text=f"Question {index + 1} / {len(questions)}")
 
                     with st.form(key=f"form_quiz_{index}"):
                         if sens == "vers_francais":
                             st.markdown(f"### Traduis en langue étrangère : **{item['traduction']}**")
-                            c_art, c_mot = st.columns([1, 3])
-                            user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
-                            user_mot = c_mot.text_input("Mot / Nom", key=f"mot_in_{index}")
-
-                        else:  # depuis_francais
+                            if has_article:
+                                c_art, c_mot = st.columns([1, 3])
+                                user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
+                                user_mot = c_mot.text_input("Mot / Nom", key=f"mot_in_{index}")
+                            else:
+                                user_art = ""
+                                user_mot = st.text_input("Mot / Nom", key=f"mot_in_{index}")
+                            user_trad = ""
+                        else:
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
                             st.markdown(f"### Traduis en français : **{mot_affiche}**")
-                            c_art, c_trad = st.columns([1, 3])
-                            user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
-                            user_trad = c_trad.text_input("Traduction", key=f"trad_in_{index}")
+                            user_art = ""
+                            user_mot = ""
+                            user_trad = st.text_input("Traduction", key=f"trad_in_{index}")
 
                         valider = st.form_submit_button("Vérifier 🚀", type="primary")
 
@@ -1187,14 +1196,12 @@ elif st.session_state.etat == "connecte":
                         u_mot = user_mot.strip() if sens == "vers_francais" else user_trad.strip()
 
                         if sens == "vers_francais":
-                            # Vers la langue étrangère : on évalue l'article ET le mot
                             art_correct = (u_art.lower() == item["article"].lower()) if has_article else True
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
                             q_txt = f"Traduction de **{item['traduction']}**"
                             rep_att = f"{item['article']} {item['mot']}".strip()
 
-                            # Calcul du score
                             if has_article:
                                 if art_correct:
                                     points_gagnes += 0.5
@@ -1204,7 +1211,6 @@ elif st.session_state.etat == "connecte":
                                 if mot_correct:
                                     points_gagnes += 1.0
 
-                            # Mise en forme pour le bilan d'erreurs
                             if points_gagnes < 1.0:
                                 partie_art_html = f"<span style='color:red;'>{u_art if u_art else '(vide)'}</span>" if not art_correct else u_art
                                 partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>" if not mot_correct else u_mot
@@ -1213,14 +1219,13 @@ elif st.session_state.etat == "connecte":
 
                                 st.session_state.erreurs_commises.append({
                                     "id_mot": item["id_mot"],
-                                    "sens": "depuis_fr",  # 👈 Faute sur la colonne de la langue étrangère
+                                    "sens": "depuis_fr",
                                     "question": q_txt,
                                     "reponse_user_html": rep_user_formatted,
                                     "reponse_attendue": rep_att
                                 })
 
-                        else:  # depuis_francais
-                            # Vers le français : l'utilisateur traduit toute l'expression
+                        else:
                             mot_correct = (u_mot.lower() == item["traduction"].lower())
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
                             q_txt = f"Traduction de **{mot_affiche}**"
@@ -1234,13 +1239,12 @@ elif st.session_state.etat == "connecte":
                                 
                                 st.session_state.erreurs_commises.append({
                                     "id_mot": item["id_mot"],
-                                    "sens": "vers_fr",  # 👈 Faute sur la colonne française
+                                    "sens": "vers_fr",
                                     "question": q_txt,
                                     "reponse_user_html": partie_mot_html,
                                     "reponse_attendue": rep_att
                                 })
 
-                        # Mise à jour des scores généraux
                         if sens == "vers_francais":
                             st.session_state.score_vers_fr += points_gagnes
                             st.session_state.total_vers_fr += total_q
@@ -1251,13 +1255,12 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_index += 1
                         st.rerun()
 
-                    # --- BOUTONS DE SORTIE ET SAUVEGARDE EN BAS DU QUIZ ---
+                    # --- BOUTONS PAUSE ET ABANDON ---
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
 
                     with col_b1:
                         if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
-                            # 1. On prépare le dictionnaire des données de la session
                             etat_a_sauver = {
                                 "quiz_index": st.session_state.quiz_index,
                                 "quiz_mots": st.session_state.quiz_mots,
@@ -1268,10 +1271,8 @@ elif st.session_state.etat == "connecte":
                                 "erreurs_commises": st.session_state.get("erreurs_commises", [])
                             }
                             
-                            # 2. Sauvegarde en BDD
                             sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                             
-                            # 3. Nettoyage de la session active
                             clefs_a_supprimer = [
                                 "quiz_mots", "quiz_index", "quiz_liste_id", 
                                 "score_vers_fr", "total_vers_fr", 
@@ -1281,21 +1282,16 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
                             
-                            st.toast("💾 Entraînement sauvegardé ! Tu pourras le reprendre plus tard.")
+                            st.toast("💾 Entraînement sauvegardé !")
                             st.session_state.action_liste = "liste"
                             st.rerun()
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
                             clefs_a_supprimer = [
-                                "quiz_mots", 
-                                "quiz_index", 
-                                "quiz_liste_id", 
-                                "score_vers_fr", 
-                                "total_vers_fr", 
-                                "score_depuis_fr", 
-                                "total_depuis_fr", 
-                                "erreurs_commises"
+                                "quiz_mots", "quiz_index", "quiz_liste_id", 
+                                "score_vers_fr", "total_vers_fr", 
+                                "score_depuis_fr", "total_depuis_fr", "erreurs_commises"
                             ]
                             for clef in clefs_a_supprimer:
                                 if clef in st.session_state:
