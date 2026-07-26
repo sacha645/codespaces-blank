@@ -913,10 +913,32 @@ elif st.session_state.etat == "connecte":
                     s_d = st.session_state.score_depuis_fr
                     t_d = st.session_state.total_depuis_fr
 
-                    # Enregistrement automatique du record s'il est battu
+                    # 1. Vérification si un record a été battu AVANT la mise à jour
+                    score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
+                    est_nouveau_record = False
+
+                    if score_actuel_bdd is None:
+                        est_nouveau_record = True
+                    else:
+                        anc_v, _, anc_d, _ = score_actuel_bdd
+                        # Record battu si au moins un des deux scores est strictement supérieur
+                        if s_v > anc_v or s_d > anc_d:
+                            est_nouveau_record = True
+
+                    # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
 
+                    # 3. Affichage des résultats
+                    st.write("")
                     st.write("### 📊 Tes résultats :")
+
+                    if est_nouveau_record:
+                        st.success("🥳 **Nouveau meilleur score !**")
+                    elif score_actuel_bdd:
+                        anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
+                        st.caption(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+
+                    st.write("")
 
                     col_res1, col_res2 = st.columns(2)
                     with col_res1:
