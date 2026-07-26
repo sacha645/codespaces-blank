@@ -815,6 +815,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.total_vers_fr = 0.0
                     st.session_state.score_depuis_fr = 0.0
                     st.session_state.total_depuis_fr = 0.0
+                    st.session_state.erreurs_commises = []
                     st.session_state.quiz_liste_id = liste_id
 
                 questions = st.session_state.quiz_mots
@@ -823,21 +824,41 @@ elif st.session_state.etat == "connecte":
                 # 2. VUE FINALE : BILAN DU QUIZ
                 if index >= len(questions):
                     st.success("🎉 Entraînement terminé !")
-                    st.write("Voici tes résultats :")
+                    st.write("### 📊 Tes résultats :")
 
                     col_res1, col_res2 = st.columns(2)
                     with col_res1:
                         score_v = st.session_state.score_vers_fr
                         tot_v = st.session_state.total_vers_fr
-                        st.metric(label="📥 Vers le français (Traduction ➔ Mot)", value=f"{score_v:g} / {tot_v:g}")
+                        st.metric(label="📥 Vers la langue étrangère", value=f"{score_v:g} / {tot_v:g}")
 
                     with col_res2:
                         score_d = st.session_state.score_depuis_fr
                         tot_d = st.session_state.total_depuis_fr
-                        st.metric(label="📤 À partir du français (Mot ➔ Traduction)", value=f"{score_d:g} / {tot_d:g}")
+                        st.metric(label="📤 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
-                    if (score_v + score_d) == (tot_v + tot_d) and (tot_v + tot_d) > 0:
+                    # --- RECAPITULATIF DES ERREURS ---
+                    erreurs = st.session_state.erreurs_commises
+                    st.divider()
+
+                    if erreurs:
+                        st.write("### ❌ Liste des erreurs commises")
+                        st.caption("Seuls les éléments erronés sont affichés en rouge :")
+
+                        col_q, col_rep, col_att = st.columns([2, 2, 2])
+                        col_q.markdown("**Question posée**")
+                        col_rep.markdown("**Ta réponse**")
+                        col_att.markdown("**Réponse attendue**")
+                        st.divider()
+
+                        for err in erreurs:
+                            c1, c2, c3 = st.columns([2, 2, 2])
+                            c1.markdown(err["question"])
+                            c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
+                            c3.markdown(f"🟢 `{err['reponse_attendue']}`")
+                    else:
                         st.balloons()
+                        st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
 
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
@@ -881,31 +902,50 @@ elif st.session_state.etat == "connecte":
                         points_gagnes = 0.0
                         total_q = 1.0
 
-                        # A. Calcul des points pour l'article
+                        # Récupération et nettoyage des saisies
+                        u_art = user_art.strip()
+                        u_mot = user_mot.strip() if sens == "vers_francais" else user_trad.strip()
+
+                        # Vérification de l'article et du mot
+                        art_correct = (u_art.lower() == item["article"].lower()) if has_article else True
+
+                        if sens == "vers_francais":
+                            mot_correct = (u_mot.lower() == item["mot"].lower())
+                            question_texte = f"Traduction de **{item['traduction']}**"
+                            rep_attendue = f"{item['article']} {item['mot']}".strip()
+                        else:
+                            mot_correct = (u_mot.lower() == item["traduction"].lower())
+                            mot_affiche = f"{item['article']} {item['mot']}".strip()
+                            question_texte = f"Traduction de **{mot_affiche}**"
+                            rep_attendue = item["traduction"]
+
+                        # Calcul des points
                         if has_article:
-                            art_correct = user_art.strip().lower() == item["article"].lower()
                             if art_correct:
                                 points_gagnes += 0.5
-                        else:
-                            # S'il n'y avait pas d'article exigé mais que l'utilisateur en a mis un, pas de demi-point
-                            pass
-
-                        # B. Calcul des points pour le mot/traduction
-                        if sens == "vers_francais":
-                            mot_correct = user_mot.strip().lower() == item["mot"].lower()
-                            val_attendue = f"{item['article']} {item['mot']}".strip()
-                        else:
-                            mot_correct = user_trad.strip().lower() == item["traduction"].lower()
-                            val_attendue = item["traduction"]
-
-                        if has_article:
                             if mot_correct:
                                 points_gagnes += 0.5
                         else:
                             if mot_correct:
                                 points_gagnes += 1.0
 
-                        # C. Mise à jour des scores
+                        # --- ENREGISTREMENT DE LA FAUTE SI SCORE < 1.0 ---
+                        if points_gagnes < 1.0:
+                            partie_art_html = f"<span style='color:red;'>{u_art if u_art else '(vide)'}</span>" if not art_correct else u_art
+                            partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>" if not mot_correct else u_mot
+
+                            if has_article and sens == "vers_francais":
+                                rep_user_formatted = f"{partie_art_html} {partie_mot_html}".strip()
+                            else:
+                                rep_user_formatted = partie_mot_html
+
+                            st.session_state.erreurs_commises.append({
+                                "question": question_texte,
+                                "reponse_user_html": rep_user_formatted,
+                                "reponse_attendue": rep_attendue
+                            })
+
+                        # Mise à jour des scores
                         if sens == "vers_francais":
                             st.session_state.score_vers_fr += points_gagnes
                             st.session_state.total_vers_fr += total_q
@@ -913,13 +953,13 @@ elif st.session_state.etat == "connecte":
                             st.session_state.score_depuis_fr += points_gagnes
                             st.session_state.total_depuis_fr += total_q
 
-                        # D. Notification feedback
+                        
                         if points_gagnes == 1.0:
                             st.toast("Parfait ! 1/1 pt 🎉", icon="✅")
                         elif points_gagnes == 0.5:
-                            st.toast(f"Moitié bon (0.5/1 pt) ! Réponse attendue : '{val_attendue}'", icon="⚠️")
+                            st.toast(f"Moitié bon (0.5/1 pt) ! Réponse attendue : '{rep_attendue}'", icon="⚠️")
                         else:
-                            st.toast(f"Incorrect (0/1 pt) ! Réponse attendue : '{val_attendue}'", icon="❌")
+                            st.toast(f"Incorrect (0/1 pt) ! Réponse attendue : '{rep_attendue}'", icon="❌")
 
                         st.session_state.quiz_index += 1
                         st.rerun()
