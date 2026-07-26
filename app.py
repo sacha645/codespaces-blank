@@ -823,7 +823,6 @@ elif st.session_state.etat == "connecte":
 
                 # 2. VUE FINALE : BILAN DU QUIZ
                 if index >= len(questions):
-                    st.success("🎉 Entraînement terminé !")
                     st.write("### 📊 Tes résultats :")
 
                     col_res1, col_res2 = st.columns(2)
@@ -839,17 +838,17 @@ elif st.session_state.etat == "connecte":
 
                     # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
-                    st.divider()
+                    ligne_epaisse()
 
                     if erreurs:
                         st.write("### ❌ Liste des erreurs commises")
                         st.caption("Seuls les éléments erronés sont affichés en rouge :")
+                        st.divider()
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
                         col_q.markdown("**Question posée**")
                         col_rep.markdown("**Ta réponse**")
                         col_att.markdown("**Réponse attendue**")
-                        st.divider()
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
@@ -860,6 +859,7 @@ elif st.session_state.etat == "connecte":
                         st.balloons()
                         st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
 
+                    st.divider()
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
@@ -962,14 +962,6 @@ elif st.session_state.etat == "connecte":
                         else:
                             st.session_state.score_depuis_fr += points_gagnes
                             st.session_state.total_depuis_fr += total_q
-
-                        # Notifications Toast
-                        if points_gagnes == 1.0:
-                            st.toast("Parfait ! 1/1 pt 🎉", icon="✅")
-                        elif points_gagnes == 0.5:
-                            st.toast(f"Demi-point (0.5/1 pt) ! Réponse attendue : '{rep_attendue}'", icon="⚠️")
-                        else:
-                            st.toast(f"Incorrect (0/1 pt) ! Réponse attendue : '{rep_attendue}'", icon="❌")
 
                         st.session_state.quiz_index += 1
                         st.rerun()
