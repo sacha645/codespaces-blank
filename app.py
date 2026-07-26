@@ -1,6 +1,7 @@
 import sqlite3
 import bcrypt
 import streamlit as st
+import random
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
@@ -132,7 +133,7 @@ def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp=""
 def recuperer_mots_liste(liste_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute("SELECT mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
+    c.execute("SELECT id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
     mots = c.fetchall()
     conn.close()
     return mots
@@ -311,6 +312,50 @@ def demeler_questions(questions):
             i += 1
 
     return questions
+
+def preparer_quiz_verbes_aleatoire(mots_verbes):
+    # mots_verbes = [(id_mot, infinitif, present, preterit, participe_passe, traduction), ...]
+    # Noms et index dans le tuple : 
+    # 1: Infinitif, 2: Présent, 3: Prétérit, 4: Participe Passé, 5: Traduction
+    formes_infos = [
+        (1, "Infinitif"),
+        (2, "Présent"),
+        (3, "Prétérit"),
+        (4, "Participe Passé"),
+        (5, "Traduction")
+    ]
+    
+    questions_finales = []
+    
+    # 5 tours de parcours complet
+    for tour in range(5):
+        for verbe in mots_verbes:
+            id_mot = verbe[0]
+            # Choix au hasard de l'index de la forme fournie comme indice (entre 0 et 4 dans formes_infos)
+            idx_tirage = random.randint(0, 4)
+            idx_tuple_fourni, nom_fourni = formes_infos[idx_tirage]
+            valeur_fournie = verbe[idx_tuple_fourni]
+            
+            # Les 4 autres formes à deviner
+            attentes = []
+            for idx_tuple, nom_f in formes_infos:
+                if idx_tuple != idx_tuple_fourni:
+                    attentes.append({
+                        "idx_tuple": idx_tuple,
+                        "nom": nom_f,
+                        "reponse_attendue": verbe[idx_tuple]
+                    })
+            
+            question = {
+                "id_mot": id_mot,
+                "nom_fourni": nom_fourni,
+                "valeur_fournie": valeur_fournie,
+                "attentes": attentes,
+                "verbe_tuple": verbe
+            }
+            questions_finales.append(question)
+            
+    return questions_finales
 
 
 # --- APPARENCE ---
@@ -702,13 +747,25 @@ elif st.session_state.etat == "connecte":
                     c5.markdown("**Traduction**")
                     st.divider()
 
-                    for inf, pres, pret, pp, trad in mots:
+                    # Récupération des erreurs commises pour cette liste
+                    compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
+
+                    for mot in mots:
+                        id_m, inf, pres, pret, pp, trad = mot
+                        errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
+                        
+                        # Fonction interne pour formater en rouge en cas de >= 2 erreurs
+                        def fmt(texte, idx_f):
+                            if errs.get(idx_f, 0) >= 2:
+                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
+                            return texte
+
                         col1, col2, col3, col4, col5 = st.columns(5)
-                        col1.write(inf)
-                        col2.write(pres)
-                        col3.write(pret)
-                        col4.write(pp)
-                        col5.write(trad)
+                        col1.markdown(fmt(inf, 1), unsafe_allow_html=True)
+                        col2.markdown(fmt(pres, 2), unsafe_allow_html=True)
+                        col3.markdown(fmt(pret, 3), unsafe_allow_html=True)
+                        col4.markdown(fmt(pp, 4), unsafe_allow_html=True)
+                        col5.markdown(fmt(trad, 5), unsafe_allow_html=True)
                 else:
                     c_m1, c_m2 = st.columns(2)
                     c_m1.markdown("**Mot / Expression**")
@@ -948,7 +1005,7 @@ elif st.session_state.etat == "connecte":
                     with col_res2:
                         score_d = st.session_state.score_depuis_fr
                         tot_d = st.session_state.total_depuis_fr
-                        st.metric(label="🇫🇷  Vers le français", value=f"{score_d:g} / {tot_d:g}")
+                        st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
                     # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
@@ -1102,12 +1159,107 @@ elif st.session_state.etat == "connecte":
                         st.session_state.action_liste = "liste"
                         st.rerun()
 
-            # --- S'IL S'AGIT D'UNE LISTE DE VERBES (A développer plus tard) ---
+            # --- S'IL S'AGIT D'UNE LISTE DE VERBES ---
             else:
-                st.info("⚡ L'entraînement pour les verbes sera configuré à la prochaine étape.")
-                if st.button("🔙 Retour aux listes", use_container_width=True):
-                    st.session_state.action_liste = "liste"
-                    st.rerun()
+                # 1. INITIALISATION DU QUIZ VERBES
+                if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
+                    mots_bruts = recuperer_mots_liste(liste_id)
+                    
+                    # Récupération des mots avec leur ID
+                    # Note: Assure-toi que recuperer_mots_liste renvoie aussi l'ID ou utilise l'index
+                    st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
+                    st.session_state.quiz_index = 0
+                    st.session_state.score_verbes = 0.0
+                    st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
+                    st.session_state.erreurs_compteur = {}
+                    st.session_state.quiz_liste_id = liste_id
+
+                questions = st.session_state.quiz_mots
+                index = st.session_state.quiz_index
+
+                # 2. VUE FINALE : BILAN ET SAUVEGARDE
+                if index >= len(questions):
+                    s_v = st.session_state.score_verbes
+                    t_v = st.session_state.total_verbes
+
+                    # Sauvegarde des erreurs en session pour l'affichage en rouge dans la vue de la liste
+                    st.session_state[f"erreurs_liste_{liste_id}"] = st.session_state.erreurs_compteur
+
+                    # Enregistrement du score global
+                    enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
+
+                    st.write("### 📊 Tes résultats :")
+                    st.metric(label="⚡ Score global Verbes", value=f"{s_v:g} / {t_v:g}")
+
+                    ligne_epaisse()
+                    st.write("")
+                    col_b1, col_b2 = st.columns(2)
+                    with col_b1:
+                        if st.button("🔄 Recommencer", use_container_width=True):
+                            del st.session_state.quiz_mots
+                            st.rerun()
+                    with col_b2:
+                        if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
+                            del st.session_state.quiz_mots
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
+
+                # 3. VUE DE QUESTION EN COURS
+                else:
+                    q = questions[index]
+                    st.progress(index / len(questions), text=f"Question {index + 1} / {len(questions)}")
+                    
+                    st.info(f"💡 Forme fournie : **{q['nom_fourni']}** ➔ `{q['valeur_fournie']}`")
+
+                    with st.form(key=f"form_verbe_{index}"):
+                        reponses_user = {}
+                        
+                        # Ordre des 5 formes à afficher
+                        ordre_formes = [
+                            (1, "Infinitif"),
+                            (2, "Présent"),
+                            (3, "Prétérit"),
+                            (4, "Participe Passé"),
+                            (5, "Traduction")
+                        ]
+                        
+                        for idx_t, nom_f in ordre_formes:
+                            if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
+                                reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
+                            else:
+                                st.text_input(f"{nom_f} (donné) :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
+
+                        valider = st.form_submit_button("Vérifier 🚀", type="primary")
+
+                    if valider:
+                        pts_gagnes = 0.0
+                        id_mot = q["id_mot"]
+
+                        if id_mot not in st.session_state.erreurs_compteur:
+                            st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+
+                        for att in q["attentes"]:
+                            idx_t = att["idx_tuple"]
+                            rep_u = reponses_user.get(idx_t, "").strip().lower()
+                            rep_att = att["reponse_attendue"].strip().lower()
+
+                            if rep_u == rep_att:
+                                pts_gagnes += 0.25
+                            else:
+                                st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+
+                        st.session_state.score_verbes += pts_gagnes
+                        st.session_state.quiz_index += 1
+                        st.rerun()
+
+                    st.write("")
+                    if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                        clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur"]
+                        for clef in clefs_a_supprimer:
+                            if clef in st.session_state:
+                                del st.session_state[clef]
+                        st.session_state.action_liste = "liste"
+                        st.rerun()
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
