@@ -1151,7 +1151,7 @@ elif st.session_state.etat == "connecte":
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(err['question'])
+                            c1.markdown(f"Traduction de **{err['question']}**")
                             c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
                             c3.markdown(f"🟢 {err['reponse_attendue']}")
                     else:
@@ -1214,7 +1214,7 @@ elif st.session_state.etat == "connecte":
                             art_correct = (u_art.lower() == item["article"].lower()) if has_article else True
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
-                            q_txt = f"Traduction de **{item['traduction']}**"
+                            q_txt = item['traduction']
                             rep_att = f"{item['article']} {item['mot']}".strip()
 
                             if has_article:
@@ -1243,7 +1243,7 @@ elif st.session_state.etat == "connecte":
                         else:
                             mot_correct = (u_mot.lower() == item["traduction"].lower())
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
-                            q_txt = f"Traduction de **{mot_affiche}**"
+                            q_txt = mot_affiche
                             rep_att = item["traduction"]
 
                             if mot_correct:
