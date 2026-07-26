@@ -1180,27 +1180,33 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_index += 1
                         st.rerun()
 
-                    # --- BOUTON DE SORTIE EN BAS DU QUIZ ---
+                    # --- BOUTONS DE SORTIE ET SAUVEGARDE EN BAS DU QUIZ ---
                     st.write("")
-                    if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
-                        # 1. Nettoyage complet des variables du quiz dans la session
-                        clefs_a_supprimer = [
-                            "quiz_mots", 
-                            "quiz_index", 
-                            "quiz_liste_id", 
-                            "score_vers_fr", 
-                            "total_vers_fr", 
-                            "score_depuis_fr", 
-                            "total_depuis_fr", 
-                            "erreurs_commises"
-                        ]
-                        for clef in clefs_a_supprimer:
-                            if clef in st.session_state:
-                                del st.session_state[clef]
+                    col_b1, col_b2 = st.columns(2)
 
-                        # 2. Redirection vers la page des listes
-                        st.session_state.action_liste = "liste"
-                        st.rerun()
+                    with col_b1:
+                        if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
+                            # On ajoutera la logique de sauvegarde ici à l'étape suivante
+                            pass
+
+                    with col_b2:
+                        if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                            clefs_a_supprimer = [
+                                "quiz_mots", 
+                                "quiz_index", 
+                                "quiz_liste_id", 
+                                "score_vers_fr", 
+                                "total_vers_fr", 
+                                "score_depuis_fr", 
+                                "total_depuis_fr", 
+                                "erreurs_commises"
+                            ]
+                            for clef in clefs_a_supprimer:
+                                if clef in st.session_state:
+                                    del st.session_state[clef]
+
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
 
             # --- S'IL S'AGIT D'UNE LISTE DE VERBES ---
             else:
@@ -1327,14 +1333,22 @@ elif st.session_state.etat == "connecte":
                         st.rerun()
 
                     st.write("")
-                    if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
-                        clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
-                        for clef in clefs_a_supprimer:
-                            if clef in st.session_state:
-                                del st.session_state[clef]
-                        st.session_state.action_liste = "liste"
-                        st.rerun()
+                    col_b1, col_b2 = st.columns(2)
 
+                    with col_b1:
+                        if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
+                            # On ajoutera la logique de sauvegarde ici à l'étape suivante
+                            pass
+
+                    with col_b2:
+                        if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                            clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
+                            for clef in clefs_a_supprimer:
+                                if clef in st.session_state:
+                                    del st.session_state[clef]
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
+                            
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             if not st.session_state.confirmer_suppr_compte:
