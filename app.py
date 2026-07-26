@@ -977,13 +977,13 @@ elif st.session_state.etat == "connecte":
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
-                        if st.button("🔄 Recommencer", use_container_width=True):
-                            del st.session_state.quiz_mots
-                            st.rerun()
-                    with col_b2:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             del st.session_state.quiz_mots
                             st.session_state.action_liste = "liste"
+                            st.rerun()
+                    with col_b2:
+                        if st.button("🔄 Recommencer", use_container_width=True):
+                            del st.session_state.quiz_mots
                             st.rerun()
 
                 # 3. VUE DE QUESTION EN COURS
