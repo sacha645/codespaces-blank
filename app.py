@@ -1152,17 +1152,18 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
-                        # --- AFFICHAGE DU MEILLEUR SCORE EN BAS À DROITE (SOUS LES BOUTONS) ---
+                        # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ ---
                         score_record = recuperer_score_liste(user_id, liste_id)
-                        
-                        col_score_box = st.columns([1])
+
                         st.write("")
-                        with col_score_box:
-                            if score_record:
-                                s_v, t_v, s_d, t_d = score_record
-                                st.caption(f"🏆 **Meilleur score :** 🌐 `{s_v:g}/{t_v:g}` &nbsp;|&nbsp; 🇫🇷 `{s_d:g}/{t_d:g}`")
-                            else:
-                                st.caption("🏆 **Meilleur score :** Pas encore d'essai")
+                        if score_record:
+                            s_v, t_v, s_d, t_d = score_record
+                            texte_score = f"🏆 <b>Meilleur score :</b> 🌐 <code>{s_v:g}/{t_v:g}</code> &nbsp;|&nbsp; 🇫🇷 <code>{s_d:g}/{t_d:g}</code>"
+                        else:
+                            texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
+
+                        # Utilisation du CSS text-align: center pour tout centrer parfaitement
+                        st.markdown(f"<div style='text-align: center; color: gray; font-size: 0.85rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
 
