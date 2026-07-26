@@ -1155,7 +1155,8 @@ elif st.session_state.etat == "connecte":
                         # --- AFFICHAGE DU MEILLEUR SCORE EN BAS À DROITE (SOUS LES BOUTONS) ---
                         score_record = recuperer_score_liste(user_id, liste_id)
                         
-                        col_vide, col_score_box = st.columns([1, 1])
+                        col_score_box = st.columns([1])
+                        st.write("")
                         with col_score_box:
                             if score_record:
                                 s_v, t_v, s_d, t_d = score_record
