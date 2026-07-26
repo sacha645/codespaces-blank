@@ -838,7 +838,7 @@ elif st.session_state.etat == "connecte":
 
                     # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
-                    ligne_epaisse()
+                    st.divider()
 
                     if erreurs:
                         st.write("### ❌ Liste des erreurs commises")
@@ -859,7 +859,7 @@ elif st.session_state.etat == "connecte":
                         st.balloons()
                         st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
 
-                    st.divider()
+                    ligne_epaisse()
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
