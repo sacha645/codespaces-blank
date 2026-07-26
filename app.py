@@ -858,6 +858,8 @@ elif st.session_state.etat == "connecte":
                         cm2.markdown(trad_disp, unsafe_allow_html=True)
 
             ligne_epaisse()
+            st.write("")
+            
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
                 st.session_state.liste_active_id = None
