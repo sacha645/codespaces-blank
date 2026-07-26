@@ -774,15 +774,19 @@ elif st.session_state.etat == "connecte":
 
                     for mot in mots:
                         id_m, mot_or, _, _, _, trad = mot
-                        # Pour le vocabulaire : rouge si au moins 1 erreur commise lors du dernier entraînement
-                        est_erreur = compteur_err.get(id_m, False) if isinstance(compteur_err, dict) else False
                         
-                        if est_erreur:
-                            mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>"
-                            trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>"
-                        else:
-                            mot_disp = mot_or
-                            trad_disp = trad
+                        # Récupération des erreurs spécifiques par sens
+                        # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
+                        err_info = compteur_err.get(id_m, {}) if isinstance(compteur_err, dict) else {}
+                        
+                        # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
+                        err_trad = err_info.get("vers_fr", False)
+                        # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
+                        err_orig = err_info.get("depuis_fr", False)
+
+                        # Coloration uniquement du côté erroné
+                        mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>" if err_orig else mot_or
+                        trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" if err_trad else trad
 
                         cm1, cm2 = st.columns(2)
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
@@ -997,7 +1001,20 @@ elif st.session_state.etat == "connecte":
                     # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
 
-                    mots_err = {err["id_mot"]: True for err in st.session_state.erreurs_commises if "id_mot" in err}
+                    # Sauvegarde ciblée des erreurs selon le sens pour la vue "Voir la liste"
+                    mots_err = {}
+                    for err in st.session_state.erreurs_commises:
+                        if "id_mot" in err:
+                            id_m = err["id_mot"]
+                            sens = err.get("sens", "")
+                            if id_m not in mots_err:
+                                mots_err[id_m] = {"vers_fr": False, "depuis_fr": False}
+                            
+                            if sens == "vers_fr":
+                                mots_err[id_m]["vers_fr"] = True
+                            elif sens == "depuis_fr":
+                                mots_err[id_m]["depuis_fr"] = True
+
                     st.session_state[f"erreurs_liste_{liste_id}"] = mots_err
 
                     # 3. Affichage des résultats
@@ -1096,8 +1113,8 @@ elif st.session_state.etat == "connecte":
                             art_correct = (u_art.lower() == item["article"].lower()) if has_article else True
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
-                            question_texte = f"Traduction de **{item['traduction']}**"
-                            rep_attendue = f"{item['article']} {item['mot']}".strip()
+                            q_txt = f"Traduction de **{item['traduction']}**"
+                            rep_att = f"{item['article']} {item['mot']}".strip()
 
                             # Calcul du score
                             if has_article:
@@ -1117,18 +1134,19 @@ elif st.session_state.etat == "connecte":
                                 rep_user_formatted = f"{partie_art_html} {partie_mot_html}".strip() if has_article else partie_mot_html
 
                                 st.session_state.erreurs_commises.append({
-                                    "question": question_texte,
+                                    "id_mot": item["id_mot"],
+                                    "sens": "depuis_fr",  # 👈 Faute sur la colonne de la langue étrangère
+                                    "question": q_txt,
                                     "reponse_user_html": rep_user_formatted,
-                                    "reponse_attendue": rep_attendue,
-                                    "id_mot": item["id_mot"]
+                                    "reponse_attendue": rep_att
                                 })
 
                         else:  # depuis_francais
-                            # Vers le français : l'utilisateur traduit toute l'expression sur 1 point entier
+                            # Vers le français : l'utilisateur traduit toute l'expression
                             mot_correct = (u_mot.lower() == item["traduction"].lower())
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
-                            question_texte = f"Traduction de **{mot_affiche}**"
-                            rep_attendue = item["traduction"]
+                            q_txt = f"Traduction de **{mot_affiche}**"
+                            rep_att = item["traduction"]
 
                             if mot_correct:
                                 points_gagnes = 1.0
@@ -1137,9 +1155,11 @@ elif st.session_state.etat == "connecte":
                                 partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>"
                                 
                                 st.session_state.erreurs_commises.append({
-                                    "question": question_texte,
+                                    "id_mot": item["id_mot"],
+                                    "sens": "vers_fr",  # 👈 Faute sur la colonne française
+                                    "question": q_txt,
                                     "reponse_user_html": partie_mot_html,
-                                    "reponse_attendue": rep_attendue
+                                    "reponse_attendue": rep_att
                                 })
 
                         # Mise à jour des scores généraux
