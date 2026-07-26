@@ -1173,6 +1173,6 @@ elif st.session_state.etat == "connecte":
                             texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
 
                         # Affichage avec taille personnalisable (font-size)
-                        st.markdown(f"<div style='text-align: left; color: gray; font-size: 1.1rem;'>{texte_score}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
