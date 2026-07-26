@@ -2,6 +2,7 @@ import sqlite3
 import bcrypt
 import streamlit as st
 import random
+import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
@@ -57,6 +58,17 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
             FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE,
             UNIQUE(user_id, liste_id)
+        )
+    ''')
+
+    # 5. Table Sauvegardes d'entraînement (quiz en pause)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sauvegardes_quiz (
+            user_id INTEGER NOT NULL,
+            liste_id INTEGER PRIMARY KEY,
+            donnees_json TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+            FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE
         )
     ''')
 
@@ -415,7 +427,42 @@ def reinitialiser_score_liste(user_id, liste_id):
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     conn.commit()
     conn.close()
-    
+
+
+# --- Bouton pause ---
+def sauvegarder_partie(user_id, liste_id, donnees_dict):
+    """Enregistre ou met à jour la progression d'un quiz sous forme de texte JSON."""
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    donnees_json = json.dumps(donnees_dict)
+    c.execute('''
+        INSERT INTO sauvegardes_quiz (user_id, liste_id, donnees_json)
+        VALUES (?, ?, ?)
+        ON CONFLICT(liste_id) DO UPDATE SET donnees_json = excluded.donnees_json
+    ''', (user_id, liste_id, donnees_json))
+    conn.commit()
+    conn.close()
+
+def charger_partie_sauvegardee(liste_id):
+    """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT donnees_json FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return json.loads(row[0])
+    return None
+
+def supprimer_sauvegarde_partie(liste_id):
+    """Supprime la sauvegarde d'un quiz (quand le quiz est terminé)."""
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
+    conn.commit()
+    conn.close()
+
+
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
@@ -940,48 +987,69 @@ elif st.session_state.etat == "connecte":
 
                 # 1. INITIALISATION DE LA SESSION DE RÉVISION
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
-                    import random
-                    mots_bruts = recuperer_mots_liste(liste_id)
-                    
-                    # Traitement des mots pour séparer article et mot
-                    mots_traites = []
-                    articles_connus = ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]
-                    
-                    for id_m, mot_or, _, _, _, trad in mots_bruts:
-                        parts = mot_or.strip().split(" ", 1)
-                        if len(parts) == 2 and parts[0].lower() in articles_connus:
-                            art, mot = parts[0], parts[1]
-                        else:
-                            art, mot = "", mot_or.strip()
+                    # On vérifie si une sauvegarde existe en BDD
+                    partie_sauvee = charger_partie_sauvegardee(liste_id)
+
+                    if partie_sauvee and "choix_reprise" not in st.session_state:
+                        # Demande de confirmation à l'utilisateur
+                        st.info("💾 Une sauvegarde d'entraînement existe pour cette liste.")
+                        col_c1, col_c2 = st.columns(2)
                         
-                        mots_traites.append({
-                            "id_mot": id_m,
-                            "article": art,
-                            "mot": mot,
-                            "traduction": trad.strip()
-                        })
+                        with col_c1:
+                            if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
+                                st.session_state.choix_reprise = "charger"
+                                st.rerun()
 
-                    # On crée la liste de questions avec les 2 sens (1 = Vers le français, 2 = À partir du français)
-                    questions = []
-                    for item in mots_traites:
-                        questions.append({"item": item, "sens": "vers_francais"})
-                        questions.append({"item": item, "sens": "depuis_francais"})
-                    
-                    # Mélange 1 : Mélange aléatoire standard
-                    random.shuffle(questions)
+                        with col_c2:
+                            if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
+                                supprimer_sauvegarde_partie(liste_id)
+                                st.session_state.choix_reprise = "nouveau"
+                                st.rerun()
 
-                    # Mélange 2 : Application de ta méthode de dépilement
-                    questions = demeler_questions(questions)
+                        st.stop()  # Stoppe l'affichage tant que l'utilisateur n'a pas choisi
 
-                    # Sauvegarde dans le session_state
-                    st.session_state.quiz_mots = questions
-                    st.session_state.quiz_index = 0
-                    st.session_state.score_vers_fr = 0.0
-                    st.session_state.total_vers_fr = 0.0
-                    st.session_state.score_depuis_fr = 0.0
-                    st.session_state.total_depuis_fr = 0.0
-                    st.session_state.erreurs_commises = []
-                    st.session_state.quiz_liste_id = liste_id
+                    # Applique le choix fait par l'utilisateur
+                    if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
+                        st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
+                        st.session_state.quiz_index = partie_sauvee["quiz_index"]
+                        st.session_state.score_vers_fr = partie_sauvee["score_vers_fr"]
+                        st.session_state.total_vers_fr = partie_sauvee["total_vers_fr"]
+                        st.session_state.score_depuis_fr = partie_sauvee["score_depuis_fr"]
+                        st.session_state.total_depuis_fr = partie_sauvee["total_depuis_fr"]
+                        st.session_state.erreurs_commises = partie_sauvee["erreurs_commises"]
+                        st.session_state.quiz_liste_id = liste_id
+                        st.toast("⚡ Sauvegarde chargée !")
+                    else:
+                        mots_bruts = recuperer_mots_liste(liste_id)
+                        articles_connus = ["der", "die", "das", "the", "le", "la", "l'", "les", "un", "une", "des", "a", "an"]
+                        
+                        mots_traites = []
+                        for id_m, mot_or, _, _, _, trad in mots_bruts:
+                            parts = mot_or.strip().split(" ", 1)
+                            if len(parts) == 2 and parts[0].lower() in articles_connus:
+                                art, mot = parts[0], parts[1]
+                            else:
+                                art, mot = "", mot_or.strip()
+                            
+                            mots_traites.append({
+                                "id_mot": id_m,
+                                "article": art,
+                                "mot": mot,
+                                "traduction": trad.strip()
+                            })
+                        
+                        st.session_state.quiz_mots = demeler_questions(mots_traites)
+                        st.session_state.quiz_index = 0
+                        st.session_state.score_vers_fr = 0.0
+                        st.session_state.total_vers_fr = 0.0
+                        st.session_state.score_depuis_fr = 0.0
+                        st.session_state.total_depuis_fr = 0.0
+                        st.session_state.erreurs_commises = []
+                        st.session_state.quiz_liste_id = liste_id
+
+                    # Nettoyage de la variable de choix temporaire
+                    if "choix_reprise" in st.session_state:
+                        del st.session_state.choix_reprise
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
@@ -1007,6 +1075,9 @@ elif st.session_state.etat == "connecte":
 
                     # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
+
+                    # Suppression de la partie sauvegardée
+                    supprimer_sauvegarde_partie(liste_id)
 
                     # Sauvegarde ciblée des erreurs selon le sens (vers_fr vs depuis_fr)
                     mots_err = {}
@@ -1186,8 +1257,33 @@ elif st.session_state.etat == "connecte":
 
                     with col_b1:
                         if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
-                            # On ajoutera la logique de sauvegarde ici à l'étape suivante
-                            pass
+                            # 1. On prépare le dictionnaire des données de la session
+                            etat_a_sauver = {
+                                "quiz_index": st.session_state.quiz_index,
+                                "quiz_mots": st.session_state.quiz_mots,
+                                "score_vers_fr": st.session_state.get("score_vers_fr", 0.0),
+                                "total_vers_fr": st.session_state.get("total_vers_fr", 0.0),
+                                "score_depuis_fr": st.session_state.get("score_depuis_fr", 0.0),
+                                "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
+                                "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                            }
+                            
+                            # 2. Sauvegarde en BDD
+                            sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                            
+                            # 3. Nettoyage de la session active
+                            clefs_a_supprimer = [
+                                "quiz_mots", "quiz_index", "quiz_liste_id", 
+                                "score_vers_fr", "total_vers_fr", 
+                                "score_depuis_fr", "total_depuis_fr", "erreurs_commises"
+                            ]
+                            for clef in clefs_a_supprimer:
+                                if clef in st.session_state:
+                                    del st.session_state[clef]
+                            
+                            st.toast("💾 Entraînement sauvegardé ! Tu pourras le reprendre plus tard.")
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
@@ -1212,15 +1308,51 @@ elif st.session_state.etat == "connecte":
             else:
                 # 1. INITIALISATION DU QUIZ VERBES
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
-                    mots_bruts = recuperer_mots_liste(liste_id)
-                    
-                    st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
-                    st.session_state.quiz_index = 0
-                    st.session_state.score_verbes = 0.0
-                    st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
-                    st.session_state.erreurs_compteur = {}
-                    st.session_state.erreurs_verbes_detail = []
-                    st.session_state.quiz_liste_id = liste_id
+                    # On vérifie si une sauvegarde existe en BDD
+                    partie_sauvee = charger_partie_sauvegardee(liste_id)
+
+                    if partie_sauvee and "choix_reprise" not in st.session_state:
+                        # Demande de confirmation à l'utilisateur
+                        st.info("💾 Une sauvegarde d'entraînement existe pour cette liste de verbes.")
+                        col_c1, col_c2 = st.columns(2)
+                        
+                        with col_c1:
+                            if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
+                                st.session_state.choix_reprise = "charger"
+                                st.rerun()
+
+                        with col_c2:
+                            if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
+                                supprimer_sauvegarde_partie(liste_id)
+                                st.session_state.choix_reprise = "nouveau"
+                                st.rerun()
+
+                        st.stop()  # Stoppe l'affichage tant que l'utilisateur n'a pas choisi
+
+                    # Applique le choix fait par l'utilisateur
+                    if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
+                        st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
+                        st.session_state.quiz_index = partie_sauvee["quiz_index"]
+                        st.session_state.score_verbes = partie_sauvee["score_verbes"]
+                        st.session_state.total_verbes = partie_sauvee["total_verbes"]
+                        st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
+                        st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
+                        st.session_state.quiz_liste_id = liste_id
+                        st.toast("⚡ Sauvegarde chargée !")
+                    else:
+                        mots_bruts = recuperer_mots_liste(liste_id)
+                        
+                        st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
+                        st.session_state.quiz_index = 0
+                        st.session_state.score_verbes = 0.0
+                        st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
+                        st.session_state.erreurs_compteur = {}
+                        st.session_state.erreurs_verbes_detail = []
+                        st.session_state.quiz_liste_id = liste_id
+
+                    # Nettoyage de la variable de choix temporaire
+                    if "choix_reprise" in st.session_state:
+                        del st.session_state.choix_reprise
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
@@ -1235,6 +1367,9 @@ elif st.session_state.etat == "connecte":
 
                     # Enregistrement du meilleur score
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
+
+                    # Suppression de la partie sauvegardée
+                    supprimer_sauvegarde_partie(liste_id)
 
                     st.write("### 📊 Tes résultats :")
                     st.metric(label="⚡ Score global Verbes", value=f"{s_v:g} / {t_v:g}")
@@ -1337,8 +1472,32 @@ elif st.session_state.etat == "connecte":
 
                     with col_b1:
                         if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
-                            # On ajoutera la logique de sauvegarde ici à l'étape suivante
-                            pass
+                            # 1. On prépare le dictionnaire des données de la session
+                            etat_a_sauver = {
+                                "quiz_index": st.session_state.quiz_index,
+                                "quiz_mots": st.session_state.quiz_mots,
+                                "score_verbes": st.session_state.get("score_verbes", 0.0),
+                                "total_verbes": st.session_state.get("total_verbes", 0.0),
+                                "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                                "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                            }
+                            
+                            # 2. Sauvegarde en BDD
+                            sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                            
+                            # 3. Nettoyage de la session active
+                            clefs_a_supprimer = [
+                                "quiz_mots", "quiz_index", "quiz_liste_id", 
+                                "score_verbes", "total_verbes", 
+                                "erreurs_compteur", "erreurs_verbes_detail"
+                            ]
+                            for clef in clefs_a_supprimer:
+                                if clef in st.session_state:
+                                    del st.session_state[clef]
+                            
+                            st.toast("💾 Entraînement sauvegardé ! Tu pourras le reprendre plus tard.")
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
@@ -1348,7 +1507,7 @@ elif st.session_state.etat == "connecte":
                                     del st.session_state[clef]
                             st.session_state.action_liste = "liste"
                             st.rerun()
-                            
+
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             if not st.session_state.confirmer_suppr_compte:
