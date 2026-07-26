@@ -922,12 +922,12 @@ elif st.session_state.etat == "connecte":
                     with col_res1:
                         score_v = st.session_state.score_vers_fr
                         tot_v = st.session_state.total_vers_fr
-                        st.metric(label="📥 Vers la langue étrangère", value=f"{score_v:g} / {tot_v:g}")
+                        st.metric(label="🌐 Vers la langue étrangère", value=f"{score_v:g} / {tot_v:g}")
 
                     with col_res2:
                         score_d = st.session_state.score_depuis_fr
                         tot_d = st.session_state.total_depuis_fr
-                        st.metric(label="📤 Vers le français", value=f"{score_d:g} / {tot_d:g}")
+                        st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
                     # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
@@ -1157,18 +1157,22 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
-                        # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ ---
+                        # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ AVEC INFOBULLES ---
                         score_record = recuperer_score_liste(user_id, liste_id)
 
                         st.write("")
                         if score_record:
                             s_v, t_v, s_d, t_d = score_record
-                            texte_score = f"🏆 <b>Meilleur score :</b> 🌐 <code>{s_v:g}/{t_v:g}</code> &nbsp;|&nbsp; 🇫🇷 <code>{s_d:g}/{t_d:g}</code>"
+                            
+                            # On ajoute l'attribut title="..." autour de chaque score/icône
+                            partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
+                            partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
+                            
+                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
                         else:
                             texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
 
-                        # Utilisation du CSS text-align: center pour tout centrer parfaitement
-                        st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
+                        # Affichage avec taille personnalisable (font-size)
+                        st.markdown(f"<div style='text-align: left; color: gray; font-size: 1.1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
-
