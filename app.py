@@ -1001,7 +1001,7 @@ elif st.session_state.etat == "connecte":
                     # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
 
-                    # Sauvegarde ciblée des erreurs selon le sens pour la vue "Voir la liste"
+                    # Sauvegarde ciblée des erreurs selon le sens (vers_fr vs depuis_fr)
                     mots_err = {}
                     for err in st.session_state.erreurs_commises:
                         if "id_mot" in err:
@@ -1255,14 +1255,15 @@ elif st.session_state.etat == "connecte":
                     st.write("")
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
-                        if st.button("🔄 Recommencer", use_container_width=True):
-                            del st.session_state.quiz_mots
-                            st.rerun()
-                    with col_b2:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             del st.session_state.quiz_mots
                             st.session_state.action_liste = "liste"
                             st.rerun()
+                    with col_b2:
+                        if st.button("🔄 Recommencer", use_container_width=True):
+                            del st.session_state.quiz_mots
+                            st.rerun()
+                    
 
                 # 3. VUE DE QUESTION EN COURS
                 else:
@@ -1352,7 +1353,7 @@ elif st.session_state.etat == "connecte":
                     st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
                 else:
                     for liste_id, nom_liste, type_liste in listes:
-                        col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
+                        col_nom, col_voir, col_edit, col_train, col_share, col_del = st.columns([3, 1, 1, 1, 1, 1])
                         
                         with col_nom:
                             if type_liste == "verbe":
@@ -1403,11 +1404,16 @@ elif st.session_state.etat == "connecte":
                         if score_record:
                             s_v, t_v, s_d, t_d = score_record
                             
-                            # On ajoute l'attribut title="..." autour de chaque score/icône
-                            partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
-                            partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
-                            
-                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
+                            if type_liste == "verbe":
+                                partie_verbe = f"<span title='Score global aux verbes'>⚡ <code>{s_v:g}/{t_v:g}</code></span>"
+                                texte_score = f"🏆 <b>Meilleur score :</b> {partie_verbe}"
+
+                            else:
+                                partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
+                                partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
+
+                                texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
+
                         else:
                             texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
 
