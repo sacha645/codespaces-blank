@@ -1151,7 +1151,7 @@ elif st.session_state.etat == "connecte":
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(f"Traduction de <u>**{err['question']}**</u>")
+                            c1.markdown(f"Traduction de <u>**{err['question']}**</u>", unsafe_allow_html=True)
                             c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
                             c3.markdown(f"🟢 {err['reponse_attendue']}")
                     else:
