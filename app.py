@@ -976,6 +976,7 @@ elif st.session_state.etat == "connecte":
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             if not st.session_state.confirmer_suppr_compte:
+                st.write("")
                 col_titre, col_import, col_ajout = st.columns([3, 1, 1])
                 with col_titre:
                     st.subheader("📋 Mes listes")
@@ -1036,4 +1037,5 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
-                        ligne_epaisse()
+                        st.divider()
+                    ligne_epaisse()
