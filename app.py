@@ -270,6 +270,32 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     
     return len(mots_a_inserer)
 
+def demeler_questions(questions):
+    n = len(questions)
+    if n <= 2:
+        return questions
+
+    milieu = n // 2
+    i = 1
+
+    while i < len(questions):
+        # Si la question actuelle a le même mot que la précédente
+        if questions[i]["item"] == questions[i - 1]["item"]:
+            item_a_deplacer = questions.pop(i)
+
+            if i <= milieu:
+                # Envoi à la fin
+                questions.append(item_a_deplacer)
+            else:
+                # Envoi au début
+                questions.insert(0, item_a_deplacer)
+                i += 1
+        else:
+            # Pas de doublon : on avance normalement
+            i += 1
+
+    return questions
+
 
 # --- APPARENCE ---
 def ligne_epaisse():
@@ -805,8 +831,11 @@ elif st.session_state.etat == "connecte":
                         questions.append({"item": item, "sens": "vers_francais"})
                         questions.append({"item": item, "sens": "depuis_francais"})
                     
-                    # Mélange aléatoire
+                    # Mélange 1 : Mélange aléatoire standard
                     random.shuffle(questions)
+
+                    # Mélange 2 : Application de ta méthode de dépilement
+                    questions = demeler_questions(questions)
 
                     # Sauvegarde dans le session_state
                     st.session_state.quiz_mots = questions
@@ -964,6 +993,28 @@ elif st.session_state.etat == "connecte":
                             st.session_state.total_depuis_fr += total_q
 
                         st.session_state.quiz_index += 1
+                        st.rerun()
+
+                    # --- BOUTON DE SORTIE EN BAS DU QUIZ ---
+                    st.write("")
+                    if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                        # 1. Nettoyage complet des variables du quiz dans la session
+                        clefs_a_supprimer = [
+                            "quiz_mots", 
+                            "quiz_index", 
+                            "quiz_liste_id", 
+                            "score_vers_fr", 
+                            "total_vers_fr", 
+                            "score_depuis_fr", 
+                            "total_depuis_fr", 
+                            "erreurs_commises"
+                        ]
+                        for clef in clefs_a_supprimer:
+                            if clef in st.session_state:
+                                del st.session_state[clef]
+
+                        # 2. Redirection vers la page des listes
+                        st.session_state.action_liste = "liste"
                         st.rerun()
 
             # --- S'IL S'AGIT D'UNE LISTE DE VERBES (A développer plus tard) ---
