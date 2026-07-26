@@ -935,7 +935,7 @@ elif st.session_state.etat == "connecte":
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
-                        st.caption(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
 
                     st.write("")
 
