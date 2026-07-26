@@ -859,7 +859,7 @@ elif st.session_state.etat == "connecte":
 
             ligne_epaisse()
             st.write("")
-            
+
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
                 st.session_state.liste_active_id = None
@@ -1151,8 +1151,8 @@ elif st.session_state.etat == "connecte":
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(f"<u>**{err['question']}**</u>", unsafe_allow_html=True)
-                            c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
+                            c1.markdown(err['question'])
+                            c2.markdown(err["reponse_user_html"])
                             c3.markdown(f"🟢 {err['reponse_attendue']}")
                     else:
                         st.balloons()
@@ -1200,6 +1200,7 @@ elif st.session_state.etat == "connecte":
                             user_mot = ""
                             user_trad = st.text_input("Traduction", key=f"trad_in_{index}")
 
+                        st.write("")
                         valider = st.form_submit_button("Vérifier 🚀", type="primary")
 
                     if valider:
