@@ -409,6 +409,12 @@ def recuperer_score_liste(user_id, liste_id):
     conn.close()
     return score
 
+def reinitialiser_score_liste(user_id, liste_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
+    conn.commit()
+    conn.close()
     
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
@@ -722,6 +728,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.action_liste = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.nb_lignes_mots = 2
+                        reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
         # CAS C : VUE VOIR UNE LISTE (👁️)
