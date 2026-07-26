@@ -929,7 +929,6 @@ elif st.session_state.etat == "connecte":
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
 
                     # 3. Affichage des résultats
-                    st.write("")
                     st.write("### 📊 Tes résultats :")
 
                     if est_nouveau_record:
@@ -949,7 +948,7 @@ elif st.session_state.etat == "connecte":
                     with col_res2:
                         score_d = st.session_state.score_depuis_fr
                         tot_d = st.session_state.total_depuis_fr
-                        st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
+                        st.metric(label="🇫🇷  Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
                     # --- RECAPITULATIF DES ERREURS ---
                     erreurs = st.session_state.erreurs_commises
