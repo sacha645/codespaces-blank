@@ -315,8 +315,6 @@ def demeler_questions(questions):
 
 def preparer_quiz_verbes_aleatoire(mots_verbes):
     # mots_verbes = [(id_mot, infinitif, present, preterit, participe_passe, traduction), ...]
-    # Noms et index dans le tuple : 
-    # 1: Infinitif, 2: Présent, 3: Prétérit, 4: Participe Passé, 5: Traduction
     formes_infos = [
         (1, "Infinitif"),
         (2, "Présent"),
@@ -327,12 +325,17 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
     
     questions_finales = []
     
-    # 5 tours de parcours complet
+    # Pour chaque verbe, on génère un ordre aléatoire unique de ses 5 formes (sans remise)
+    # Ainsi chaque forme servira EXACTEMENT 1 fois d'indice sur les 5 tours.
+    tirages_par_verbe = {
+        verbe[0]: random.sample(range(5), 5) for verbe in mots_verbes
+    }
+    
     for tour in range(5):
         for verbe in mots_verbes:
             id_mot = verbe[0]
-            # Choix au hasard de l'index de la forme fournie comme indice (entre 0 et 4 dans formes_infos)
-            idx_tirage = random.randint(0, 4)
+            # Forme choisie pour ce tour (0 à 4)
+            idx_tirage = tirages_par_verbe[id_mot][tour]
             idx_tuple_fourni, nom_fourni = formes_infos[idx_tirage]
             valeur_fournie = verbe[idx_tuple_fourni]
             
@@ -356,7 +359,6 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
             questions_finales.append(question)
             
     return questions_finales
-
 
 # --- APPARENCE ---
 def ligne_epaisse():
@@ -654,7 +656,7 @@ elif st.session_state.etat == "connecte":
                 for i in range(nb_lignes):
                     inf_v, pres_v, pret_v, pp_v, trad_v = "", "", "", "", ""
                     if i < len(mots_existants):
-                        inf_v, pres_v, pret_v, pp_v, trad_v = mots_existants[i]
+                        _, inf_v, pres_v, pret_v, pp_v, trad_v = mots_existants[i]
 
                     c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
                     inf = c1.text_input(f"edit_inf_{i}", value=inf_v, key=f"edit_inf_{i}", label_visibility="collapsed")
@@ -677,7 +679,7 @@ elif st.session_state.etat == "connecte":
                 for i in range(nb_lignes):
                     art_val, mot_val, trad_val = "", "", ""
                     if i < len(mots_existants):
-                        mot_or, _, _, _, trad_val = mots_existants[i]
+                        _, mot_or, _, _, _, trad_val = mots_existants[i]
                         parts = mot_or.split(" ", 1)
                         if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
                             art_val, mot_val = parts[0], parts[1]
@@ -738,6 +740,8 @@ elif st.session_state.etat == "connecte":
             if not mots:
                 st.info("Cette liste ne contient aucun élément.")
             else:
+                compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
+
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
                     c1.markdown("**Infinitif**")
@@ -747,35 +751,42 @@ elif st.session_state.etat == "connecte":
                     c5.markdown("**Traduction**")
                     st.divider()
 
-                    # Récupération des erreurs commises pour cette liste
-                    compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
-
                     for mot in mots:
                         id_m, inf, pres, pret, pp, trad = mot
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
-                        # Fonction interne pour formater en rouge en cas de >= 2 erreurs
-                        def fmt(texte, idx_f):
-                            if errs.get(idx_f, 0) >= 2:
+                        def fmt_v(texte, idx_f):
+                            if isinstance(errs, dict) and errs.get(idx_f, 0) >= 2:
                                 return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
                             return texte
 
                         col1, col2, col3, col4, col5 = st.columns(5)
-                        col1.markdown(fmt(inf, 1), unsafe_allow_html=True)
-                        col2.markdown(fmt(pres, 2), unsafe_allow_html=True)
-                        col3.markdown(fmt(pret, 3), unsafe_allow_html=True)
-                        col4.markdown(fmt(pp, 4), unsafe_allow_html=True)
-                        col5.markdown(fmt(trad, 5), unsafe_allow_html=True)
+                        col1.markdown(fmt_v(inf, 1), unsafe_allow_html=True)
+                        col2.markdown(fmt_v(pres, 2), unsafe_allow_html=True)
+                        col3.markdown(fmt_v(pret, 3), unsafe_allow_html=True)
+                        col4.markdown(fmt_v(pp, 4), unsafe_allow_html=True)
+                        col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
                 else:
                     c_m1, c_m2 = st.columns(2)
                     c_m1.markdown("**Mot / Expression**")
                     c_m2.markdown("**Traduction**")
                     st.divider()
 
-                    for mot_or, _, _, _, trad in mots:
+                    for mot in mots:
+                        id_m, mot_or, _, _, _, trad = mot
+                        # Pour le vocabulaire : rouge si au moins 1 erreur commise lors du dernier entraînement
+                        est_erreur = compteur_err.get(id_m, False) if isinstance(compteur_err, dict) else False
+                        
+                        if est_erreur:
+                            mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>"
+                            trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>"
+                        else:
+                            mot_disp = mot_or
+                            trad_disp = trad
+
                         cm1, cm2 = st.columns(2)
-                        cm1.write(mot_or)
-                        cm2.write(trad)
+                        cm1.markdown(mot_disp, unsafe_allow_html=True)
+                        cm2.markdown(trad_disp, unsafe_allow_html=True)
 
             st.divider()
             if st.button("🔙 Retour", use_container_width=True):
@@ -925,7 +936,7 @@ elif st.session_state.etat == "connecte":
                     mots_traites = []
                     articles_connus = ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]
                     
-                    for mot_or, _, _, _, trad in mots_bruts:
+                    for id_m, mot_or, _, _, _, trad in mots_bruts:
                         parts = mot_or.strip().split(" ", 1)
                         if len(parts) == 2 and parts[0].lower() in articles_connus:
                             art, mot = parts[0], parts[1]
@@ -933,6 +944,7 @@ elif st.session_state.etat == "connecte":
                             art, mot = "", mot_or.strip()
                         
                         mots_traites.append({
+                            "id_mot": id_m,
                             "article": art,
                             "mot": mot,
                             "traduction": trad.strip()
@@ -984,6 +996,9 @@ elif st.session_state.etat == "connecte":
 
                     # 2. Enregistrement automatique en BDD
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
+
+                    mots_err = {err["id_mot"]: True for err in st.session_state.erreurs_commises if "id_mot" in err}
+                    st.session_state[f"erreurs_liste_{liste_id}"] = mots_err
 
                     # 3. Affichage des résultats
                     st.write("### 📊 Tes résultats :")
@@ -1104,7 +1119,8 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.erreurs_commises.append({
                                     "question": question_texte,
                                     "reponse_user_html": rep_user_formatted,
-                                    "reponse_attendue": rep_attendue
+                                    "reponse_attendue": rep_attendue,
+                                    "id_mot": item["id_mot"]
                                 })
 
                         else:  # depuis_francais
@@ -1165,13 +1181,12 @@ elif st.session_state.etat == "connecte":
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     mots_bruts = recuperer_mots_liste(liste_id)
                     
-                    # Récupération des mots avec leur ID
-                    # Note: Assure-toi que recuperer_mots_liste renvoie aussi l'ID ou utilise l'index
                     st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
                     st.session_state.quiz_index = 0
                     st.session_state.score_verbes = 0.0
                     st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
                     st.session_state.erreurs_compteur = {}
+                    st.session_state.erreurs_verbes_detail = []
                     st.session_state.quiz_liste_id = liste_id
 
                 questions = st.session_state.quiz_mots
@@ -1182,14 +1197,39 @@ elif st.session_state.etat == "connecte":
                     s_v = st.session_state.score_verbes
                     t_v = st.session_state.total_verbes
 
-                    # Sauvegarde des erreurs en session pour l'affichage en rouge dans la vue de la liste
+                    # Sauvegarde des erreurs en session
                     st.session_state[f"erreurs_liste_{liste_id}"] = st.session_state.erreurs_compteur
 
-                    # Enregistrement du score global
+                    # Enregistrement du meilleur score
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
 
                     st.write("### 📊 Tes résultats :")
                     st.metric(label="⚡ Score global Verbes", value=f"{s_v:g} / {t_v:g}")
+
+                    # --- RECAPITULATIF DES ERREURS POUR VERBES ---
+                    err_details = st.session_state.get("erreurs_verbes_detail", [])
+                    st.divider()
+
+                    if err_details:
+                        st.write("### ❌ Récapitulatif des erreurs commises")
+                        st.caption("Voici les formes sur lesquelles tu t'es trompé(e) :")
+                        st.write("")
+
+                        col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
+                        col_v.markdown("**Verbe (Infinitif)**")
+                        col_f.markdown("**Forme demandée**")
+                        col_rep.markdown("**Ta réponse**")
+                        col_att.markdown("**Réponse attendue**")
+
+                        for err in err_details:
+                            c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
+                            c1.markdown(f"**{err['verbe']}**")
+                            c2.markdown(err["forme"])
+                            c3.markdown(f"<span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span>", unsafe_allow_html=True)
+                            c4.markdown(f"🟢 `{err['rep_attendue']}`")
+                    else:
+                        st.balloons()
+                        st.info("⭐ Félicitations ! Un sans-faute parfait sur les verbes !")
 
                     ligne_epaisse()
                     st.write("")
@@ -1214,7 +1254,6 @@ elif st.session_state.etat == "connecte":
                     with st.form(key=f"form_verbe_{index}"):
                         reponses_user = {}
                         
-                        # Ordre des 5 formes à afficher
                         ordre_formes = [
                             (1, "Infinitif"),
                             (2, "Présent"),
@@ -1240,13 +1279,20 @@ elif st.session_state.etat == "connecte":
 
                         for att in q["attentes"]:
                             idx_t = att["idx_tuple"]
-                            rep_u = reponses_user.get(idx_t, "").strip().lower()
-                            rep_att = att["reponse_attendue"].strip().lower()
+                            rep_u = reponses_user.get(idx_t, "").strip()
+                            rep_att = att["reponse_attendue"].strip()
 
-                            if rep_u == rep_att:
+                            if rep_u.lower() == rep_att.lower():
                                 pts_gagnes += 0.25
                             else:
                                 st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+                                # Détail de l'erreur pour le bilan final
+                                st.session_state.erreurs_verbes_detail.append({
+                                    "verbe": q["verbe_tuple"][1],
+                                    "forme": att["nom"],
+                                    "rep_user": rep_u,
+                                    "rep_attendue": rep_att
+                                })
 
                         st.session_state.score_verbes += pts_gagnes
                         st.session_state.quiz_index += 1
@@ -1254,7 +1300,7 @@ elif st.session_state.etat == "connecte":
 
                     st.write("")
                     if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
-                        clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur"]
+                        clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                         for clef in clefs_a_supprimer:
                             if clef in st.session_state:
                                 del st.session_state[clef]
