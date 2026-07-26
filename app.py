@@ -1409,10 +1409,10 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
-                        col_v.markdown("**Verbe (Infinitif)**")
-                        col_f.markdown("**Forme demandée**")
-                        col_rep.markdown("**Ta réponse**")
-                        col_att.markdown("**Réponse attendue**")
+                        col_v.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
+                        col_f.markdown("<u>**Forme demandée :**</u>", unsafe_allow_html=True)
+                        col_rep.markdown("<u>**Ta réponse :**</u>", unsafe_allow_html=True)
+                        col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
                         for err in err_details:
                             c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
