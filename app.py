@@ -1125,12 +1125,14 @@ elif st.session_state.etat == "connecte":
                                 st.markdown(f"<h3 style='color: #1E90FF; margin:0;'>📖 {nom_liste} <span style='font-size:12px; background-color:#1E90FF; color:white; padding:2px 8px; border-radius:10px;'>VOCABULAIRE</span></h3>", unsafe_allow_html=True)
 
                         with col_voir:
+                            st.write("")
                             if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
                                 st.session_state.action_liste = "voir"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_edit:
+                            st.write("")
                             if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
                                 st.session_state.action_liste = "editer"
                                 st.session_state.liste_active_id = liste_id
@@ -1138,18 +1140,21 @@ elif st.session_state.etat == "connecte":
                                 st.rerun()
 
                         with col_share:
+                            st.write("")
                             if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
                                 st.session_state.action_liste = "partager"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_train:
+                            st.write("")
                             if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
                                 st.session_state.action_liste = "entrainer"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_del:
+                            st.write("")
                             if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
                                 st.session_state.action_liste = "supprimer"
                                 st.session_state.liste_active_id = liste_id
@@ -1159,7 +1164,7 @@ elif st.session_state.etat == "connecte":
                         score_record = recuperer_score_liste(user_id, liste_id)
                         
                         st.write("")
-                        col_vide, col_score_box = st.columns([3, 5])
+                        col_vide, col_score_box = st.columns([3, 3])
                         with col_score_box:
                             if score_record:
                                 s_v, t_v, s_d, t_d = score_record
