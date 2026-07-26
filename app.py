@@ -576,7 +576,11 @@ elif st.session_state.etat == "connecte":
 
         # CONFIRMATION DE SUPPRESSION DE COMPTE
         if st.session_state.confirmer_suppr_compte:
+
+            st.write("")
             st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
+            st.write("")
+
             col_annuler_compte, col_confirmer_compte = st.columns(2)
             
             with col_annuler_compte:
@@ -590,14 +594,17 @@ elif st.session_state.etat == "connecte":
                     st.session_state.user = None
                     st.session_state.etat = "none"
                     st.session_state.confirmer_suppr_compte = False
-                    st.toast("Ton compte a été supprimé avec succès.", icon="⚠️")
                     st.rerun()
         
         # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
         elif st.session_state.action_liste == "creer":
             st.subheader("✨ Créer une nouvelle liste")
-            
+            ligne_epaisse()
+
+            st.write("")
             nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
+            st.write("")
+
             type_liste_choisi = st.radio(
                 "Type de liste :", 
                 ["Vocabulaire (Article, Mot, Traduction)", "Verbes (5 formes)"],
@@ -650,6 +657,7 @@ elif st.session_state.etat == "connecte":
                 st.rerun()
 
             st.write("")
+            st.write("")
             col_annuler, col_sauvegarder = st.columns(2)
 
             with col_annuler:
@@ -676,7 +684,6 @@ elif st.session_state.etat == "connecte":
                                     mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
                                     ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
-                        st.toast(f"Liste '{nom_liste}' enregistrée !", icon="✅")
                         st.session_state.action_liste = "liste"
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
@@ -690,7 +697,9 @@ elif st.session_state.etat == "connecte":
             nom_actuel, type_liste = info_liste
 
             st.subheader("✏️ Éditer la liste")
+            ligne_epaisse()
             
+            st.write("")
             nouveau_nom = st.text_input("Nom de la liste", value=nom_actuel)
             st.divider()
 
@@ -754,6 +763,7 @@ elif st.session_state.etat == "connecte":
                 st.rerun()
 
             st.write("")
+            st.write("")
             col_annuler, col_sauvegarder = st.columns(2)
 
             with col_annuler:
@@ -771,7 +781,6 @@ elif st.session_state.etat == "connecte":
                         renommer_liste(liste_id, nouveau_nom.strip())
                         remplacer_mots_liste(liste_id, mots_modifies, type_liste)
                         
-                        st.toast("Modifications enregistrées !", icon="✅")
                         st.session_state.action_liste = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.nb_lignes_mots = 2
@@ -859,7 +868,10 @@ elif st.session_state.etat == "connecte":
             listes_user = recuperer_listes_utilisateur(user_id)
             nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
 
+            st.write("")
             st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
+            st.write("")
+
             col_non, col_oui = st.columns(2)
             
             with col_non:
@@ -871,7 +883,6 @@ elif st.session_state.etat == "connecte":
             with col_oui:
                 if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
                     supprimer_liste(liste_id)
-                    st.toast(f"La liste '{nom_actuel}' a été supprimée.", icon="🗑️")
                     st.session_state.action_liste = "liste"
                     st.session_state.liste_active_id = None
                     st.rerun()
@@ -895,7 +906,6 @@ elif st.session_state.etat == "connecte":
                     if id_ami.isdigit():
                         succes, msg = partager_liste_a_utilisateur(liste_id, int(id_ami))
                         if succes:
-                            st.toast(msg, icon="✅")
                             st.session_state.action_liste = "liste"
                             st.session_state.liste_active_id = None
                             st.rerun()
@@ -924,7 +934,6 @@ elif st.session_state.etat == "connecte":
                     if id_saisi.isdigit():
                         succes, msg = importer_liste_par_id(int(id_saisi), user_id)
                         if succes:
-                            st.toast(msg, icon="✅")
                             st.session_state.action_liste = "liste"
                             st.rerun()
                         else:
@@ -961,13 +970,13 @@ elif st.session_state.etat == "connecte":
                         nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
                         
                         if nb_mots > 0:
-                            st.toast(f"Liste '{nom_nouvelle_liste}' créée avec {nb_mots} éléments !", icon="✅")
                             st.session_state.action_liste = "liste"
                             st.rerun()
                         else:
                             st.error("Aucun élément n'a pu être extrait. Vérifie que le format correspond bien aux consignes.")
 
-            st.divider()
+            ligne_epaisse()
+
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
                 st.rerun()
@@ -1253,6 +1262,19 @@ elif st.session_state.etat == "connecte":
                             st.session_state.total_depuis_fr += total_q
 
                         st.session_state.quiz_index += 1
+
+                        # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
+                        etat_a_sauver = {
+                            "quiz_index": st.session_state.quiz_index,
+                            "quiz_mots": st.session_state.quiz_mots,
+                            "score_vers_fr": st.session_state.score_vers_fr,
+                            "total_vers_fr": st.session_state.total_vers_fr,
+                            "score_depuis_fr": st.session_state.score_depuis_fr,
+                            "total_depuis_fr": st.session_state.total_depuis_fr,
+                            "erreurs_commises": st.session_state.erreurs_commises
+                        }
+                        sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+
                         st.rerun()
 
                     # --- BOUTONS PAUSE ET ABANDON ---
@@ -1282,7 +1304,7 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
                             
-                            st.toast("💾 Entraînement sauvegardé !")
+
                             st.session_state.action_liste = "liste"
                             st.rerun()
 
@@ -1298,6 +1320,7 @@ elif st.session_state.etat == "connecte":
                                     del st.session_state[clef]
 
                             st.session_state.action_liste = "liste"
+                            supprimer_sauvegarde_partie(liste_id)
                             st.rerun()
 
             # --- S'IL S'AGIT D'UNE LISTE DE VERBES ---
@@ -1413,8 +1436,6 @@ elif st.session_state.etat == "connecte":
                 else:
                     q = questions[index]
                     st.progress(index / len(questions), text=f"Question {index + 1} / {len(questions)}")
-                    
-                    st.info(f"💡 Forme fournie : **{q['nom_fourni']}** ➔ `{q['valeur_fournie']}`")
 
                     with st.form(key=f"form_verbe_{index}"):
                         reponses_user = {}
@@ -1433,7 +1454,7 @@ elif st.session_state.etat == "connecte":
                             else:
                                 st.text_input(f"{nom_f} (donné) :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
 
-                        valider = st.form_submit_button("Vérifier 🚀", type="primary")
+                        valider = st.form_submit_button("Suivant 🚀", type="primary")
 
                     if valider:
                         pts_gagnes = 0.0
@@ -1460,7 +1481,19 @@ elif st.session_state.etat == "connecte":
                                 })
 
                         st.session_state.score_verbes += pts_gagnes
+
                         st.session_state.quiz_index += 1
+
+                        # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
+                        etat_a_sauver = {
+                            "quiz_index": st.session_state.quiz_index,
+                            "quiz_mots": st.session_state.quiz_mots,
+                            "score_global": st.session_state.get("score_global", 0.0),
+                            "total_global": st.session_state.get("total_global", 0.0),
+                            "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                        }
+                        sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+
                         st.rerun()
 
                     st.write("")
@@ -1491,7 +1524,6 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
                             
-                            st.toast("💾 Entraînement sauvegardé ! Tu pourras le reprendre plus tard.")
                             st.session_state.action_liste = "liste"
                             st.rerun()
 
@@ -1501,7 +1533,9 @@ elif st.session_state.etat == "connecte":
                             for clef in clefs_a_supprimer:
                                 if clef in st.session_state:
                                     del st.session_state[clef]
+
                             st.session_state.action_liste = "liste"
+                            supprimer_sauvegarde_partie(liste_id)
                             st.rerun()
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
