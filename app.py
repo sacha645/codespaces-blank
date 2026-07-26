@@ -1116,6 +1116,7 @@ elif st.session_state.etat == "connecte":
                         col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
                         
                         with col_nom:
+                            st.write("")
                             if type_liste == "verbe":
                                 st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
                             else:
@@ -1155,13 +1156,14 @@ elif st.session_state.etat == "connecte":
                         # --- AFFICHAGE DU MEILLEUR SCORE EN BAS À DROITE (SOUS LES BOUTONS) ---
                         score_record = recuperer_score_liste(user_id, liste_id)
                         
+                        st.write("")
                         col_vide, col_score_box = st.columns([3, 5])
                         with col_score_box:
                             if score_record:
                                 s_v, t_v, s_d, t_d = score_record
-                                st.caption(f"🏆 **Meilleur score :** 🌐 `{s_v:g}/{t_v:g}` &nbsp;|&nbsp; 🇫🇷 `{s_d:g}/{t_d:g}`")
+                                st.write(f"🏆 **Meilleur score :** 🌐 `{s_v:g}/{t_v:g}` &nbsp;|&nbsp; 🇫🇷 `{s_d:g}/{t_d:g}`")
                             else:
-                                st.caption("🏆 **Meilleur score :** Pas encore d'essai")
+                                st.write("🏆 **Meilleur score :** Pas encore d'essai")
 
                         st.divider()
 
