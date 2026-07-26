@@ -43,6 +43,22 @@ def init_db():
         )
     ''')
 
+    # 4. Table Scores (Meilleurs scores par utilisateur et par liste)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS scores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            liste_id INTEGER NOT NULL,
+            score_vers_fr REAL DEFAULT 0,
+            total_vers_fr REAL DEFAULT 0,
+            score_depuis_fr REAL DEFAULT 0,
+            total_depuis_fr REAL DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+            FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE,
+            UNIQUE(user_id, liste_id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -307,6 +323,46 @@ def ligne_epaisse():
     )
 
 
+# --- GESTION DU MEILLEUR SCORE ---
+def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    
+    c.execute("SELECT score_vers_fr, score_depuis_fr FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
+    existant = c.fetchone()
+    
+    if existant:
+        anc_v, anc_d = existant
+        nouveau_s_vers = max(anc_v, s_vers)
+        nouveau_s_depuis = max(anc_d, s_depuis)
+        
+        c.execute("""
+            UPDATE scores 
+            SET score_vers_fr = ?, total_vers_fr = ?, score_depuis_fr = ?, total_depuis_fr = ?
+            WHERE user_id = ? AND liste_id = ?
+        """, (nouveau_s_vers, t_vers, nouveau_s_depuis, t_depuis, user_id, liste_id))
+    else:
+        c.execute("""
+            INSERT INTO scores (user_id, liste_id, score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis))
+        
+    conn.commit()
+    conn.close()
+
+def recuperer_score_liste(user_id, liste_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr 
+        FROM scores 
+        WHERE user_id = ? AND liste_id = ?
+    """, (user_id, liste_id))
+    score = c.fetchone()
+    conn.close()
+    return score
+
+    
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
@@ -850,8 +906,16 @@ elif st.session_state.etat == "connecte":
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
 
-                # 2. VUE FINALE : BILAN DU QUIZ
+                # 2. VUE FINALE : BILAN DU QUIZ ET SAUVEGARDE EN BDD
                 if index >= len(questions):
+                    s_v = st.session_state.score_vers_fr
+                    t_v = st.session_state.total_vers_fr
+                    s_d = st.session_state.score_depuis_fr
+                    t_d = st.session_state.total_depuis_fr
+
+                    # Enregistrement automatique du record s'il est battu
+                    enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
+
                     st.write("### 📊 Tes résultats :")
 
                     col_res1, col_res2 = st.columns(2)
@@ -1088,4 +1152,16 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
+                        # --- AFFICHAGE DU MEILLEUR SCORE EN BAS À DROITE (SOUS LES BOUTONS) ---
+                        score_record = recuperer_score_liste(user_id, liste_id)
+                        
+                        col_vide, col_score_box = st.columns([1, 1])
+                        with col_score_box:
+                            if score_record:
+                                s_v, t_v, s_d, t_d = score_record
+                                st.caption(f"🏆 **Meilleur score :** 🌐 `{s_v:g}/{t_v:g}` &nbsp;|&nbsp; 🇫🇷 `{s_d:g}/{t_d:g}`")
+                            else:
+                                st.caption("🏆 **Meilleur score :** Pas encore d'essai")
+
                         st.divider()
+
