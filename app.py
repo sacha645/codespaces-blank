@@ -303,7 +303,7 @@ if st.session_state.etat == "connecte":
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
             st.session_state.confirmer_suppr_compte = True
             st.rerun()
-
+            
     with col_signup:
         if st.button("Déconnexion", use_container_width=True):
             st.session_state.user = None
@@ -763,6 +763,173 @@ elif st.session_state.etat == "connecte":
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
                 st.rerun()
+
+        # CAS H : VUE ENTRAÎNEMENT (🎯)
+        elif st.session_state.action_liste == "entrainer":
+            liste_id = st.session_state.liste_active_id
+            listes_user = recuperer_listes_utilisateur(user_id)
+            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
+            nom_actuel, type_liste = info_liste
+
+            st.subheader(f"🎯 Entraînement : {nom_actuel}")
+            ligne_epaisse()
+
+            # --- S'IL S'AGIT D'UNE LISTE DE VOCABULAIRE ---
+            if type_liste == "vocabulaire":
+
+                # 1. INITIALISATION DE LA SESSION DE RÉVISION
+                if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
+                    import random
+                    mots_bruts = recuperer_mots_liste(liste_id)
+                    
+                    # Traitement des mots pour séparer article et mot
+                    mots_traites = []
+                    articles_connus = ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]
+                    
+                    for mot_or, _, _, _, trad in mots_bruts:
+                        parts = mot_or.strip().split(" ", 1)
+                        if len(parts) == 2 and parts[0].lower() in articles_connus:
+                            art, mot = parts[0], parts[1]
+                        else:
+                            art, mot = "", mot_or.strip()
+                        
+                        mots_traites.append({
+                            "article": art,
+                            "mot": mot,
+                            "traduction": trad.strip()
+                        })
+
+                    # On crée la liste de questions avec les 2 sens (1 = Vers le français, 2 = À partir du français)
+                    questions = []
+                    for item in mots_traites:
+                        questions.append({"item": item, "sens": "vers_francais"})
+                        questions.append({"item": item, "sens": "depuis_francais"})
+                    
+                    # Mélange aléatoire
+                    random.shuffle(questions)
+
+                    # Sauvegarde dans le session_state
+                    st.session_state.quiz_mots = questions
+                    st.session_state.quiz_index = 0
+                    st.session_state.score_vers_fr = 0.0
+                    st.session_state.total_vers_fr = 0.0
+                    st.session_state.score_depuis_fr = 0.0
+                    st.session_state.total_depuis_fr = 0.0
+                    st.session_state.quiz_liste_id = liste_id
+
+                questions = st.session_state.quiz_mots
+                index = st.session_state.quiz_index
+
+                # 2. VUE FINALE : BILAN DU QUIZ
+                if index >= len(questions):
+                    st.success("🎉 Entraînement terminé !")
+                    st.write("Voici tes résultats :")
+
+                    col_res1, col_res2 = st.columns(2)
+                    with col_res1:
+                        score_v = st.session_state.score_vers_fr
+                        tot_v = st.session_state.total_vers_fr
+                        st.metric(label="📥 Vers le français (Traduction ➔ Mot)", value=f"{score_v:g} / {tot_v:g}")
+
+                    with col_res2:
+                        score_d = st.session_state.score_depuis_fr
+                        tot_d = st.session_state.total_depuis_fr
+                        st.metric(label="📤 À partir du français (Mot ➔ Traduction)", value=f"{score_d:g} / {tot_d:g}")
+
+                    if (score_v + score_d) == (tot_v + tot_d) and (tot_v + tot_d) > 0:
+                        st.balloons()
+
+                    st.write("")
+                    col_b1, col_b2 = st.columns(2)
+                    with col_b1:
+                        if st.button("🔄 Recommencer", use_container_width=True):
+                            del st.session_state.quiz_mots
+                            st.rerun()
+                    with col_b2:
+                        if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
+                            del st.session_state.quiz_mots
+                            st.session_state.action_liste = "liste"
+                            st.rerun()
+
+                # 3. VUE DE QUESTION EN COURS
+                else:
+                    q = questions[index]
+                    item = q["item"]
+                    sens = q["sens"]
+                    has_article = bool(item["article"])
+
+                    # Barre de progression
+                    st.progress(index / len(questions), text=f"Question {index + 1} / {len(questions)}")
+
+                    with st.form(key=f"form_quiz_{index}"):
+                        if sens == "vers_francais":
+                            st.markdown(f"### Traduis en langue étrangère : **{item['traduction']}**")
+                            c_art, c_mot = st.columns([1, 3])
+                            user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
+                            user_mot = c_mot.text_input("Mot / Nom", key=f"mot_in_{index}")
+
+                        else:  # depuis_francais
+                            mot_affiche = f"{item['article']} {item['mot']}".strip()
+                            st.markdown(f"### Traduis en français : **{mot_affiche}**")
+                            c_art, c_trad = st.columns([1, 3])
+                            user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
+                            user_trad = c_trad.text_input("Traduction", key=f"trad_in_{index}")
+
+                        valider = st.form_submit_button("Vérifier 🚀", type="primary")
+
+                    if valider:
+                        points_gagnes = 0.0
+                        total_q = 1.0
+
+                        # A. Calcul des points pour l'article
+                        if has_article:
+                            art_correct = user_art.strip().lower() == item["article"].lower()
+                            if art_correct:
+                                points_gagnes += 0.5
+                        else:
+                            # S'il n'y avait pas d'article exigé mais que l'utilisateur en a mis un, pas de demi-point
+                            pass
+
+                        # B. Calcul des points pour le mot/traduction
+                        if sens == "vers_francais":
+                            mot_correct = user_mot.strip().lower() == item["mot"].lower()
+                            val_attendue = f"{item['article']} {item['mot']}".strip()
+                        else:
+                            mot_correct = user_trad.strip().lower() == item["traduction"].lower()
+                            val_attendue = item["traduction"]
+
+                        if has_article:
+                            if mot_correct:
+                                points_gagnes += 0.5
+                        else:
+                            if mot_correct:
+                                points_gagnes += 1.0
+
+                        # C. Mise à jour des scores
+                        if sens == "vers_francais":
+                            st.session_state.score_vers_fr += points_gagnes
+                            st.session_state.total_vers_fr += total_q
+                        else:
+                            st.session_state.score_depuis_fr += points_gagnes
+                            st.session_state.total_depuis_fr += total_q
+
+                        # D. Notification feedback
+                        if points_gagnes == 1.0:
+                            st.toast("Parfait ! 1/1 pt 🎉", icon="✅")
+                        elif points_gagnes == 0.5:
+                            st.toast(f"Moitié bon (0.5/1 pt) ! Réponse attendue : '{val_attendue}'", icon="⚠️")
+                        else:
+                            st.toast(f"Incorrect (0/1 pt) ! Réponse attendue : '{val_attendue}'", icon="❌")
+
+                        st.session_state.quiz_index += 1
+                        st.rerun()
+
+            # --- S'IL S'AGIT D'UNE LISTE DE VERBES (A développer plus tard) ---
+            else:
+                st.info("⚡ L'entraînement pour les verbes sera configuré à la prochaine étape.")
+                if st.button("🔙 Retour aux listes", use_container_width=True):
+                    st.session_state.action_liste = "liste"
+                    st.rerun()
 
         # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
