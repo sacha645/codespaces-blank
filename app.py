@@ -809,11 +809,11 @@ elif st.session_state.etat == "connecte":
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
-                    c1.markdown("<u>**Infinitif :**</u>")
-                    c2.markdown("<u>**Présent :**</u>")
-                    c3.markdown("<u>**Prétérit :**</u>")
-                    c4.markdown("<u>**Participe Passé :**</u>")
-                    c5.markdown("<u>**Traduction :**</u>")
+                    c1.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
+                    c2.markdown("<u>**Présent :**</u>", unsafe_allow_html=True)
+                    c3.markdown("<u>**Prétérit :**</u>", unsafe_allow_html=True)
+                    c4.markdown("<u>**Participe Passé :**</u>", unsafe_allow_html=True)
+                    c5.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
                     for mot in mots:
@@ -833,8 +833,8 @@ elif st.session_state.etat == "connecte":
                         col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
                 else:
                     c_m1, c_m2 = st.columns(2)
-                    c_m1.markdown("<u>**Mot :**</u>")
-                    c_m2.markdown("<u>**Traduction :**</u>")
+                    c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
+                    c_m2.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
                     for mot in mots:
@@ -1143,9 +1143,9 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
-                        col_q.markdown("<u>**Question posée :**</u>")
-                        col_rep.markdown("<u>**Ta réponse:**</u>")
-                        col_att.markdown("<u>**Réponse attendue :**</u>")
+                        col_q.markdown("<u>**Question posée :**</u>", unsafe_allow_html=True)
+                        col_rep.markdown("<u>**Ta réponse:**</u>", unsafe_allow_html=True)
+                        col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
