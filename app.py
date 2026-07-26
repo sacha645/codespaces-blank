@@ -1116,9 +1116,6 @@ elif st.session_state.etat == "connecte":
                         col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
                         
                         with col_nom:
-                            st.write("")
-                            st.write("")
-                            st.write("")
                             if type_liste == "verbe":
                                 st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
                             else:
@@ -1160,17 +1157,18 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
-                        # --- AFFICHAGE DU MEILLEUR SCORE EN BAS À DROITE (SOUS LES BOUTONS) ---
+                        # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ ---
                         score_record = recuperer_score_liste(user_id, liste_id)
-                        
+
                         st.write("")
-                        col_vide, col_score_box = st.columns([3, 3])
-                        with col_score_box:
-                            if score_record:
-                                s_v, t_v, s_d, t_d = score_record
-                                st.write(f"🏆 **Meilleur score :** 🌐 `{s_v:g}/{t_v:g}` &nbsp;|&nbsp; 🇫🇷 `{s_d:g}/{t_d:g}`")
-                            else:
-                                st.write("🏆 **Meilleur score :** Pas encore d'essai")
+                        if score_record:
+                            s_v, t_v, s_d, t_d = score_record
+                            texte_score = f"🏆 <b>Meilleur score :</b> 🌐 <code>{s_v:g}/{t_v:g}</code> &nbsp;|&nbsp; 🇫🇷 <code>{s_d:g}/{t_d:g}</code>"
+                        else:
+                            texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
+
+                        # Utilisation du CSS text-align: center pour tout centrer parfaitement
+                        st.markdown(f"<div style='text-align: center; color: gray; font-size: 0.85rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
 
