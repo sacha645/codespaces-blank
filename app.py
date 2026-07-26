@@ -1201,7 +1201,7 @@ elif st.session_state.etat == "connecte":
                             user_trad = st.text_input("Traduction", key=f"trad_in_{index}")
 
                         st.write("")
-                        valider = st.form_submit_button("Vérifier 🚀", type="primary")
+                        valider = st.form_submit_button("Suivant 🚀", type="primary")
 
                     if valider:
                         points_gagnes = 0.0
@@ -1460,6 +1460,7 @@ elif st.session_state.etat == "connecte":
                             else:
                                 st.text_input(f"{nom_f} (donné) :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
 
+                        st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
 
                     if valider:
