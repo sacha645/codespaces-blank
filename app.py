@@ -843,6 +843,7 @@ elif st.session_state.etat == "connecte":
                     if erreurs:
                         st.write("### ❌ Liste des erreurs commises")
                         st.caption("Seuls les éléments erronés sont affichés en rouge :")
+                        st.write("")
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
                         col_q.markdown("**Question posée**")
