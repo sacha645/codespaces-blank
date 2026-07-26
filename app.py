@@ -796,7 +796,9 @@ elif st.session_state.etat == "connecte":
             nom_actuel, type_liste = info_liste
 
             st.subheader(f"📖 {nom_actuel}")
+
             ligne_epaisse()
+            st.write("")
 
             mots = recuperer_mots_liste(liste_id)
 
@@ -807,12 +809,12 @@ elif st.session_state.etat == "connecte":
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
-                    c1.markdown("**Infinitif**")
-                    c2.markdown("**Présent**")
-                    c3.markdown("**Prétérit**")
-                    c4.markdown("**Participe Passé**")
-                    c5.markdown("**Traduction**")
-                    st.divider()
+                    c1.markdown("<u>**Infinitif :**</u>")
+                    c2.markdown("<u>**Présent :**</u>")
+                    c3.markdown("<u>**Prétérit :**</u>")
+                    c4.markdown("<u>**Participe Passé :**</u>")
+                    c5.markdown("<u>**Traduction :**</u>")
+                    st.write("")
 
                     for mot in mots:
                         id_m, inf, pres, pret, pp, trad = mot
@@ -831,9 +833,9 @@ elif st.session_state.etat == "connecte":
                         col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
                 else:
                     c_m1, c_m2 = st.columns(2)
-                    c_m1.markdown("**Mot / Expression**")
-                    c_m2.markdown("**Traduction**")
-                    st.divider()
+                    c_m1.markdown("<u>**Mot :**</u>")
+                    c_m2.markdown("<u>**Traduction :**</u>")
+                    st.write("")
 
                     for mot in mots:
                         id_m, mot_or, _, _, _, trad = mot
@@ -855,7 +857,7 @@ elif st.session_state.etat == "connecte":
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
                         cm2.markdown(trad_disp, unsafe_allow_html=True)
 
-            st.divider()
+            ligne_epaisse()
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action_liste = "liste"
                 st.session_state.liste_active_id = None
@@ -990,6 +992,7 @@ elif st.session_state.etat == "connecte":
 
             st.subheader(f"🎯 Entraînement : {nom_actuel}")
             ligne_epaisse()
+            st.write("")
 
             # --- S'IL S'AGIT D'UNE LISTE DE VOCABULAIRE ---
             if type_liste == "vocabulaire":
@@ -1140,15 +1143,15 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
-                        col_q.markdown("**Question posée**")
-                        col_rep.markdown("**Ta réponse**")
-                        col_att.markdown("**Réponse attendue**")
+                        col_q.markdown("<u>**Question posée :**</u>")
+                        col_rep.markdown("<u>**Ta réponse:**</u>")
+                        col_att.markdown("<u>**Réponse attendue :**</u>")
 
                         for err in erreurs:
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(err["question"])
+                            c1.markdown(f"<u>**{err['question']}**</u>", unsafe_allow_html=True)
                             c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
-                            c3.markdown(f"🟢 `{err['reponse_attendue']}`")
+                            c3.markdown(f"🟢 {err['reponse_attendue']}")
                     else:
                         st.balloons()
                         st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
