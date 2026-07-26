@@ -1116,7 +1116,7 @@ elif st.session_state.etat == "connecte":
                         col_nom, col_voir, col_edit, col_share, col_train, col_del = st.columns([3, 1, 1, 1, 1, 1])
                         
                         with col_nom:
-                            st.write("")
+                            st.write("\n")
                             if type_liste == "verbe":
                                 st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
                             else:
