@@ -521,14 +521,14 @@ with col_title:
                     etat_a_sauver = {
                         "quiz_index": st.session_state.get("quiz_index", 0),
                         "quiz_mots": st.session_state.get("quiz_mots", []),
-                        "score_global": st.session_state.get("score_global", 0.0),
-                        "total_global": st.session_state.get("total_global", 0.0),
+                        "score_verbes": st.session_state.get("score_verbes", 0.0),
+                        "total_verbes": st.session_state.get("total_verbes", 0.0),
                         "erreurs_commises": st.session_state.get("erreurs_commises", [])
                     }
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
-                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_global", 
-                                 "total_global", "erreurs_commises"]:
+                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", 
+                                 "total_verbes", "erreurs_commises"]:
                         st.session_state.pop(clef, None)
 
             st.session_state.action_liste = "liste"
@@ -1564,8 +1564,8 @@ elif st.session_state.etat == "connecte":
                         etat_a_sauver = {
                             "quiz_index": st.session_state.quiz_index,
                             "quiz_mots": st.session_state.quiz_mots,
-                            "score_global": st.session_state.get("score_global", 0.0),
-                            "total_global": st.session_state.get("total_global", 0.0),
+                            "score_verbes": st.session_state.get("score_verbes", 0.0),
+                            "total_verbes": st.session_state.get("total_verbes", 0.0),
                             "erreurs_commises": st.session_state.get("erreurs_commises", [])
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
