@@ -1410,7 +1410,7 @@ elif st.session_state.etat == "connecte":
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     # On vérifie si une sauvegarde existe en BDD
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
-                    st.write(partie_sauvee)
+                    st.write("voici le dico :\n", partie_sauvee)
 
                     if partie_sauvee and "choix_reprise" not in st.session_state:
                         # Demande de confirmation à l'utilisateur
