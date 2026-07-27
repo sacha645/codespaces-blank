@@ -499,7 +499,10 @@ with col_title:
         button[kind="tertiary"] p {
             font-size: 2.25rem !important;
             font-weight: 700 !important;
-            padding-top: 0 !important;
+        }
+
+        button[kind="tertiary"] {
+            padding-top : 0;
         }
         </style>
     """, unsafe_allow_html=True)
