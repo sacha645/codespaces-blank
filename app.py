@@ -472,7 +472,7 @@ if "user" not in st.session_state:
 
 
 # --- BARRE DE NAVIGATION ---
-col_title, col_action, col_signup = st.columns([6, 1, 1])
+col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
     st.markdown("### 📘 Reviseur")
@@ -514,6 +514,7 @@ if st.session_state.etat == "none":
 
 # 2. ÉTAT : NOUVEAU (Inscription)
 elif st.session_state.etat == "nouveau":
+    st.write("")
     _, col_centre, _ = st.columns([1, 2, 1])
     with col_centre:
         with st.form("form_inscription"):
@@ -539,6 +540,7 @@ elif st.session_state.etat == "nouveau":
 
 # 3. ÉTAT : CONNECT (Connexion)
 elif st.session_state.etat == "connect":
+    st.write("")
     _, col_centre, _ = st.columns([1, 2, 1])
     with col_centre:
         with st.form("form_connexion"):
