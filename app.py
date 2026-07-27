@@ -373,6 +373,21 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
             
     return questions_finales
 
+def obtenir_type_liste(liste_id):
+    """
+    Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
+    """
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT type_liste FROM listes WHERE id = ?", (liste_id,))
+    resultat = c.fetchone()
+    conn.close()
+    
+    if resultat:
+        return resultat[0]
+    return None
+
+
 # --- APPARENCE ---
 def ligne_epaisse():
     st.markdown(
@@ -499,7 +514,7 @@ with col_title:
         elif st.session_state.get("action_liste") == "entrainer":
             user_id = st.session_state.user[1] if st.session_state.get("user") else None
             liste_id = st.session_state.get("quiz_liste_id")
-            type_liste = st.session_state.get("quiz_type_liste", "vocabulaire")
+            type_liste = st.session_state.get(obtenir_type_liste(liste_id))
 
             if user_id and liste_id:
                 if type_liste == "vocabulaire":
@@ -1410,7 +1425,6 @@ elif st.session_state.etat == "connecte":
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     # On vérifie si une sauvegarde existe en BDD
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
-                    st.write("voici le dico :\n", partie_sauvee)
 
                     if partie_sauvee and "choix_reprise" not in st.session_state:
                         # Demande de confirmation à l'utilisateur
@@ -1716,6 +1730,7 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
+"""
 # On utilise un expander pour garder l'interface propre
 with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
     st.caption("Affiche en temps réel le contenu de st.session_state")
@@ -1728,3 +1743,4 @@ with st.expander("🛠️ Console de débogage (Session State)", expanded=False)
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+"""
