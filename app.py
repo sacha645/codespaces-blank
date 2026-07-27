@@ -102,10 +102,7 @@ def verifier_connexion(username, password):
     if user:
         user_id, db_username, db_password = user
 
-        if isinstance(db_password, str):
-            db_password = db_password.encode('utf-8')
-
-        if bcrypt.checkpw(password.encode('utf-8'), db_password):
+        if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
             return "OK", db_username, user_id
         
     return "ERREUR", None, None
@@ -637,9 +634,15 @@ elif st.session_state.etat == "nouveau":
     with col_centre:
         with st.form("form_inscription"):
             st.subheader("📝 Créer un compte")
+
+            st.write("")
+
             nom = st.text_input("Nom d'utilisateur")
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
+
+            st.write("")
+
             valider = st.form_submit_button("S'inscrire", type="primary")
 
             if valider:
@@ -663,8 +666,14 @@ elif st.session_state.etat == "connect":
     with col_centre:
         with st.form("form_connexion"):
             st.subheader("🔑 Connexion")
+
+            st.write("")
+
             nom = st.text_input("Nom d'utilisateur")
             mot_de_passe = st.text_input("Mot de passe", type="password")
+
+            st.write("")
+
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
