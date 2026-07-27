@@ -475,24 +475,18 @@ if "user" not in st.session_state:
 col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
-    # 1. On injecte le style CSS directement sur le bouton
     st.markdown("""
         <style>
-        /* Ciblage direct du bouton dans le conteneur principal */
-        button[kind="tertiary"] {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            color: inherit !important;
+        /* On cible le bouton ET le texte à l'intérieur */
+        button[kind="tertiary"], 
+        button[kind="tertiary"] p {
             font-size: 2.25rem !important;
             font-weight: 700 !important;
-            cursor: pointer !important;
+            padding: 0 !important;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # 2. Ton titre/bouton d'accueil
     if st.button("📘 Reviseur", key="btn_titre_accueil", type="tertiary"):
         st.session_state.action_liste = "liste"
         st.rerun()
