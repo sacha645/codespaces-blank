@@ -475,31 +475,40 @@ if "user" not in st.session_state:
 col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
-    # 1. On injecte le style CSS directement sur le bouton
+    # 1. On englobe le bouton dans une div avec la classe CSS 'titre-btn-container'
     st.markdown("""
         <style>
-        /* Ciblage direct du bouton dans le conteneur principal */
-        div[data-testid="stButton"] > button[kind="secondary"] {
+        /* Ciblage STRICTEMENT réservé à la classe .titre-btn-container */
+        .titre-btn-container button {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             color: inherit !important;
-            font-size: 1.75rem !important;
-            font-weight: 700 !important;
+            font-size: 1.75rem !important; /* Taille d'un titre h3 */
+            font-weight: bold !important;
             cursor: pointer !important;
         }
+        
+        /* Effet au survol léger */
+        .titre-btn-container button:hover {
+            opacity: 0.8 !important;
+        }
         </style>
+        <div class="titre-btn-container">
     """, unsafe_allow_html=True)
 
-    # 2. Ton titre/bouton d'accueil
-    if st.button("📘 Reviseur", key="btn_titre_accueil"):
+    # 2. Le bouton à l'intérieur
+    if st.button("📘 Reviseur", key="btn_titre_accueil_unique"):
         st.session_state.action_liste = "liste"
         st.rerun()
+
+    # 3. On ferme la div pour ne pas impacter le reste de la page
+    st.markdown("</div>", unsafe_allow_html=True)
             
-        if st.session_state.etat == "connecte":
-            username, user_id = st.session_state.user
-            st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
+    if st.session_state.etat == "connecte":
+        username, user_id = st.session_state.user
+        st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
 
 if st.session_state.etat == "connecte":
     with col_action:
