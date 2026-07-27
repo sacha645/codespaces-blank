@@ -1,7 +1,7 @@
-import sqlite3
-import bcrypt
 import streamlit as st
+import sqlite3
 import random
+import bcrypt
 import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
@@ -1434,7 +1434,7 @@ elif st.session_state.etat == "connecte":
                     if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
                         st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
                         st.session_state.quiz_index = partie_sauvee["quiz_index"]
-                        st.session_state.score_verbes = partie_sauvee["score_verbes"]
+                        st.session_state.score_verbes = partie_sauvee["score_verbe"]
                         st.session_state.total_verbes = partie_sauvee["total_verbes"]
                         st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
                         st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
