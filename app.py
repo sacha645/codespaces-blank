@@ -495,6 +495,7 @@ with col_title:
         username, user_id = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
         st.write("")
+        st.write("")
     else : 
         st.write("")
 
