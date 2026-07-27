@@ -489,7 +489,37 @@ if "user" not in st.session_state:
 
 
 # --- BARRE DE NAVIGATION ---
-col_title, col_action, col_signup = st.columns([6, 2, 2])
+if st.session_state.etat == "connecte" : 
+    col_title, col_compte, col_action, col_signup = st.columns([6, 2, 2, 2])
+
+    with col_compte : 
+        if st.button("Profil", use_container_width=True):
+            st.session_state.action = "compte"
+            st.rerun()
+
+    with col_action:
+        if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
+            st.session_state.action = "suppr_compte"
+            st.rerun()
+                
+    with col_signup:
+        if st.button("Déconnexion", use_container_width=True):
+            st.session_state.user = None
+            st.session_state.etat = "none"
+            st.rerun()
+else : 
+    col_title, col_action, col_signup = st.columns([6, 2, 2])
+
+    with col_action:
+        if st.button("Se connecter", use_container_width=True):
+            st.session_state.etat = "connect"
+            st.rerun()
+                
+    with col_signup:
+        if st.button("S'inscrire", type="primary", use_container_width=True):
+            st.session_state.etat = "nouveau"
+            st.rerun()
+
 
 with col_title:
     st.markdown("""
@@ -500,20 +530,16 @@ with col_title:
             font-size: 2.25rem !important;
             font-weight: 700 !important;
         }
-
-        button[kind="tertiary"] {
-            margin-top : 0 !important;
-        }
         </style>
     """, unsafe_allow_html=True)
 
-    if st.button("📘 Reviseur", key="btn_titre_accueil", type="tertiary"):
+    if st.button("📘 Réviseur", key="btn_titre_accueil", type="tertiary"):
         # 1. Si déconnecté
         if st.session_state.get("etat") in ["nouveau", "connect", "none", "None"]:
             st.session_state.etat = "none"
 
         # 2. Si connecté et en plein entraînement
-        elif st.session_state.get("action_liste") == "entrainer":
+        elif st.session_state.get("action") == "entrainer":
             user_id = st.session_state.user[1] if st.session_state.get("user") else None
             liste_id = st.session_state.get("liste_active_id")
             type_liste = obtenir_type_liste(liste_id)
@@ -553,43 +579,20 @@ with col_title:
                         if clef in st.session_state:
                             del st.session_state[clef]
 
-            st.session_state.action_liste = "liste"
+            st.session_state.action = "liste"
 
         # 3. Si connecté sur une autre vue
         else:
-            st.session_state.action_liste = "liste"
+            st.session_state.action = "liste"
             st.session_state.nb_lignes_mots = 2
             st.session_state.liste_active_id = None
-            st.session_state.confirmer_suppr_compte = False
 
         st.rerun()
             
     if st.session_state.etat == "connecte":
         username, user_id = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
-
-if st.session_state.etat == "connecte":
-    with col_action:
-        if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            st.session_state.confirmer_suppr_compte = True
-            st.rerun()
-            
-    with col_signup:
-        if st.button("Déconnexion", use_container_width=True):
-            st.session_state.user = None
-            st.session_state.etat = "none"
-            st.rerun()
-
-else:
-    with col_action:
-        if st.button("Se connecter", use_container_width=True):
-            st.session_state.etat = "connect"
-            st.rerun()
-            
-    with col_signup:
-        if st.button("S'inscrire", type="primary", use_container_width=True):
-            st.session_state.etat = "nouveau"
-            st.rerun()
+    
 ligne_epaisse()
 
 
@@ -650,21 +653,23 @@ elif st.session_state.etat == "connect":
 elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
-    if "action_liste" not in st.session_state:
-        st.session_state.action_liste = "liste"
+    if "action" not in st.session_state:
+        st.session_state.action = "liste"
     if "liste_active_id" not in st.session_state:
         st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
         st.session_state.nb_lignes_mots = 2
-    if "confirmer_suppr_compte" not in st.session_state:
-        st.session_state.confirmer_suppr_compte = False
 
     _, col_centre, _ = st.columns([1, 3, 1])
 
     with col_centre:
 
-        # CONFIRMATION DE SUPPRESSION DE COMPTE
-        if st.session_state.confirmer_suppr_compte:
+        # CAS A : VUE/MODIFICATION DES INFORMATIONS DU COMPTE
+        if st.session_state.action == "compte" :
+            pass
+
+        # CAS A : CONFIRMATION DE SUPPRESSION DE COMPTE
+        elif st.session_state.action == "suppr_compte":
 
             st.write("")
             st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
@@ -674,7 +679,7 @@ elif st.session_state.etat == "connecte":
             
             with col_annuler_compte:
                 if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.confirmer_suppr_compte = False
+                    st.session_state.action = "liste"
                     st.rerun()
 
             with col_confirmer_compte:
@@ -682,11 +687,72 @@ elif st.session_state.etat == "connecte":
                     supprimer_compte(user_id)
                     st.session_state.user = None
                     st.session_state.etat = "none"
-                    st.session_state.confirmer_suppr_compte = False
+                    st.session_state.action = "liste"
                     st.rerun()
-        
-        # CAS A : VUE FORMULAIRE DE CRÉATION DE LISTE
-        elif st.session_state.action_liste == "creer":
+
+        # CAS B : VUE IMPORTER UNE LISTE (📥)
+        elif st.session_state.action == "importer":
+            st.subheader("📥 Importer une liste")
+            
+            tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
+            
+            with tab_id:
+                st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
+                id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
+                
+                if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
+                    if id_saisi.isdigit():
+                        succes, msg = importer_liste_par_id(int(id_saisi), user_id)
+                        if succes:
+                            st.session_state.action = "liste"
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                    else:
+                        st.warning("Veuillez entrer un ID valide.")
+
+            with tab_fichier:
+                st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
+                
+                type_import = st.radio(
+                    "Type de liste à importer :", 
+                    ["Vocabulaire", "Verbes"],
+                    horizontal=True,
+                    key="type_import_file"
+                )
+                type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
+
+                if type_import_code == "verbe":
+                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction` (un verbe par ligne)")
+                else:
+                    st.info("💡 **Format attendu :** `mot, traduction` (un mot par ligne)")
+                
+                nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
+                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
+                
+                if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
+                    if not nom_nouvelle_liste.strip():
+                        st.warning("Donne un nom à la nouvelle liste.")
+                    elif fichier_uploade is None:
+                        st.warning("Veuillez sélectionner un fichier.")
+                    else:
+                        contenu = fichier_uploade.getvalue().decode("utf-8")
+                        nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
+                        
+                        if nb_mots > 0:
+                            st.session_state.action = "liste"
+                            st.rerun()
+                        else:
+                            st.error("Aucun élément n'a pu être extrait. Vérifie que le format correspond bien aux consignes.")
+
+            ligne_epaisse()
+
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action = "liste"
+                st.rerun()
+
+        # CAS C : VUE FORMULAIRE DE CRÉATION DE LISTE
+        elif st.session_state.action == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             ligne_epaisse()
 
@@ -751,7 +817,7 @@ elif st.session_state.etat == "connecte":
 
             with col_annuler:
                 if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action_liste = "liste"
+                    st.session_state.action = "liste"
                     st.session_state.nb_lignes_mots = 2
                     st.rerun()
 
@@ -773,12 +839,90 @@ elif st.session_state.etat == "connecte":
                                     mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
                                     ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
-                        st.session_state.action_liste = "liste"
+                        st.session_state.action = "liste"
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-        # CAS B : VUE ÉDITER UNE LISTE (✏️)
-        elif st.session_state.action_liste == "editer":
+        # CAS D : VUE VOIR UNE LISTE (👁️)
+        elif st.session_state.action == "voir":
+            liste_id = st.session_state.liste_active_id
+            
+            listes_user = recuperer_listes_utilisateur(user_id)
+            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
+            nom_actuel, type_liste = info_liste
+
+            st.subheader(f"📖 {nom_actuel}")
+
+            ligne_epaisse()
+            st.write("")
+
+            mots = recuperer_mots_liste(liste_id)
+
+            if not mots:
+                st.info("Cette liste ne contient aucun élément.")
+            else:
+                compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
+
+                if type_liste == "verbe":
+                    c1, c2, c3, c4, c5 = st.columns(5)
+                    c1.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
+                    c2.markdown("<u>**Présent :**</u>", unsafe_allow_html=True)
+                    c3.markdown("<u>**Prétérit :**</u>", unsafe_allow_html=True)
+                    c4.markdown("<u>**Participe Passé :**</u>", unsafe_allow_html=True)
+                    c5.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
+                    st.write("")
+
+                    for mot in mots:
+                        id_m, inf, pres, pret, pp, trad = mot
+                        errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
+                        
+                        def fmt_v(texte, idx_f):
+                            if isinstance(errs, dict) and errs.get(idx_f, 0) >= 2:
+                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
+                            return texte
+
+                        col1, col2, col3, col4, col5 = st.columns(5)
+                        col1.markdown(fmt_v(inf, 1), unsafe_allow_html=True)
+                        col2.markdown(fmt_v(pres, 2), unsafe_allow_html=True)
+                        col3.markdown(fmt_v(pret, 3), unsafe_allow_html=True)
+                        col4.markdown(fmt_v(pp, 4), unsafe_allow_html=True)
+                        col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
+                else:
+                    c_m1, c_m2 = st.columns(2)
+                    c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
+                    c_m2.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
+                    st.write("")
+
+                    for mot in mots:
+                        id_m, mot_or, _, _, _, trad = mot
+                        
+                        # Récupération des erreurs spécifiques par sens
+                        # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
+                        err_info = compteur_err.get(id_m, {}) if isinstance(compteur_err, dict) else {}
+                        
+                        # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
+                        err_trad = err_info.get("vers_fr", False)
+                        # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
+                        err_orig = err_info.get("depuis_fr", False)
+
+                        # Coloration uniquement du côté erroné
+                        mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>" if err_orig else mot_or
+                        trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" if err_trad else trad
+
+                        cm1, cm2 = st.columns(2)
+                        cm1.markdown(mot_disp, unsafe_allow_html=True)
+                        cm2.markdown(trad_disp, unsafe_allow_html=True)
+
+            ligne_epaisse()
+            st.write("")
+
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action = "liste"
+                st.session_state.liste_active_id = None
+                st.rerun()
+
+        # CAS E : VUE ÉDITER UNE LISTE (✏️)
+        elif st.session_state.action == "editer":
             liste_id = st.session_state.liste_active_id
             
             listes_user = recuperer_listes_utilisateur(user_id)
@@ -857,7 +1001,7 @@ elif st.session_state.etat == "connecte":
 
             with col_annuler:
                 if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action_liste = "liste"
+                    st.session_state.action = "liste"
                     st.session_state.liste_active_id = None
                     st.session_state.nb_lignes_mots = 2
                     st.rerun()
@@ -870,212 +1014,14 @@ elif st.session_state.etat == "connecte":
                         renommer_liste(liste_id, nouveau_nom.strip())
                         remplacer_mots_liste(liste_id, mots_modifies, type_liste)
                         
-                        st.session_state.action_liste = "liste"
+                        st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.nb_lignes_mots = 2
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
-        # CAS C : VUE VOIR UNE LISTE (👁️)
-        elif st.session_state.action_liste == "voir":
-            liste_id = st.session_state.liste_active_id
-            
-            listes_user = recuperer_listes_utilisateur(user_id)
-            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
-            nom_actuel, type_liste = info_liste
-
-            st.subheader(f"📖 {nom_actuel}")
-
-            ligne_epaisse()
-            st.write("")
-
-            mots = recuperer_mots_liste(liste_id)
-
-            if not mots:
-                st.info("Cette liste ne contient aucun élément.")
-            else:
-                compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
-
-                if type_liste == "verbe":
-                    c1, c2, c3, c4, c5 = st.columns(5)
-                    c1.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
-                    c2.markdown("<u>**Présent :**</u>", unsafe_allow_html=True)
-                    c3.markdown("<u>**Prétérit :**</u>", unsafe_allow_html=True)
-                    c4.markdown("<u>**Participe Passé :**</u>", unsafe_allow_html=True)
-                    c5.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
-                    st.write("")
-
-                    for mot in mots:
-                        id_m, inf, pres, pret, pp, trad = mot
-                        errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
-                        
-                        def fmt_v(texte, idx_f):
-                            if isinstance(errs, dict) and errs.get(idx_f, 0) >= 2:
-                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
-                            return texte
-
-                        col1, col2, col3, col4, col5 = st.columns(5)
-                        col1.markdown(fmt_v(inf, 1), unsafe_allow_html=True)
-                        col2.markdown(fmt_v(pres, 2), unsafe_allow_html=True)
-                        col3.markdown(fmt_v(pret, 3), unsafe_allow_html=True)
-                        col4.markdown(fmt_v(pp, 4), unsafe_allow_html=True)
-                        col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
-                else:
-                    c_m1, c_m2 = st.columns(2)
-                    c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
-                    c_m2.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
-                    st.write("")
-
-                    for mot in mots:
-                        id_m, mot_or, _, _, _, trad = mot
-                        
-                        # Récupération des erreurs spécifiques par sens
-                        # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
-                        err_info = compteur_err.get(id_m, {}) if isinstance(compteur_err, dict) else {}
-                        
-                        # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
-                        err_trad = err_info.get("vers_fr", False)
-                        # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
-                        err_orig = err_info.get("depuis_fr", False)
-
-                        # Coloration uniquement du côté erroné
-                        mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>" if err_orig else mot_or
-                        trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" if err_trad else trad
-
-                        cm1, cm2 = st.columns(2)
-                        cm1.markdown(mot_disp, unsafe_allow_html=True)
-                        cm2.markdown(trad_disp, unsafe_allow_html=True)
-
-            ligne_epaisse()
-            st.write("")
-
-            if st.button("🔙 Retour", use_container_width=True):
-                st.session_state.action_liste = "liste"
-                st.session_state.liste_active_id = None
-                st.rerun()
-
-        # CAS D : CONFIRMATION DE SUPPRESSION (🗑️)
-        elif st.session_state.action_liste == "supprimer":
-            liste_id = st.session_state.liste_active_id
-            
-            listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
-
-            st.write("")
-            st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
-            st.write("")
-
-            col_non, col_oui = st.columns(2)
-            
-            with col_non:
-                if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action_liste = "liste"
-                    st.session_state.liste_active_id = None
-                    st.rerun()
-
-            with col_oui:
-                if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
-                    supprimer_liste(liste_id)
-                    st.session_state.action_liste = "liste"
-                    st.session_state.liste_active_id = None
-                    st.rerun()
-
-        # CAS E : VUE PARTAGER UNE LISTE (🔗)
-        elif st.session_state.action_liste == "partager":
-            liste_id = st.session_state.liste_active_id
-            st.subheader("🔗 Partager la liste")
-            
-            tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
-            
-            with tab_id:
-                st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
-                st.code(str(liste_id), language="text")
-            
-            with tab_direct:
-                st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
-                id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
-                
-                if st.button("📤 Envoyer la liste", type="primary", use_container_width=True):
-                    if id_ami.isdigit():
-                        succes, msg = partager_liste_a_utilisateur(liste_id, int(id_ami))
-                        if succes:
-                            st.session_state.action_liste = "liste"
-                            st.session_state.liste_active_id = None
-                            st.rerun()
-                        else:
-                            st.error(msg)
-                    else:
-                        st.warning("Veuillez entrer un ID d'utilisateur valide.")
-
-            ligne_epaisse()
-            if st.button("🔙 Retour", use_container_width=True):
-                st.session_state.action_liste = "liste"
-                st.session_state.liste_active_id = None
-                st.rerun()
-
-        # CAS F : VUE IMPORTER UNE LISTE (📥)
-        elif st.session_state.action_liste == "importer":
-            st.subheader("📥 Importer une liste")
-            
-            tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
-            
-            with tab_id:
-                st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
-                id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
-                
-                if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
-                    if id_saisi.isdigit():
-                        succes, msg = importer_liste_par_id(int(id_saisi), user_id)
-                        if succes:
-                            st.session_state.action_liste = "liste"
-                            st.rerun()
-                        else:
-                            st.error(msg)
-                    else:
-                        st.warning("Veuillez entrer un ID valide.")
-
-            with tab_fichier:
-                st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
-                
-                type_import = st.radio(
-                    "Type de liste à importer :", 
-                    ["Vocabulaire", "Verbes"],
-                    horizontal=True,
-                    key="type_import_file"
-                )
-                type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
-
-                if type_import_code == "verbe":
-                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction` (un verbe par ligne)")
-                else:
-                    st.info("💡 **Format attendu :** `mot, traduction` (un mot par ligne)")
-                
-                nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
-                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
-                
-                if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
-                    if not nom_nouvelle_liste.strip():
-                        st.warning("Donne un nom à la nouvelle liste.")
-                    elif fichier_uploade is None:
-                        st.warning("Veuillez sélectionner un fichier.")
-                    else:
-                        contenu = fichier_uploade.getvalue().decode("utf-8")
-                        nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
-                        
-                        if nb_mots > 0:
-                            st.session_state.action_liste = "liste"
-                            st.rerun()
-                        else:
-                            st.error("Aucun élément n'a pu être extrait. Vérifie que le format correspond bien aux consignes.")
-
-            ligne_epaisse()
-
-            if st.button("🔙 Retour", use_container_width=True):
-                st.session_state.action_liste = "liste"
-                st.rerun()
-
-        # CAS H : VUE ENTRAÎNEMENT (🎯)
-        elif st.session_state.action_liste == "entrainer":
+        # CAS F : VUE ENTRAÎNEMENT (🎯)
+        elif st.session_state.action == "entrainer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
             info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
@@ -1255,7 +1201,7 @@ elif st.session_state.etat == "connecte":
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             if "quiz_mots" in st.session_state:
                                 del st.session_state.quiz_mots
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             st.rerun()
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
@@ -1401,7 +1347,7 @@ elif st.session_state.etat == "connecte":
                                     del st.session_state[clef]
                             
 
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             st.rerun()
 
                     with col_b2:
@@ -1415,7 +1361,7 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
 
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             supprimer_sauvegarde_partie(liste_id)
                             st.rerun()
 
@@ -1521,7 +1467,7 @@ elif st.session_state.etat == "connecte":
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             del st.session_state.quiz_mots
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             st.rerun()
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
@@ -1619,7 +1565,7 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
                             
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             st.rerun()
 
                     with col_b2:
@@ -1629,37 +1575,95 @@ elif st.session_state.etat == "connecte":
                                 if clef in st.session_state:
                                     del st.session_state[clef]
 
-                            st.session_state.action_liste = "liste"
+                            st.session_state.action = "liste"
                             supprimer_sauvegarde_partie(liste_id)
                             st.rerun()
 
-        # CAS G : VUE NORMALE (AFFICHAGE DES LISTES)
-        else:
-            if not st.session_state.confirmer_suppr_compte:
-                st.write("")
-                col_titre, col_import, col_ajout = st.columns([3, 1, 1])
-                with col_titre:
-                    st.subheader("📋 Mes listes")
-
-                with col_import:
-                    if st.button("📥", use_container_width=True, help="Importer une liste"):
-                        st.session_state.action_liste = "importer"
-                        st.rerun()
+        # CAS G : VUE PARTAGER UNE LISTE (🔗)
+        elif st.session_state.action == "partager":
+            liste_id = st.session_state.liste_active_id
+            st.subheader("🔗 Partager la liste")
+            
+            tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
+            
+            with tab_id:
+                st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
+                st.code(str(liste_id), language="text")
+            
+            with tab_direct:
+                st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
+                id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
                 
-                with col_ajout:
-                    if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
-                        st.session_state.action_liste = "creer"
-                        st.session_state.nb_lignes_mots = 2
-                        st.rerun()
+                if st.button("📤 Envoyer la liste", type="primary", use_container_width=True):
+                    if id_ami.isdigit():
+                        succes, msg = partager_liste_a_utilisateur(liste_id, int(id_ami))
+                        if succes:
+                            st.session_state.action = "liste"
+                            st.session_state.liste_active_id = None
+                            st.rerun()
+                        else:
+                            st.error(msg)
+                    else:
+                        st.warning("Veuillez entrer un ID d'utilisateur valide.")
 
-                ligne_epaisse()
+            ligne_epaisse()
+            if st.button("🔙 Retour", use_container_width=True):
+                st.session_state.action = "liste"
+                st.session_state.liste_active_id = None
+                st.rerun()
 
-                listes = recuperer_listes_utilisateur(user_id)
+        # CAS H : CONFIRMATION DE SUPPRESSION (🗑️)
+        elif st.session_state.action == "supprimer":
+            liste_id = st.session_state.liste_active_id
+            
+            listes_user = recuperer_listes_utilisateur(user_id)
+            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
 
-                if not listes:
-                    st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+            st.write("")
+            st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
+            st.write("")
 
-                else:
+            col_non, col_oui = st.columns(2)
+            
+            with col_non:
+                if st.button("❌ Annuler", use_container_width=True):
+                    st.session_state.action = "liste"
+                    st.session_state.liste_active_id = None
+                    st.rerun()
+
+            with col_oui:
+                if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
+                    supprimer_liste(liste_id)
+                    st.session_state.action = "liste"
+                    st.session_state.liste_active_id = None
+                    st.rerun()
+        
+        # CAS I : VUE NORMALE (AFFICHAGE DES LISTES)
+        else:
+            st.write("")
+            col_titre, col_import, col_ajout = st.columns([3, 1, 1])
+            with col_titre:
+                st.subheader("📋 Mes listes")
+
+            with col_import:
+                if st.button("📥", use_container_width=True, help="Importer une liste"):
+                    st.session_state.action = "importer"
+                    st.rerun()
+            
+            with col_ajout:
+                if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
+                    st.session_state.action = "creer"
+                    st.session_state.nb_lignes_mots = 2
+                    st.rerun()
+
+            ligne_epaisse()
+
+            listes = recuperer_listes_utilisateur(user_id)
+
+            if not listes:
+                st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+
+            else:
                     for liste_id, nom_liste, type_liste in listes:
                         col_nom, col_voir, col_edit, col_train, col_share, col_del = st.columns([3, 1, 1, 1, 1, 1])
                         
@@ -1672,14 +1676,14 @@ elif st.session_state.etat == "connecte":
                         with col_voir:
                             st.write("")
                             if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                                st.session_state.action_liste = "voir"
+                                st.session_state.action = "voir"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_edit:
                             st.write("")
                             if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
-                                st.session_state.action_liste = "editer"
+                                st.session_state.action = "editer"
                                 st.session_state.liste_active_id = liste_id
                                 st.session_state.nb_lignes_mots = 2
                                 st.rerun()
@@ -1687,21 +1691,21 @@ elif st.session_state.etat == "connecte":
                         with col_share:
                             st.write("")
                             if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
-                                st.session_state.action_liste = "partager"
+                                st.session_state.action = "partager"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_train:
                             st.write("")
                             if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
-                                st.session_state.action_liste = "entrainer"
+                                st.session_state.action = "entrainer"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
                         with col_del:
                             st.write("")
                             if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                                st.session_state.action_liste = "supprimer"
+                                st.session_state.action = "supprimer"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
 
