@@ -517,19 +517,20 @@ with col_title:
                                  "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
                         st.session_state.pop(clef, None)
                 else:
-                    # 💾 CORRECTION DES CLÉS POUR LES VERBES
                     etat_a_sauver = {
                         "quiz_index": st.session_state.get("quiz_index", 0),
                         "quiz_mots": st.session_state.get("quiz_mots", []),
                         "score_verbes": st.session_state.get("score_verbes", 0.0),
                         "total_verbes": st.session_state.get("total_verbes", 0.0),
-                        "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                        "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
                     }
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
-                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", 
-                                 "total_verbes", "erreurs_commises"]:
-                        st.session_state.pop(clef, None)
+                    clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
+                    for clef in clefs_a_supprimer:
+                        if clef in st.session_state:
+                            del st.session_state[clef]
 
             st.session_state.action_liste = "liste"
 
@@ -1433,9 +1434,9 @@ elif st.session_state.etat == "connecte":
                         st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
                         st.session_state.quiz_liste_id = liste_id
                         st.toast("⚡ Sauvegarde chargée !")
+
                     else:
                         mots_bruts = recuperer_mots_liste(liste_id)
-                        
                         st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
                         st.session_state.quiz_index = 0
                         st.session_state.score_verbes = 0.0
@@ -1562,11 +1563,12 @@ elif st.session_state.etat == "connecte":
 
                         # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
                         etat_a_sauver = {
-                            "quiz_index": st.session_state.quiz_index,
-                            "quiz_mots": st.session_state.quiz_mots,
+                            "quiz_index": st.session_state.get("quiz_index", 0),
+                            "quiz_mots": st.session_state.get("quiz_mots", []),
                             "score_verbes": st.session_state.get("score_verbes", 0.0),
                             "total_verbes": st.session_state.get("total_verbes", 0.0),
-                            "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                            "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                            "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
 
@@ -1591,11 +1593,7 @@ elif st.session_state.etat == "connecte":
                             sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                             
                             # 3. Nettoyage de la session active
-                            clefs_a_supprimer = [
-                                "quiz_mots", "quiz_index", "quiz_liste_id", 
-                                "score_verbes", "total_verbes", 
-                                "erreurs_compteur", "erreurs_verbes_detail"
-                            ]
+                            clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                             for clef in clefs_a_supprimer:
                                 if clef in st.session_state:
                                     del st.session_state[clef]
