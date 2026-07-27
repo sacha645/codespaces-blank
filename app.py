@@ -6,7 +6,19 @@ import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
+def reinitialiser_toutes_les_bdd():
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    # Supprime les 3 tables
+    c.execute("DROP TABLE IF EXISTS mots")
+    c.execute("DROP TABLE IF EXISTS listes")
+    c.execute("DROP TABLE IF EXISTS scores")
+    c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
+    conn.commit()
+    conn.close()
 
+# Décommente cette ligne, lance l'application une fois, puis recommente-la :
+reinitialiser_toutes_les_bdd()
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
@@ -103,9 +115,9 @@ def verifier_connexion(username, password):
         user_id, db_username, db_password = user
 
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return "OK", db_username, user_id
+            return True, db_username, user_id
         
-    return "ERREUR", None, None
+    return False, None, None
 
 def authentifier_connexion(username, password) :
     conn = sqlite3.connect("utilisateurs.db")
@@ -698,8 +710,8 @@ elif st.session_state.etat == "connect":
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                statut, username, user_id = verifier_connexion(nom, mot_de_passe)
-                if statut == "OK":
+                est_bon, username, user_id = verifier_connexion(nom, mot_de_passe)
+                if est_bon :
                     st.session_state.user = (username, user_id)
                     st.session_state.etat = "connecte"
                     st.rerun()
