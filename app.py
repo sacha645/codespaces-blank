@@ -475,36 +475,27 @@ if "user" not in st.session_state:
 col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
-    # 1. On englobe le bouton dans une div avec la classe CSS 'titre-btn-container'
+    # 1. On injecte le style CSS directement sur le bouton
     st.markdown("""
         <style>
-        /* Ciblage STRICTEMENT réservé à la classe .titre-btn-container */
-        .titre-btn-container button {
+        /* Ciblage direct du bouton dans le conteneur principal */
+        div[data-testid="stButton"] > button[kind="tertiary"] {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             color: inherit !important;
-            font-size: 1.75rem !important; /* Taille d'un titre h3 */
-            font-weight: bold !important;
+            font-size: 1.75rem !important;
+            font-weight: 700 !important;
             cursor: pointer !important;
         }
-        
-        /* Effet au survol léger */
-        .titre-btn-container button:hover {
-            opacity: 0.8 !important;
-        }
         </style>
-        <div class="titre-btn-container">
     """, unsafe_allow_html=True)
 
-    # 2. Le bouton à l'intérieur
-    if st.button("📘 Reviseur", key="btn_titre_accueil_unique"):
+    # 2. Ton titre/bouton d'accueil
+    if st.button("📘 Reviseur", key="btn_titre_accueil", type="tertiary"):
         st.session_state.action_liste = "liste"
         st.rerun()
-
-    # 3. On ferme la div pour ne pas impacter le reste de la page
-    st.markdown("</div>", unsafe_allow_html=True)
             
     if st.session_state.etat == "connecte":
         username, user_id = st.session_state.user
