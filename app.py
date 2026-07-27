@@ -503,7 +503,6 @@ with col_title:
             line-height: 1.2 !important;
         }
         </style>
-        <div class="titre-container">
     """, unsafe_allow_html=True)
 
     if st.button("📘 Reviseur", key="btn_titre_accueil", type="tertiary"):
@@ -562,8 +561,6 @@ with col_title:
             st.session_state.confirmer_suppr_compte = False
 
         st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
             
     if st.session_state.etat == "connecte":
         username, user_id = st.session_state.user
