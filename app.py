@@ -740,8 +740,8 @@ elif st.session_state.etat == "connecte":
             nouveau_mdp = st.text_input("Nouveau mot de passe", value=st.session_state.temp_new_password, type="password", placeholder="Entrer un nouveau mot de passe") if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
 
             # 2. Vérification des modifications
-            pseudo_modifie = nouveau_pseudo.strip() != username
-            mdp_modifie = len(nouveau_mdp.strip()) > 0
+            pseudo_modifie = nouveau_pseudo.strip() != username and bool(nouveau_pseudo.strip())
+            mdp_modifie = len(nouveau_mdp.strip()) > 0 
             a_modifie = pseudo_modifie or mdp_modifie
 
             st.write("") # Espacement
@@ -813,7 +813,8 @@ elif st.session_state.etat == "connecte":
                             final_username = st.session_state.temp_new_username if pseudo_modifie else username
                             final_password = st.session_state.temp_new_password if mdp_modifie else mdp_actuel
 
-                            modifier_profil_bdd(user_id, final_username, final_password)
+                            if not modifier_profil_bdd(user_id, final_username, final_password) : 
+                                st.error("Le nom d'utilisateur choisi est déjà pris.")
 
                             # Mise à jour de la session
                             username = final_username
