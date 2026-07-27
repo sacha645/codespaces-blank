@@ -479,13 +479,13 @@ with col_title:
     st.markdown("""
         <style>
         /* Ciblage direct du bouton dans le conteneur principal */
-        div[data-testid="stButton"] > button[kind="tertiary"] {
+        button[kind="tertiary"] {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             color: inherit !important;
-            font-size: 1.75rem !important;
+            font-size: 2.25rem !important;
             font-weight: 700 !important;
             cursor: pointer !important;
         }
@@ -530,7 +530,7 @@ ligne_epaisse()
 
 # 1. ÉTAT : NONE (Accueil public)
 if st.session_state.etat == "none":
-    _, col_texte, _ = st.cloumns([1, 3, 1])
+    _, col_texte, _ = st.columns([1, 3, 1])
 
 # 2. ÉTAT : NOUVEAU (Inscription)
 elif st.session_state.etat == "nouveau":
