@@ -9,7 +9,7 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 def reinitialiser_toutes_les_bdd():
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    # Supprime les 3 tables
+    c.execute("DROP TABLE IF EXISTS users")
     c.execute("DROP TABLE IF EXISTS mots")
     c.execute("DROP TABLE IF EXISTS listes")
     c.execute("DROP TABLE IF EXISTS scores")
