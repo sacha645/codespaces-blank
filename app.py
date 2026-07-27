@@ -101,8 +101,13 @@ def verifier_connexion(username, password):
 
     if user:
         user_id, db_username, db_password = user
-        if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
+
+        if isinstance(db_password, str):
+            db_password = db_password.encode('utf-8')
+
+        if bcrypt.checkpw(password.encode('utf-8'), db_password):
             return "OK", db_username, user_id
+        
     return "ERREUR", None, None
 
 def authentifier_connexion(username, password) :
