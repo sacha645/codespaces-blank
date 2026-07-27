@@ -113,7 +113,7 @@ def authentifier_connexion(username, password) :
     conn.close()
 
     if user:
-        db_password = user
+        db_password = user[0]
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
             return True
     return False
