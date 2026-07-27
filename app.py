@@ -815,6 +815,7 @@ elif st.session_state.etat == "connecte":
 
                             if not modifier_profil_bdd(user_id, final_username, final_password) : 
                                 st.error("Le nom d'utilisateur choisi est déjà pris.")
+                                st.rerun()
 
                             # Mise à jour de la session
                             username = final_username
