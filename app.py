@@ -477,19 +477,70 @@ col_title, col_action, col_signup = st.columns([6, 2, 2])
 with col_title:
     st.markdown("""
         <style>
-        /* On cible le bouton ET le texte à l'intérieur */
-        button[kind="tertiary"], 
-        button[kind="tertiary"] p {
+        .titre-container button[kind="tertiary"], 
+        .titre-container button[kind="tertiary"] p {
             font-size: 2.25rem !important;
             font-weight: 700 !important;
             padding: 0 !important;
         }
         </style>
+        <div class="titre-container">
     """, unsafe_allow_html=True)
 
     if st.button("📘 Reviseur", key="btn_titre_accueil", type="tertiary"):
-        st.session_state.action_liste = "liste"
+        # 1. Si déconnecté
+        if st.session_state.get("etat") in ["nouveau", "connect", "none", "None"]:
+            st.session_state.etat = "none"
+
+        # 2. Si connecté et en plein entraînement
+        elif st.session_state.get("action_liste") == "entrainer":
+            user_id = st.session_state.user[1] if st.session_state.get("user") else None
+            liste_id = st.session_state.get("quiz_liste_id")
+            type_liste = st.session_state.get("quiz_type_liste", "vocabulaire")
+
+            if user_id and liste_id:
+                if type_liste == "vocabulaire":
+                    etat_a_sauver = {
+                        "quiz_index": st.session_state.get("quiz_index", 0),
+                        "quiz_mots": st.session_state.get("quiz_mots", []),
+                        "score_vers_fr": st.session_state.get("score_vers_fr", 0.0),
+                        "total_vers_fr": st.session_state.get("total_vers_fr", 0.0),
+                        "score_depuis_fr": st.session_state.get("score_depuis_fr", 0.0),
+                        "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
+                        "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                    }
+                    sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                    
+                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_vers_fr", 
+                                 "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
+                        st.session_state.pop(clef, None)
+                else:
+                    etat_a_sauver = {
+                        "quiz_index": st.session_state.get("quiz_index", 0),
+                        "quiz_mots": st.session_state.get("quiz_mots", []),
+                        "score_verbes": st.session_state.get("score_verbes", 0.0),
+                        "total_verbes": st.session_state.get("total_verbes", 0.0),
+                        "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                    }
+                    sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                    
+                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", 
+                                 "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]:
+                        st.session_state.pop(clef, None)
+
+            st.session_state.action_liste = "liste"
+
+        # 3. Si connecté sur une autre vue
+        else:
+            st.session_state.action_liste = "liste"
+            st.session_state.nb_lignes_mots = 2
+            st.session_state.liste_active_id = None
+            st.session_state.confirmer_suppr_compte = False
+
         st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
             
     if st.session_state.etat == "connecte":
         username, user_id = st.session_state.user
@@ -1568,10 +1619,12 @@ elif st.session_state.etat == "connecte":
                 col_titre, col_import, col_ajout = st.columns([3, 1, 1])
                 with col_titre:
                     st.subheader("📋 Mes listes")
+
                 with col_import:
                     if st.button("📥", use_container_width=True, help="Importer une liste"):
                         st.session_state.action_liste = "importer"
                         st.rerun()
+                
                 with col_ajout:
                     if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
                         st.session_state.action_liste = "creer"
@@ -1584,6 +1637,7 @@ elif st.session_state.etat == "connecte":
 
                 if not listes:
                     st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
+
                 else:
                     for liste_id, nom_liste, type_liste in listes:
                         col_nom, col_voir, col_edit, col_train, col_share, col_del = st.columns([3, 1, 1, 1, 1, 1])
