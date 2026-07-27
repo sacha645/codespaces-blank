@@ -525,7 +525,8 @@ with col_title:
                         "total_vers_fr": st.session_state.get("total_vers_fr", 0.0),
                         "score_depuis_fr": st.session_state.get("score_depuis_fr", 0.0),
                         "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
-                        "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                        "erreurs_commises": st.session_state.get("erreurs_commises", []),
+                        "Temp" : "Bizzare"
                     }
                     
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
@@ -541,7 +542,8 @@ with col_title:
                         "score_verbes": st.session_state.get("score_verbes", 0.0),
                         "total_verbes": st.session_state.get("total_verbes", 0.0),
                         "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                        "Temp" : "Le bug passe par la" 
                     }
 
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
