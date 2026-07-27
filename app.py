@@ -1091,7 +1091,7 @@ elif st.session_state.etat == "connecte":
                 # 1. INITIALISATION / REPRISE DU QUIZ VOCABULAIRE
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
-                    st.write(partie_sauvee, type_liste)
+                    st.write(partie_sauvee, type_liste, type_liste == "vocabulaire")
 
                     # Demande si une sauvegarde existe
                     if partie_sauvee and "choix_reprise" not in st.session_state:
