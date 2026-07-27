@@ -477,11 +477,13 @@ col_title, col_action, col_signup = st.columns([6, 2, 2])
 with col_title:
     st.markdown("""
         <style>
+        /* Force la taille H1 sur le bouton tertiaire ET tous ses éléments internes */
         .titre-container button[kind="tertiary"], 
-        .titre-container button[kind="tertiary"] p {
+        .titre-container button[kind="tertiary"] * {
             font-size: 2.25rem !important;
             font-weight: 700 !important;
             padding: 0 !important;
+            line-height: 1.2 !important;
         }
         </style>
         <div class="titre-container">
@@ -515,18 +517,18 @@ with col_title:
                                  "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
                         st.session_state.pop(clef, None)
                 else:
+                    # 💾 CORRECTION DES CLÉS POUR LES VERBES
                     etat_a_sauver = {
                         "quiz_index": st.session_state.get("quiz_index", 0),
                         "quiz_mots": st.session_state.get("quiz_mots", []),
-                        "score_verbes": st.session_state.get("score_verbes", 0.0),
-                        "total_verbes": st.session_state.get("total_verbes", 0.0),
-                        "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                        "score_global": st.session_state.get("score_global", 0.0),
+                        "total_global": st.session_state.get("total_global", 0.0),
+                        "erreurs_commises": st.session_state.get("erreurs_commises", [])
                     }
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
-                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", 
-                                 "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]:
+                    for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_global", 
+                                 "total_global", "erreurs_commises"]:
                         st.session_state.pop(clef, None)
 
             st.session_state.action_liste = "liste"
