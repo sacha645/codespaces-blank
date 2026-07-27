@@ -502,7 +502,7 @@ with col_title:
         }
 
         button[kind="tertiary"] {
-            padding-top : 0;
+            margin : 0 !important;
         }
         </style>
     """, unsafe_allow_html=True)
