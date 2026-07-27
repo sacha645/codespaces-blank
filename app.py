@@ -569,7 +569,6 @@ with col_title:
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
 
 if st.session_state.etat == "connecte":
-    st.write("")
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
             st.session_state.confirmer_suppr_compte = True
