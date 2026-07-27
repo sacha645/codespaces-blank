@@ -105,6 +105,16 @@ def verifier_connexion(username, password):
             return "OK", db_username, user_id
     return "ERREUR", None, None
 
+def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute(
+        "UPDATE users SET username = ?, password = ? WHERE id = ?",
+        (nouveau_username, nouveau_password, user_id)
+    )
+    conn.commit()
+    conn.close()
+
 def supprimer_compte(user_id):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
@@ -490,7 +500,7 @@ if "user" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 if st.session_state.etat == "connecte" : 
-    col_title, col_compte, col_action, col_signup = st.columns([4, 2, 2, 2])
+    col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
     with col_compte : 
         if st.button("Profil", use_container_width=True):
@@ -664,11 +674,111 @@ elif st.session_state.etat == "connecte":
 
     with col_centre:
 
-        # CAS A : VUE/MODIFICATION DES INFORMATIONS DU COMPTE
-        if st.session_state.action == "compte" :
-            pass
+        # CAS A VUE/MODIFICATIONS PROFIL
+        if st.session_state.action == "compte":
+            st.subheader("👤 Mon Profil")
 
-        # CAS A : CONFIRMATION DE SUPPRESSION DE COMPTE
+            # 1. Champs de saisie
+            nouveau_pseudo = st.text_input("Pseudo", value=st.session_state.username)
+            nouveau_mdp = st.text_input(
+                "Nouveau mot de passe",
+                type="password",
+                placeholder="Entrer un nouveau mot de passe"
+            )
+
+            # 2. Vérification des modifications
+            pseudo_modifie = nouveau_pseudo.strip() != st.session_state.username
+            mdp_modifie = len(nouveau_mdp.strip()) > 0
+            a_modifie = pseudo_modifie or mdp_modifie
+
+            st.write("") # Espacement
+
+            # 3. Boutons d'action
+            col_save, col_back = st.columns(2)
+
+            with col_save:
+                if st.button("💾 Sauvegarder", type="primary", use_container_width=True, disabled=not a_modifie):
+                    # Enregistrement temporaire des saisies
+                    st.session_state.temp_new_username = nouveau_pseudo.strip()
+                    st.session_state.temp_new_password = nouveau_mdp.strip()
+                    # Passage à l'écran de confirmation
+                    st.session_state.action = "confirmation_compte"
+                    st.rerun()
+
+            with col_back:
+                if st.button("🔙 Retour", use_container_width=True):
+                    st.session_state.action = "liste"
+                    st.rerun()
+
+        # CAS B : CONFIRMATION MODIFICATION DU PROFIL
+        elif st.session_state.action == "confirmation_compte":
+            st.subheader("🔒 Confirmation des modifications")
+
+            pseudo_modifie = st.session_state.temp_new_username != st.session_state.username
+            mdp_modifie = len(st.session_state.temp_new_password) > 0
+
+            # Cas A : Seulement le pseudo a été modifié
+            if pseudo_modifie and not mdp_modifie:
+                st.info("Vous êtes sur le point de modifier votre pseudo.")
+                mdp_actuel = st.text_input(
+                    "Mot de passe actuel",
+                    type="password",
+                    placeholder="Veuillez confirmer votre mot de passe"
+                )
+                confirm_mdp = None  # Non nécessaire dans ce cas
+
+            # Cas B : Le mot de passe (ou les deux) a été modifié
+            else:
+                st.info("Vous êtes sur le point de modifier des informations sensibles.")
+                confirm_mdp = st.text_input(
+                    "Confirmer le nouveau mot de passe",
+                    type="password",
+                    placeholder="Saisissez à nouveau votre nouveau mot de passe"
+                )
+                mdp_actuel = st.text_input(
+                    "Mot de passe actuel",
+                    type="password",
+                    placeholder="Veuillez confirmer votre mot de passe actuel"
+                )
+
+            st.write("") # Espacement
+
+            col_confirm, col_cancel = st.columns(2)
+
+            with col_confirm:
+                if st.button("✅ Confirmer", type="primary", use_container_width=True):
+                    # Validation du mot de passe actuel avec la BDD
+                    if verifier_connexion(st.session_state.username, mdp_actuel):
+                        
+                        # Vérification supplémentaire si le nouveau mot de passe devait être confirmé
+                        if mdp_modifie and confirm_mdp != st.session_state.temp_new_password:
+                            st.error("Le nouveau mot de passe et sa confirmation ne correspondent pas.")
+                        else:
+                            # Mise à jour en base de données
+                            final_username = st.session_state.temp_new_username if pseudo_modifie else st.session_state.username
+                            final_password = st.session_state.temp_new_password if mdp_modifie else mdp_actuel
+
+                            modifier_profil_bdd(st.session_state.user_id, final_username, final_password)
+
+                            # Mise à jour de la session
+                            st.session_state.username = final_username
+                            st.toast("Profil mis à jour avec succès !", icon="✅")
+
+                            # Nettoyage des données temporaires et retour accueil
+                            st.session_state.pop("temp_new_username", None)
+                            st.session_state.pop("temp_new_password", None)
+                            st.session_state.action = "accueil"
+                            st.rerun()
+                    else:
+                        st.error("Le mot de passe actuel est incorrect.")
+
+            with col_cancel:
+                if st.button("❌ Annuler", use_container_width=True):
+                    # Retour à l'écran du profil sans effacer la saisie
+                    st.session_state.action = "compte"
+                    st.rerun()
+
+        # CAS C : CONFIRMATION DE SUPPRESSION DE COMPTE
         elif st.session_state.action == "suppr_compte":
 
             st.write("")
@@ -690,7 +800,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.action = "liste"
                     st.rerun()
 
-        # CAS B : VUE IMPORTER UNE LISTE (📥)
+        # CAS D : VUE IMPORTER UNE LISTE (📥)
         elif st.session_state.action == "importer":
             st.subheader("📥 Importer une liste")
             
@@ -751,7 +861,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.action = "liste"
                 st.rerun()
 
-        # CAS C : VUE FORMULAIRE DE CRÉATION DE LISTE
+        # CAS E : VUE FORMULAIRE DE CRÉATION DE LISTE
         elif st.session_state.action == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             ligne_epaisse()
@@ -843,7 +953,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-        # CAS D : VUE VOIR UNE LISTE (👁️)
+        # CAS F : VUE VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
             liste_id = st.session_state.liste_active_id
             
@@ -921,7 +1031,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # CAS E : VUE ÉDITER UNE LISTE (✏️)
+        # CAS G : VUE ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
             liste_id = st.session_state.liste_active_id
             
@@ -1020,7 +1130,7 @@ elif st.session_state.etat == "connecte":
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
-        # CAS F : VUE ENTRAÎNEMENT (🎯)
+        # CAS H : VUE ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
@@ -1579,7 +1689,7 @@ elif st.session_state.etat == "connecte":
                             supprimer_sauvegarde_partie(liste_id)
                             st.rerun()
 
-        # CAS G : VUE PARTAGER UNE LISTE (🔗)
+        # CAS I : VUE PARTAGER UNE LISTE (🔗)
         elif st.session_state.action == "partager":
             liste_id = st.session_state.liste_active_id
             st.subheader("🔗 Partager la liste")
@@ -1612,7 +1722,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # CAS H : CONFIRMATION DE SUPPRESSION (🗑️)
+        # CAS J : CONFIRMATION DE SUPPRESSION (🗑️)
         elif st.session_state.action == "supprimer":
             liste_id = st.session_state.liste_active_id
             
@@ -1638,7 +1748,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.liste_active_id = None
                     st.rerun()
         
-        # CAS I : VUE NORMALE (AFFICHAGE DES LISTES)
+        # CAS K : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             st.write("")
             col_titre, col_import, col_ajout = st.columns([3, 1, 1])
