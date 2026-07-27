@@ -1730,17 +1730,16 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
-"""
+
 # On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-    st.caption("Affiche en temps réel le contenu de st.session_state")
-    
-    # Affiche l'état complet sous forme JSON/dictionnaire lisible
-    st.json(dict(st.session_state))
-    
-    # Optionnel : Bouton pour vider la session et recommencer à zéro
-    if st.button("🗑️ Vider le session_state"):
-        for key in list(st.session_state.keys()):
+#with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+#    st.caption("Affiche en temps réel le contenu de st.session_state")
+#    
+#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+#    st.json(dict(st.session_state))
+#    
+#    # Optionnel : Bouton pour vider la session et recommencer à zéro
+#    if st.button("🗑️ Vider le session_state"):
+#        for key in list(st.session_state.keys()):
             del st.session_state[key]
-        st.rerun()
-"""
+#        st.rerun()
