@@ -815,17 +815,18 @@ elif st.session_state.etat == "connecte":
 
                             if not modifier_profil_bdd(user_id, final_username, final_password) : 
                                 st.error("Le nom d'utilisateur choisi est déjà pris.")
+
+                            else :
+                                # Mise à jour de la session
+                                username = final_username
+                                st.toast("Profil mis à jour avec succès !", icon="✅")
+
+                                # Nettoyage des données temporaires et retour accueil
+                                st.session_state.pop("temp_new_username", None)
+                                st.session_state.pop("temp_new_password", None)
+                                st.session_state.action = "accueil"
                                 st.rerun()
-
-                            # Mise à jour de la session
-                            username = final_username
-                            st.toast("Profil mis à jour avec succès !", icon="✅")
-
-                            # Nettoyage des données temporaires et retour accueil
-                            st.session_state.pop("temp_new_username", None)
-                            st.session_state.pop("temp_new_password", None)
-                            st.session_state.action = "accueil"
-                            st.rerun()
+                                
                     else:
                         st.error("Le mot de passe actuel est incorrect.")
 
