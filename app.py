@@ -105,6 +105,19 @@ def verifier_connexion(username, password):
             return "OK", db_username, user_id
     return "ERREUR", None, None
 
+def authentifier_connexion(username, password) :
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT password FROM users WHERE username = ?", (username,))
+    user = c.fetchone()
+    conn.close()
+
+    if user:
+        db_password = user
+        if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
+            return True
+    return False
+
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
@@ -746,7 +759,7 @@ elif st.session_state.etat == "connecte":
             with col_confirm:
                 if st.button("✅ Confirmer", type="primary", use_container_width=True):
                     # Validation du mot de passe actuel avec la BDD
-                    if verifier_connexion(username, mdp_actuel):
+                    if authentifier_connexion(username, mdp_actuel):
                         
                         # Vérification supplémentaire si le nouveau mot de passe devait être confirmé
                         if mdp_modifie and confirm_mdp != st.session_state.temp_new_password:
