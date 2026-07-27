@@ -495,12 +495,11 @@ with col_title:
     st.markdown("""
         <style>
         /* Force la taille H1 sur le bouton tertiaire ET tous ses éléments internes */
-        .titre-container button[kind="tertiary"], 
-        .titre-container button[kind="tertiary"] * {
+        button[kind="tertiary"], 
+        button[kind="tertiary"] p {
             font-size: 2.25rem !important;
             font-weight: 700 !important;
             padding: 0 !important;
-            line-height: 1.2 !important;
         }
         </style>
     """, unsafe_allow_html=True)
