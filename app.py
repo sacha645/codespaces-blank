@@ -123,12 +123,33 @@ def authentifier_connexion(username, password) :
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
-    c.execute(
-        "UPDATE users SET username = ?, password = ? WHERE id = ?",
-        (nouveau_username, nouveau_password, user_id)
-    )
-    conn.commit()
-    conn.close()
+    
+    try:
+        # Si un nouveau mot de passe est fourni (non vide)
+        if nouveau_password and nouveau_password.strip():
+            # 1. On hache le nouveau mot de passe
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(nouveau_password.encode('utf-8'), salt).decode('utf-8')
+            
+            # 2. On met à jour le pseudo ET le mot de passe haché
+            c.execute(
+                "UPDATE users SET username = ?, password = ? WHERE id = ?",
+                (nouveau_username, hashed_password, user_id)
+            )
+        else:
+            # Sinon, on ne met à jour QUE le pseudo
+            c.execute(
+                "UPDATE users SET username = ? WHERE id = ?",
+                (nouveau_username, user_id)
+            )
+            
+        conn.commit()
+        conn.close()
+        return True, "Profil mis à jour avec succès !"
+        
+    except sqlite3.IntegrityError:
+        conn.close()
+        return False, "Ce nom d'utilisateur est déjà pris."
 
 def supprimer_compte(user_id):
     conn = sqlite3.connect("utilisateurs.db")
