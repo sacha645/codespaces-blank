@@ -679,8 +679,8 @@ elif st.session_state.etat == "connecte":
             st.subheader("👤 Mon Profil")
 
             # 1. Champs de saisie
-            nouveau_pseudo = st.session_state.temp_new_username if "temp_new_username" in st.session_state else st.text_input("Pseudo", value=username)
-            nouveau_mdp = st.session_state.temp_new_password if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
+            nouveau_pseudo = st.text_input("Pseudo", value=st.session_state.temp_new_username) if "temp_new_username" in st.session_state else st.text_input("Pseudo", value=username)
+            nouveau_mdp = st.text_input("Nouveau mot de passe", value=st.session_state.temp_new_password, type="password", placeholder="Entrer un nouveau mot de passe") if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
 
             # 2. Vérification des modifications
             pseudo_modifie = nouveau_pseudo.strip() != username
