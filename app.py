@@ -1410,6 +1410,7 @@ elif st.session_state.etat == "connecte":
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     # On vérifie si une sauvegarde existe en BDD
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
+                    st.write(partie_sauvee)
 
                     if partie_sauvee and "choix_reprise" not in st.session_state:
                         # Demande de confirmation à l'utilisateur
@@ -1434,7 +1435,7 @@ elif st.session_state.etat == "connecte":
                     if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
                         st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
                         st.session_state.quiz_index = partie_sauvee["quiz_index"]
-                        st.session_state.score_verbes = partie_sauvee["score_verbe"]
+                        st.session_state.score_verbes = partie_sauvee["score_verbes"]
                         st.session_state.total_verbes = partie_sauvee["total_verbes"]
                         st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
                         st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
@@ -1714,3 +1715,16 @@ elif st.session_state.etat == "connecte":
                         st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
+
+# On utilise un expander pour garder l'interface propre
+with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+    st.caption("Affiche en temps réel le contenu de st.session_state")
+    
+    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+    st.json(dict(st.session_state))
+    
+    # Optionnel : Bouton pour vider la session et recommencer à zéro
+    if st.button("🗑️ Vider le session_state"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
