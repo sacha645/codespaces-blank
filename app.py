@@ -515,9 +515,7 @@ with col_title:
             user_id = st.session_state.user[1] if st.session_state.get("user") else None
             liste_id = st.session_state.get("quiz_liste_id")
             type_liste = st.session_state.get(obtenir_type_liste(liste_id))
-            st.write(type_liste)
-            st.stop()
-                        
+
             if user_id and liste_id:
                 if type_liste == "vocabulaire":
                     etat_a_sauver = {
@@ -1093,6 +1091,7 @@ elif st.session_state.etat == "connecte":
                 # 1. INITIALISATION / REPRISE DU QUIZ VOCABULAIRE
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
+                    st.write(partie_sauvee)
 
                     # Demande si une sauvegarde existe
                     if partie_sauvee and "choix_reprise" not in st.session_state:
