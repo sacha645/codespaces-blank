@@ -475,38 +475,31 @@ if "user" not in st.session_state:
 col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
-    # 1. CSS pour transformer le bouton en texte/titre cliquable
+    # 1. On injecte le style CSS directement sur le bouton
     st.markdown("""
         <style>
-        /* On cible le bouton d'accueil spécifique */
-        div.element-container:has(button[key="btn_titre_accueil"]) button {
+        /* Ciblage direct du bouton dans le conteneur principal */
+        div[data-testid="stButton"] > button[kind="secondary"] {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
             padding: 0 !important;
             color: inherit !important;
-            font-size: 1.75rem !important; /* Taille équivalente à un ### */
+            font-size: 1.75rem !important;
             font-weight: 700 !important;
             cursor: pointer !important;
-            text-align: left !important;
-        }
-        
-        /* Effet survol discret (optionnel) */
-        div.element-container:has(button[key="btn_titre_accueil"]) button:hover {
-            opacity: 0.8;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # 2. Le bouton qui agit comme ton titre
+    # 2. Ton titre/bouton d'accueil
     if st.button("📘 Reviseur", key="btn_titre_accueil"):
-        # Réinitialise la vue pour revenir à l'écran de base
         st.session_state.action_liste = "liste"
         st.rerun()
-        
-    if st.session_state.etat == "connecte":
-        username, user_id = st.session_state.user
-        st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
+            
+        if st.session_state.etat == "connecte":
+            username, user_id = st.session_state.user
+            st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
 
 if st.session_state.etat == "connecte":
     with col_action:
