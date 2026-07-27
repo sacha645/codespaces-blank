@@ -6,19 +6,7 @@ import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
-def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    c.execute("DROP TABLE IF EXISTS users")
-    c.execute("DROP TABLE IF EXISTS mots")
-    c.execute("DROP TABLE IF EXISTS listes")
-    c.execute("DROP TABLE IF EXISTS scores")
-    c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
-    conn.commit()
-    conn.close()
 
-# Décommente cette ligne, lance l'application une fois, puis recommente-la :
-reinitialiser_toutes_les_bdd()
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
@@ -91,17 +79,23 @@ def init_db():
 def inscrire_utilisateur(username, password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
     try:
         conn = sqlite3.connect("utilisateurs.db")
         c = conn.cursor()
+
         c.execute("""
             INSERT INTO users (username, password) 
             VALUES (?, ?)
         """, (username, hashed_password))
+
         conn.commit()
         conn.close()
+
         return True
+    
     except sqlite3.IntegrityError:
+        conn.close()
         return False
 
 def verifier_connexion(username, password):
@@ -128,8 +122,10 @@ def authentifier_connexion(username, password) :
 
     if user:
         db_password = user[0]
+
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
             return True
+        
     return False
 
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
@@ -148,6 +144,7 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
                 "UPDATE users SET username = ?, password = ? WHERE id = ?",
                 (nouveau_username, hashed_password, user_id)
             )
+
         else:
             # Sinon, on ne met à jour QUE le pseudo
             c.execute(
@@ -157,11 +154,11 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
             
         conn.commit()
         conn.close()
-        return True, "Profil mis à jour avec succès !"
+        return True
         
     except sqlite3.IntegrityError:
         conn.close()
-        return False, "Ce nom d'utilisateur est déjà pris."
+        return False
 
 def supprimer_compte(user_id):
     conn = sqlite3.connect("utilisateurs.db")
@@ -710,8 +707,8 @@ elif st.session_state.etat == "connect":
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                est_bon, username, user_id = verifier_connexion(nom, mot_de_passe)
-                if est_bon :
+                succes, username, user_id = verifier_connexion(nom, mot_de_passe)
+                if succes :
                     st.session_state.user = (username, user_id)
                     st.session_state.etat = "connecte"
                     st.rerun()
