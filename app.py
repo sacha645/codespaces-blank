@@ -516,7 +516,8 @@ with col_title:
             liste_id = st.session_state.get("quiz_liste_id")
             type_liste = st.session_state.get(obtenir_type_liste(liste_id))
             st.write(type_liste)
-
+            st.stop()
+                        
             if user_id and liste_id:
                 if type_liste == "vocabulaire":
                     etat_a_sauver = {
