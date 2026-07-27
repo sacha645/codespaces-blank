@@ -475,7 +475,35 @@ if "user" not in st.session_state:
 col_title, col_action, col_signup = st.columns([6, 2, 2])
 
 with col_title:
-    st.markdown("### 📘 Reviseur")
+    # 1. CSS pour transformer le bouton en texte/titre cliquable
+    st.markdown("""
+        <style>
+        /* On cible le bouton d'accueil spécifique */
+        div.element-container:has(button[key="btn_titre_accueil"]) button {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            color: inherit !important;
+            font-size: 1.75rem !important; /* Taille équivalente à un ### */
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            text-align: left !important;
+        }
+        
+        /* Effet survol discret (optionnel) */
+        div.element-container:has(button[key="btn_titre_accueil"]) button:hover {
+            opacity: 0.8;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # 2. Le bouton qui agit comme ton titre
+    if st.button("📘 Reviseur", key="btn_titre_accueil"):
+        # Réinitialise la vue pour revenir à l'écran de base
+        st.session_state.action_liste = "liste"
+        st.rerun()
+        
     if st.session_state.etat == "connecte":
         username, user_id = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
@@ -509,8 +537,7 @@ ligne_epaisse()
 
 # 1. ÉTAT : NONE (Accueil public)
 if st.session_state.etat == "none":
-    st.title("Bienvenue sur le site !")
-    st.write("Clique sur un bouton en haut à droite pour te connecter ou créer un compte.")
+    _, col_texte, _ = st.cloumns([1, 3, 1])
 
 # 2. ÉTAT : NOUVEAU (Inscription)
 elif st.session_state.etat == "nouveau":
