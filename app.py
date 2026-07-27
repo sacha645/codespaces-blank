@@ -679,12 +679,8 @@ elif st.session_state.etat == "connecte":
             st.subheader("👤 Mon Profil")
 
             # 1. Champs de saisie
-            nouveau_pseudo = st.text_input("Pseudo", value=username)
-            nouveau_mdp = st.text_input(
-                "Nouveau mot de passe",
-                type="password",
-                placeholder="Entrer un nouveau mot de passe"
-            )
+            nouveau_pseudo = st.session_state.temp_new_username if "temp_new_username" in st.session_state else st.text_input("Pseudo", value=username)
+            nouveau_mdp = st.session_state.temp_new_password if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
 
             # 2. Vérification des modifications
             pseudo_modifie = nouveau_pseudo.strip() != username
@@ -707,6 +703,8 @@ elif st.session_state.etat == "connecte":
 
             with col_back:
                 if st.button("🔙 Retour", use_container_width=True):
+                    st.session_state.pop("temp_new_username", None)
+                    st.session_state.pop("temp_new_password", None)
                     st.session_state.action = "liste"
                     st.rerun()
 
@@ -758,7 +756,7 @@ elif st.session_state.etat == "connecte":
                             final_username = st.session_state.temp_new_username if pseudo_modifie else username
                             final_password = st.session_state.temp_new_password if mdp_modifie else mdp_actuel
 
-                            modifier_profil_bdd(st.session_state.user_id, final_username, final_password)
+                            modifier_profil_bdd(user_id, final_username, final_password)
 
                             # Mise à jour de la session
                             username = final_username
