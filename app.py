@@ -679,7 +679,7 @@ elif st.session_state.etat == "connecte":
             st.subheader("👤 Mon Profil")
 
             # 1. Champs de saisie
-            nouveau_pseudo = st.text_input("Pseudo", value=st.username)
+            nouveau_pseudo = st.text_input("Pseudo", value=username)
             nouveau_mdp = st.text_input(
                 "Nouveau mot de passe",
                 type="password",
@@ -687,7 +687,7 @@ elif st.session_state.etat == "connecte":
             )
 
             # 2. Vérification des modifications
-            pseudo_modifie = nouveau_pseudo.strip() != st.username
+            pseudo_modifie = nouveau_pseudo.strip() != username
             mdp_modifie = len(nouveau_mdp.strip()) > 0
             a_modifie = pseudo_modifie or mdp_modifie
 
@@ -714,7 +714,7 @@ elif st.session_state.etat == "connecte":
         elif st.session_state.action == "confirmation_compte":
             st.subheader("🔒 Confirmation des modifications")
 
-            pseudo_modifie = st.session_state.temp_new_username != st.username
+            pseudo_modifie = st.session_state.temp_new_username != username
             mdp_modifie = len(st.session_state.temp_new_password) > 0
 
             # Cas A : Seulement le pseudo a été modifié
@@ -748,20 +748,20 @@ elif st.session_state.etat == "connecte":
             with col_confirm:
                 if st.button("✅ Confirmer", type="primary", use_container_width=True):
                     # Validation du mot de passe actuel avec la BDD
-                    if verifier_connexion(st.username, mdp_actuel):
+                    if verifier_connexion(username, mdp_actuel):
                         
                         # Vérification supplémentaire si le nouveau mot de passe devait être confirmé
                         if mdp_modifie and confirm_mdp != st.session_state.temp_new_password:
                             st.error("Le nouveau mot de passe et sa confirmation ne correspondent pas.")
                         else:
                             # Mise à jour en base de données
-                            final_username = st.session_state.temp_new_username if pseudo_modifie else st.username
+                            final_username = st.session_state.temp_new_username if pseudo_modifie else username
                             final_password = st.session_state.temp_new_password if mdp_modifie else mdp_actuel
 
                             modifier_profil_bdd(st.session_state.user_id, final_username, final_password)
 
                             # Mise à jour de la session
-                            st.username = final_username
+                            username = final_username
                             st.toast("Profil mis à jour avec succès !", icon="✅")
 
                             # Nettoyage des données temporaires et retour accueil
