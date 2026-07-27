@@ -5,7 +5,19 @@ import bcrypt
 import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
+def reinitialiser_toutes_les_bdd():
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS users")
+    c.execute("DROP TABLE IF EXISTS mots")
+    c.execute("DROP TABLE IF EXISTS listes")
+    c.execute("DROP TABLE IF EXISTS scores")
+    c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
+    conn.commit()
+    conn.close()
 
+# Décommente cette ligne, lance l'application une fois, puis recommente-la :
+reinitialiser_toutes_les_bdd()
 
 # --- BASE DE DONNÉES ---
 def init_db():
@@ -561,6 +573,7 @@ if st.session_state.etat == "connecte" :
         if st.button("Déconnexion", use_container_width=True):
             st.session_state.user = None
             st.session_state.etat = "none"
+            st.session_state.pop("action", None)
             st.rerun()
 else : 
     col_title, col_action, col_signup = st.columns([6, 2, 2])
@@ -824,9 +837,9 @@ elif st.session_state.etat == "connecte":
                                 # Nettoyage des données temporaires et retour accueil
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
+                                st.session_state.user = (final_username, user_id)
                                 st.session_state.action = "accueil"
                                 st.rerun()
-                                
                     else:
                         st.error("Le mot de passe actuel est incorrect.")
 
