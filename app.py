@@ -511,11 +511,13 @@ with col_title:
                         "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
                         "erreurs_commises": st.session_state.get("erreurs_commises", [])
                     }
+                    
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
                     for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_vers_fr", 
                                  "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
                         st.session_state.pop(clef, None)
+
                 else:
                     etat_a_sauver = {
                         "quiz_index": st.session_state.get("quiz_index", 0),
@@ -525,6 +527,7 @@ with col_title:
                         "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
                         "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
                     }
+
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
                     clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
