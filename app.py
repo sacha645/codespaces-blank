@@ -490,7 +490,7 @@ if "user" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 if st.session_state.etat == "connecte" : 
-    col_title, col_compte, col_action, col_signup = st.columns([6, 2, 2, 2])
+    col_title, col_compte, col_action, col_signup = st.columns([4, 2, 2, 2])
 
     with col_compte : 
         if st.button("Profil", use_container_width=True):
