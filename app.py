@@ -1076,6 +1076,7 @@ elif st.session_state.etat == "connecte":
                     # Demande si une sauvegarde existe
                     if partie_sauvee and "choix_reprise" not in st.session_state:
                         st.info("💾 Une sauvegarde d'entraînement existe pour cette liste.")
+                        st.write("")
                         col_c1, col_c2 = st.columns(2)
                         
                         with col_c1:
@@ -1409,6 +1410,7 @@ elif st.session_state.etat == "connecte":
                     if partie_sauvee and "choix_reprise" not in st.session_state:
                         # Demande de confirmation à l'utilisateur
                         st.info("💾 Une sauvegarde d'entraînement existe pour cette liste de verbes.")
+                        st.write("")
                         col_c1, col_c2 = st.columns(2)
                         
                         with col_c1:
