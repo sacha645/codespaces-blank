@@ -1741,5 +1741,5 @@ elif st.session_state.etat == "connecte":
 #    # Optionnel : Bouton pour vider la session et recommencer à zéro
 #    if st.button("🗑️ Vider le session_state"):
 #        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+#            del st.session_state[key]
 #        st.rerun()
