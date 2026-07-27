@@ -377,6 +377,7 @@ def obtenir_type_liste(liste_id):
     """
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
     """
+
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     c.execute("SELECT type_liste FROM listes WHERE id = ?", (liste_id,))
@@ -513,7 +514,7 @@ with col_title:
         # 2. Si connecté et en plein entraînement
         elif st.session_state.get("action_liste") == "entrainer":
             user_id = st.session_state.user[1] if st.session_state.get("user") else None
-            liste_id = st.session_state.get("quiz_liste_id")
+            liste_id = st.session_state.get("liste_active_id")
             type_liste = st.session_state.get(obtenir_type_liste(liste_id))
 
             if user_id and liste_id:
