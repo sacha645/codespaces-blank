@@ -980,7 +980,7 @@ elif st.session_state.etat == "connecte":
 
             if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
-                    st.session_state.test.append((st.session_state.mots_temp, "avant"))
+                    st.session_state.test.append((st.session_state.mots_temp, "avant", st.session_state.id_a_suppr, st.session_state.nb_lignes_mots))
                     st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
                     st.session_state.test.append((st.session_state.mots_temp, "après"))
                     st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
