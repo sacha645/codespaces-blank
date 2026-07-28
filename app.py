@@ -944,7 +944,10 @@ elif st.session_state.etat == "connecte":
             st.write(st.session_state.test)
 
 
-            for i in range(st.session_state.nb_lignes_mots):
+            teste = []
+            for i in range(0, st.session_state.nb_lignes_mots):
+                teste.append(i)
+                st.write(teste)
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
