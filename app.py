@@ -939,7 +939,7 @@ elif st.session_state.etat == "connecte":
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
             if "test" not in st.session_state :
-                st.session_state.test = None
+                st.session_state.test = []
             st.session_state.id_a_suppr = None
             st.write(st.session_state.test)
 
