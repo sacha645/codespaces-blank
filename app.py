@@ -922,9 +922,10 @@ elif st.session_state.etat == "connecte":
 
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
-            test=[]
-            test.append(st.session_state.id_a_suppr, "avant")
             st.session_state.id_a_suppr = None
+            test=[]
+            test.append(st.session_state.id_a_suppr, "Début")
+
 
 
             if is_verbe:
