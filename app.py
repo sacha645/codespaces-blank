@@ -924,18 +924,6 @@ elif st.session_state.etat == "connecte":
 
             st.divider()
 
-            if is_verbe:
-                cols_h = st.columns([2, 2, 2, 2, 2, 1])
-                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
-                for col, h in zip(cols_h, headers):
-                    col.caption(h)
-            else:
-                cols_h = st.columns([1, 2, 2, 1])
-                headers = ["Article", "Mot / Nom", "Traduction", ""]
-                for col, h in zip(cols_h, headers):
-
-                    col.caption(h)
-
 
             toutes_lignes_visibles_remplies = True
             if "mots_temp" not in st.session_state :
@@ -943,10 +931,15 @@ elif st.session_state.etat == "connecte":
             st.session_state.id_a_suppr = None
 
 
-            for i in range(0, st.session_state.nb_lignes_mots):
+            for i in range(st.session_state.nb_lignes_mots):
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
+                    cols_h = st.columns([2, 2, 2, 2, 2, 1])
+                    headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
+                    for col, h in zip(cols_h, headers):
+                        col.caption(h)
+
                     if i < st.session_state.nb_lignes_mots-1 :
                         c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
 
@@ -969,6 +962,11 @@ elif st.session_state.etat == "connecte":
                         toutes_lignes_visibles_remplies = False
 
                 else:
+                    cols_h = st.columns([1, 2, 2, 1])
+                    headers = ["Article", "Mot / Nom", "Traduction", ""]
+                    for col, h in zip(cols_h, headers):
+                        col.caption(h)
+
                     if i < st.session_state.nb_lignes_mots-1 :
                         c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
                         with suppr :
@@ -986,6 +984,7 @@ elif st.session_state.etat == "connecte":
 
                     if not (mot.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
+
 
             if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
@@ -1138,8 +1137,8 @@ elif st.session_state.etat == "connecte":
             toutes_lignes_visibles_remplies = True
             
             if type_liste == "verbe":
-                cols_h = st.columns([2, 2, 2, 2, 2])
-                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction"]
+                cols_h = st.columns([2, 2, 2, 2, 2, 1])
+                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
 
@@ -1149,7 +1148,7 @@ elif st.session_state.etat == "connecte":
                         _, inf_v, pres_v, pret_v, pp_v, trad_v = mots_existants[i]
 
                     c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
-                    inf = c1.text_input(f"edit_inf_{i}", value=inf_v, key=f"edit_inf_{i}", label_visibility="collapsed")
+                    inf = c1.text_input(f"edit_inf_{i}", value=inf_v, label_visibility="collapsed")
                     pres = c2.text_input(f"edit_pres_{i}", value=pres_v, key=f"edit_pres_{i}", label_visibility="collapsed")
                     pret = c3.text_input(f"edit_pret_{i}", value=pret_v, key=f"edit_pret_{i}", label_visibility="collapsed")
                     pp = c4.text_input(f"edit_pp_{i}", value=pp_v, key=f"edit_pp_{i}", label_visibility="collapsed")
@@ -1186,6 +1185,7 @@ elif st.session_state.etat == "connecte":
                     if len(mot.strip()) < 1 or len(trad.strip()) < 1:
                         toutes_lignes_visibles_remplies = False
 
+
             if toutes_lignes_visibles_remplies:
                 st.session_state.nb_lignes_mots = nb_lignes + 1
                 st.rerun()
@@ -1200,7 +1200,6 @@ elif st.session_state.etat == "connecte":
                     st.session_state.liste_active_id = None
                     st.session_state.nb_lignes_mots = 2
                     st.rerun()
-
             with col_sauvegarder:
                 if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
                     if not nouveau_nom.strip():
@@ -1991,14 +1990,14 @@ elif st.session_state.etat == "connecte":
 
 
 # On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-   st.caption("Affiche en temps réel le contenu de st.session_state")
+# with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+#    st.caption("Affiche en temps réel le contenu de st.session_state")
    
-   # Affiche l'état complet sous forme JSON/dictionnaire lisible
-   st.json(dict(st.session_state))
+#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+#    st.json(dict(st.session_state))
    
-   # Optionnel : Bouton pour vider la session et recommencer à zéro
-   if st.button("🗑️ Vider le session_state"):
-       for key in list(st.session_state.keys()):
-           del st.session_state[key]
-       st.rerun()
+#    # Optionnel : Bouton pour vider la session et recommencer à zéro
+#    if st.button("🗑️ Vider le session_state"):
+#        for key in list(st.session_state.keys()):
+#            del st.session_state[key]
+#        st.rerun()
