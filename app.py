@@ -947,10 +947,9 @@ elif st.session_state.etat == "connecte":
 
                 if is_verbe:
                     c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
-                    if i < st.session_state.nb_lignes_mots-1 :
-                        with suppr :
-                            if st.button("🗑️", key=i, help="Supprimer cette ligne"):
-                                st.session_state.id_a_suppr = i
+                    with suppr :
+                        if st.button("🗑️", key=i, help="Supprimer cette ligne"):
+                            st.session_state.id_a_suppr = i
 
                     inf = c1.text_input(f"inf_{i}", label_visibility="collapsed", value=valeur[1])
                     pres = c2.text_input(f"pres_{i}", label_visibility="collapsed", value=valeur[2])
@@ -1181,10 +1180,9 @@ elif st.session_state.etat == "connecte":
 
                 else :
                     c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
-                    if i < st.session_state.nb_lignes_mots-1 :
-                        with suppr :
-                            if st.button("🗑️", key=i, help="Supprimer cette ligne"):
-                                st.session_state.id_a_suppr = i
+                    with suppr :
+                        if st.button("🗑️", key=i, help="Supprimer cette ligne"):
+                            st.session_state.id_a_suppr = i
 
 
                     valeur = st.session_state.mots_temp.get(i, ("", "", ""))
