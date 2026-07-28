@@ -922,7 +922,10 @@ elif st.session_state.etat == "connecte":
 
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
-            id_a_suppr = None
+            test=[]
+            test.append(st.session_state.id_a_suppr, "avant")
+            st.session_state.id_a_suppr = None
+
 
             if is_verbe:
                 cols_h = st.columns([2, 2, 2, 2, 2])
@@ -964,16 +967,18 @@ elif st.session_state.etat == "connecte":
 
                 with suppr :
                     if st.button("🗑️", key=i, help="Supprimer cette ligne"):
-                        id_a_suppr = i
+                        st.session_state.id_a_suppr = i
+                        test.append(st.session_state.id_a_suppr, "bouton")
 
-            if id_a_suppr is not None : 
+            if st.session_state.id_a_suppr is not None : 
+                test.append(st.session_state.id_a_suppr, "test")
                 if st.session_state.nb_lignes_mots > 2:
-                    st.session_state.mots_temp.pop(id_a_suppr, None)
-                    st.session_state.mots_temp = {(x if x < id_a_suppr else x - 1) : y for x, y in st.session_state.mots_temp.items()}
+                    st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
+                    st.session_state.mots_temp = {(x if x < st.session_state.id_a_suppr else x - 1) : y for x, y in st.session_state.mots_temp.items()}
                     st.session_state.nb_lignes_mots -= 1
 
                 else :
-                    st.session_state.mots_temp[id_a_suppr] = ("", "", "", "", "", "")
+                    st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "", "", "", "")
 
                 # 4. Nettoyage des clés widgets Streamlit pour forcer le rafraîchissement
                 for k in list(st.session_state.keys()):
@@ -989,6 +994,8 @@ elif st.session_state.etat == "connecte":
             st.write("")
             st.write("")
             col_annuler, col_sauvegarder = st.columns(2)
+
+            st.write(test)
 
             with col_annuler:
                 if st.button("❌ Annuler", use_container_width=True):
