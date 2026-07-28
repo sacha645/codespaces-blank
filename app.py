@@ -643,6 +643,8 @@ with col_title:
             st.session_state.action = "liste"
             st.session_state.nb_lignes_mots = 2
             st.session_state.liste_active_id = None
+            st.session_state.pop("mots_temp", None)
+            st.session_state.pop("id_a_suppr", None)
 
         st.rerun()
             
@@ -985,8 +987,6 @@ elif st.session_state.etat == "connecte":
                     if not (mot.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
 
-
-
             if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
                     st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
@@ -1007,60 +1007,36 @@ elif st.session_state.etat == "connecte":
 
             col_annuler, col_sauvegarder = st.columns(2)
             with col_annuler:
-
                 if st.button("❌ Annuler", use_container_width=True):
-
                     st.session_state.action = "liste"
-
                     st.session_state.nb_lignes_mots = 2
-
                     st.session_state.pop("mots_temp", None)
-
+                    st.session_state.pop("id_a_suppr", None)
                     st.rerun()
             with col_sauvegarder:
-
                 if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
-
                     if not nom_liste.strip():
-
                         st.warning("Veuillez donner un nom à la liste.")
-
                     else:
-
                         ajouter_liste(user_id, nom_liste.strip(), type_code)
-
                         listes_user = recuperer_listes_utilisateur(user_id)
-
                         derniere_liste_id = listes_user[-1][0]
 
-
-
                         for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
-
                             if is_verbe:
-
                                 if inf_mot.strip() and trad.strip():
-
                                     ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
 
                             else:
-
                                 if inf_mot.strip() and trad.strip():
-
                                     mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
-
                                     ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
-
-
                         st.session_state.action = "liste"
-
                         st.session_state.nb_lignes_mots = 2
-
                         st.session_state.pop("mots_temp", None)
-
+                        st.session_state.pop("id_a_suppr", None)
                         st.rerun() 
-
 
         # CAS E : VUE VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
