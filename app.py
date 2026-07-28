@@ -601,8 +601,8 @@ if st.session_state.etat == "connecte" :
 
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
+            st.session_state.action = "supprimer"
+            st.session_state.action_suppr = "compte"
             st.rerun()
                 
     with col_signup:
@@ -781,7 +781,7 @@ elif st.session_state.etat == "connecte":
 
     with col_centre:
 
-        # CAS A VUE/MODIFICATIONS PROFIL
+        # CAS A : VUE/MODIFICATIONS PROFIL
         if st.session_state.action == "compte":
             st.subheader("👤 Mon Profil")
 
@@ -1918,10 +1918,8 @@ elif st.session_state.etat == "connecte":
                 if st.session_state.action_suppr == "compte":
                     if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
                         supprimer_compte(user_id)
-                        st.session_state.user = None
-                        st.session_state.etat = "none"
-                        st.session_state.action = "liste"
-                        st.session_state.pop("action_suppr", None)
+                        for key in list(st.session_state.keys()):
+                            del st.session_state[key]
                         st.rerun()
 
                 elif st.session_state.action_suppr == "liste":
