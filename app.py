@@ -1583,16 +1583,18 @@ elif st.session_state.etat == "connecte":
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
-                        anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
-                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
-
-                    st.metric(label="🌐 Vers la langue étrangère", value=f"{st.session_state.score_verbes:g} / {st.session_state.total_verbes:g}")
-
-                    # --- RECAPITULATIF DES ERREURS POUR VERBES ---
-                    err_details = st.session_state.get("erreurs_verbes_detail", [])
+                        anc_v, anc_tv, _, _ = score_actuel_bdd
+                        st.write(f"🏆 **Meilleur score :** ⚡ `{anc_v:g}/{anc_tv:g}`")
 
                     st.write("")
+
+                    st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
+
+                    # --- RECAPITULATIF DES ERREURS POUR VERBES ---
+                    st.write("")
                     st.divider()
+                    
+                    err_details = st.session_state.get("erreurs_verbes_detail", [])
 
                     if err_details:
                         st.write("### ❌ Récapitulatif des erreurs commises")
