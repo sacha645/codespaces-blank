@@ -924,6 +924,17 @@ elif st.session_state.etat == "connecte":
 
             st.divider()
 
+            if is_verbe:
+                cols_h = st.columns([2, 2, 2, 2, 2, 1])
+                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
+                for col, h in zip(cols_h, headers):
+                    col.caption(h)
+            else:
+                cols_h = st.columns([1, 2, 2, 1])
+                headers = ["Article", "Mot / Nom", "Traduction", ""]
+                for col, h in zip(cols_h, headers):
+                    col.caption(h)
+
 
             toutes_lignes_visibles_remplies = True
             if "mots_temp" not in st.session_state :
@@ -935,20 +946,11 @@ elif st.session_state.etat == "connecte":
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
-                    cols_h = st.columns([2, 2, 2, 2, 2, 1])
-                    headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
-                    for col, h in zip(cols_h, headers):
-                        col.caption(h)
-
+                    c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
                     if i < st.session_state.nb_lignes_mots-1 :
-                        c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
-
                         with suppr :
                             if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                                 st.session_state.id_a_suppr = i
-
-                    else :
-                        c1, c2, c3, c4, c5, _ = st.columns([2, 2, 2, 2, 2, 1])
 
                     inf = c1.text_input(f"inf_{i}", label_visibility="collapsed", value=valeur[1])
                     pres = c2.text_input(f"pres_{i}", label_visibility="collapsed", value=valeur[2])
@@ -962,20 +964,13 @@ elif st.session_state.etat == "connecte":
                         toutes_lignes_visibles_remplies = False
 
                 else:
-                    cols_h = st.columns([1, 2, 2, 1])
-                    headers = ["Article", "Mot / Nom", "Traduction", ""]
-                    for col, h in zip(cols_h, headers):
-                        col.caption(h)
-
+                    c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
                     if i < st.session_state.nb_lignes_mots-1 :
-                        c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
                         with suppr :
                             if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                                 st.session_state.id_a_suppr = i
 
-                    else : 
-                        c1, c2, c3, _ = st.columns([1, 2, 2, 1])
-
+                    
                     art = c1.text_input(f"art_{i}", label_visibility="collapsed", value=valeur[0])
                     mot = c2.text_input(f"mot_{i}", label_visibility="collapsed", value=valeur[1])
                     trad = c3.text_input(f"trad_{i}", label_visibility="collapsed", value=valeur[5])
@@ -1016,6 +1011,7 @@ elif st.session_state.etat == "connecte":
                 if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
                     if not nom_liste.strip():
                         st.warning("Veuillez donner un nom à la liste.")
+
                     else:
                         ajouter_liste(user_id, nom_liste.strip(), type_code)
                         listes_user = recuperer_listes_utilisateur(user_id)
@@ -1118,10 +1114,8 @@ elif st.session_state.etat == "connecte":
         # CAS F : VUE ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
             liste_id = st.session_state.liste_active_id
-            
             listes_user = recuperer_listes_utilisateur(user_id)
-            info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("", "vocabulaire"))
-            nom_actuel, type_liste = info_liste
+            nom_actuel, type_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("", "vocabulaire"))
 
             st.subheader("✏️ Éditer la liste")
             ligne_epaisse()
@@ -1129,62 +1123,86 @@ elif st.session_state.etat == "connecte":
             st.write("")
             nouveau_nom = st.text_input("Nom de la liste", value=nom_actuel)
             st.divider()
-
-            mots_existants = recuperer_mots_liste(liste_id)
-            nb_lignes = max(len(mots_existants) + 1, st.session_state.nb_lignes_mots)
-
-            mots_modifies = []
-            toutes_lignes_visibles_remplies = True
             
             if type_liste == "verbe":
                 cols_h = st.columns([2, 2, 2, 2, 2, 1])
                 headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
-
-                for i in range(nb_lignes):
-                    inf_v, pres_v, pret_v, pp_v, trad_v = "", "", "", "", ""
-                    if i < len(mots_existants):
-                        _, inf_v, pres_v, pret_v, pp_v, trad_v = mots_existants[i]
-
-                    c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
-                    inf = c1.text_input(f"edit_inf_{i}", value=inf_v, label_visibility="collapsed")
-                    pres = c2.text_input(f"edit_pres_{i}", value=pres_v, key=f"edit_pres_{i}", label_visibility="collapsed")
-                    pret = c3.text_input(f"edit_pret_{i}", value=pret_v, key=f"edit_pret_{i}", label_visibility="collapsed")
-                    pp = c4.text_input(f"edit_pp_{i}", value=pp_v, key=f"edit_pp_{i}", label_visibility="collapsed")
-                    trad = c5.text_input(f"edit_vtrad_{i}", value=trad_v, key=f"edit_vtrad_{i}", label_visibility="collapsed")
-
-                    mots_modifies.append((inf, pres, pret, pp, trad))
-
-                    if len(inf.strip()) < 1 or len(trad.strip()) < 1:
-                        toutes_lignes_visibles_remplies = False
-
-            else:
+            else :
                 cols_h = st.columns([1, 2, 2])
                 headers = ["Article", "Mot / Nom", "Traduction"]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
+                
+            
+            toutes_lignes_visibles_remplies = True
+            if "mots_temp" not in st.session_state :
+                mots_existants = recuperer_mots_liste(liste_id)
+                st.session_state.mots_temp = {x: (b, c, d, e, f) for x, (a, b, c, d, e, f) in enumerate(mots_existants)}
+                st.session_state.nb_lignes_mots = len(st.session_state.mots_temp) + 1
+            st.session_state.id_a_suppr = None
 
-                for i in range(nb_lignes):
-                    art_val, mot_val, trad_val = "", "", ""
-                    if i < len(mots_existants):
-                        _, mot_or, _, _, _, trad_val = mots_existants[i]
-                        parts = mot_or.split(" ", 1)
-                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]:
-                            art_val, mot_val = parts[0], parts[1]
-                        else:
-                            mot_val = mot_or
 
-                    c1, c2, c3 = st.columns([1, 2, 2])
-                    art = c1.text_input(f"edit_art_{i}", value=art_val, key=f"edit_art_{i}", label_visibility="collapsed")
-                    mot = c2.text_input(f"edit_mot_{i}", value=mot_val, key=f"edit_mot_{i}", label_visibility="collapsed")
-                    trad = c3.text_input(f"edit_trad_{i}", value=trad_val, key=f"edit_trad_{i}", label_visibility="collapsed")
+            for i in range(st.session_state.nb_lignes_mots):
+                valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
-                    mots_modifies.append((art, mot, trad))
+                if type_liste == "verbe":
+                    c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
 
-                    if len(mot.strip()) < 1 or len(trad.strip()) < 1:
+                    if i < st.session_state.nb_lignes_mots-1 :
+                        with suppr :
+                            if st.button("🗑️", key=i, help="Supprimer cette ligne"):
+                                st.session_state.id_a_suppr = i
+
+                    inf = c1.text_input(f"edit_inf_{i}", value=valeur[1], label_visibility="collapsed")
+                    pres = c2.text_input(f"edit_pres_{i}", value=valeur[2], label_visibility="collapsed")
+                    pret = c3.text_input(f"edit_pret_{i}", value=valeur[3], label_visibility="collapsed")
+                    pp = c4.text_input(f"edit_pp_{i}", value=valeur[4], label_visibility="collapsed")
+                    trad = c5.text_input(f"edit_vtrad_{i}", value=valeur[5], label_visibility="collapsed")
+
+                    st.session_state.mots_temp[i] = (inf, pres, pret, pp, trad)
+
+                    if not (inf.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
 
+                else :
+                    def séparer_article(mot_or, trad_val):                        
+                        parts = mot_or.split(" ", 1)
+
+                        # Si on a 2 parties et que la première est un article
+                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"] :
+                            return (parts[0], parts[1], trad_val)
+                        
+                        # Sinon, tout le mot reste dans le champ mot
+                        return ("", mot_or, trad_val)
+                    st.session_state.mots_temp = {x : séparer_article(mot_or, trad_val) for x, (_, mot_or, _, _, _, trad_val) in st.session_state.mots_temp.items()}
+
+                    c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
+                    if i < st.session_state.nb_lignes_mots-1 :
+                        with suppr :
+                            if st.button("🗑️", key=i, help="Supprimer cette ligne"):
+                                st.session_state.id_a_suppr = i
+
+
+                    art = c1.text_input(f"edit_art_{i}", value=valeur[0], label_visibility="collapsed")
+                    mot = c2.text_input(f"edit_mot_{i}", value=valeur[1], label_visibility="collapsed")
+                    trad = c3.text_input(f"edit_trad_{i}", value=valeur[5], label_visibility="collapsed")
+
+                    st.session_state.mots_temp[i] = (art, mot, trad)
+
+                    if not (mot.strip() and trad.strip()):
+                        toutes_lignes_visibles_remplies = False
+
+
+            if st.session_state.id_a_suppr is not None :
+                if st.session_state.nb_lignes_mots > 2:
+                    st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
+                    st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
+                    st.session_state.nb_lignes_mots -= 1
+
+                else :
+                    st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "", "", "", "")
 
             if toutes_lignes_visibles_remplies:
                 st.session_state.nb_lignes_mots = nb_lignes + 1
@@ -1192,25 +1210,30 @@ elif st.session_state.etat == "connecte":
 
             st.write("")
             st.write("")
-            col_annuler, col_sauvegarder = st.columns(2)
 
+            col_annuler, col_sauvegarder = st.columns(2)
             with col_annuler:
                 if st.button("❌ Annuler", use_container_width=True):
                     st.session_state.action = "liste"
                     st.session_state.liste_active_id = None
                     st.session_state.nb_lignes_mots = 2
+                    st.session_state.pop("mots_temp", None)
+                    st.session_state.pop("id_a_suppr", None)
                     st.rerun()
             with col_sauvegarder:
                 if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
                     if not nouveau_nom.strip():
                         st.warning("Le nom de la liste ne peut pas être vide.")
+
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
-                        remplacer_mots_liste(liste_id, mots_modifies, type_liste)
+                        remplacer_mots_liste(liste_id, st.session_state.mots_temps, type_liste)
                         
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.nb_lignes_mots = 2
+                        st.session_state.pop("mots_temp", None)
+                        st.session_state.pop("id_a_suppr", None)
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
