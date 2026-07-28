@@ -950,11 +950,11 @@ elif st.session_state.etat == "connecte":
                 if is_verbe:
                     c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
 
-                    inf = c1.text_input(f"inf_{i}", key=f"inf_{i}", label_visibility="collapsed", value=valeur[1])
-                    pres = c2.text_input(f"pres_{i}", key=f"pres_{i}", label_visibility="collapsed", value=valeur[2])
-                    pret = c3.text_input(f"pret_{i}", key=f"pret_{i}", label_visibility="collapsed", value=valeur[3])
-                    pp = c4.text_input(f"pp_{i}", key=f"pp_{i}", label_visibility="collapsed", value=valeur[4])
-                    trad = c5.text_input(f"trad_{i}", key=f"vtrad_{i}", label_visibility="collapsed", value=valeur[5])
+                    inf = c1.text_input(f"inf_{i}", label_visibility="collapsed", value=valeur[1])
+                    pres = c2.text_input(f"pres_{i}", label_visibility="collapsed", value=valeur[2])
+                    pret = c3.text_input(f"pret_{i}", label_visibility="collapsed", value=valeur[3])
+                    pp = c4.text_input(f"pp_{i}", label_visibility="collapsed", value=valeur[4])
+                    trad = c5.text_input(f"trad_{i}", label_visibility="collapsed", value=valeur[5])
 
                     st.session_state.mots_temp[i] = ("", inf, pres, pret, pp, trad)
 
@@ -964,9 +964,9 @@ elif st.session_state.etat == "connecte":
                 else:
                     c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
 
-                    art = c1.text_input(f"art_{i}", key=f"art_{i}", label_visibility="collapsed", value=valeur[0])
-                    mot = c2.text_input(f"mot_{i}", key=f"mot_{i}", label_visibility="collapsed", value=valeur[1])
-                    trad = c3.text_input(f"trad_{i}", key=f"trad_{i}", label_visibility="collapsed", value=valeur[5])
+                    art = c1.text_input(f"art_{i}", label_visibility="collapsed", value=valeur[0])
+                    mot = c2.text_input(f"mot_{i}", label_visibility="collapsed", value=valeur[1])
+                    trad = c3.text_input(f"trad_{i}", label_visibility="collapsed", value=valeur[5])
 
                     st.session_state.mots_temp[i] = (art, mot, "", "", "", trad)
 
