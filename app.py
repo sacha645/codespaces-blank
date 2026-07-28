@@ -918,8 +918,11 @@ elif st.session_state.etat == "connecte":
             
             st.divider()
 
-            mots_saisis = []
             toutes_lignes_visibles_remplies = True
+
+            if "mots_temp" not in st.session_state :
+                st.session_state.mots_temp = {}
+            id_a_suppr = None
 
             if is_verbe:
                 cols_h = st.columns([2, 2, 2, 2, 2])
@@ -933,26 +936,51 @@ elif st.session_state.etat == "connecte":
                     col.caption(h)
 
             for i in range(st.session_state.nb_lignes_mots):
+                valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
+
                 if is_verbe:
-                    c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
-                    inf = c1.text_input(f"inf_{i}", key=f"inf_{i}", label_visibility="collapsed")
-                    pres = c2.text_input(f"pres_{i}", key=f"pres_{i}", label_visibility="collapsed")
-                    pret = c3.text_input(f"pret_{i}", key=f"pret_{i}", label_visibility="collapsed")
-                    pp = c4.text_input(f"pp_{i}", key=f"pp_{i}", label_visibility="collapsed")
-                    trad = c5.text_input(f"trad_{i}", key=f"vtrad_{i}", label_visibility="collapsed")
+                    c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
+                    inf = c1.text_input(f"inf_{i}", key=f"inf_{i}", label_visibility="collapsed", value=valeur[1])
+                    pres = c2.text_input(f"pres_{i}", key=f"pres_{i}", label_visibility="collapsed", value=valeur[2])
+                    pret = c3.text_input(f"pret_{i}", key=f"pret_{i}", label_visibility="collapsed", value=valeur[3])
+                    pp = c4.text_input(f"pp_{i}", key=f"pp_{i}", label_visibility="collapsed", value=valeur[4])
+                    trad = c5.text_input(f"trad_{i}", key=f"vtrad_{i}", label_visibility="collapsed", value=valeur[5])
                     
-                    mots_saisis.append(("", inf, pres, pret, pp, trad))
+                    st.session_state.mots_temp[i] = ("", inf, pres, pret, pp, trad)
+
                     if not (inf.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
+
                 else:
-                    c1, c2, c3 = st.columns([1, 2, 2])
-                    art = c1.text_input(f"art_{i}", key=f"art_{i}", label_visibility="collapsed")
-                    mot = c2.text_input(f"mot_{i}", key=f"mot_{i}", label_visibility="collapsed")
-                    trad = c3.text_input(f"trad_{i}", key=f"trad_{i}", label_visibility="collapsed")
+                    c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
+                    art = c1.text_input(f"art_{i}", key=f"art_{i}", label_visibility="collapsed", value=valeur[0])
+                    mot = c2.text_input(f"mot_{i}", key=f"mot_{i}", label_visibility="collapsed", value=valeur[1])
+                    trad = c3.text_input(f"trad_{i}", key=f"trad_{i}", label_visibility="collapsed", value=valeur[5])
                     
-                    mots_saisis.append((art, mot, "", "", "", trad))
+                    st.session_state.mots_temp[i] = (art, mot, "", "", "", trad)
+
                     if not (mot.strip() and trad.strip()):
                         toutes_lignes_visibles_remplies = False
+
+                with suppr :
+                    if st.button("🗑️", key=i, help="Supprimer cette ligne"):
+                        id_a_suppr = i
+
+            if id_a_suppr is not None : 
+                if st.session_state.nb_lignes_mots > 2:
+                    st.session_state.mots_temp.pop(id_a_suppr, None)
+                    st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
+                    st.session_state.nb_lignes_mots -= 1
+
+                else :
+                    st.session_state.mots_temp[id_a_suppr] = ("", "", "", "", "", "")
+
+                # 4. Nettoyage des clés widgets Streamlit pour forcer le rafraîchissement
+                for k in list(st.session_state.keys()):
+                    if any(k.startswith(prefix) for prefix in ["inf_", "pres_", "pret_", "pp_", "vtrad_", "art_", "mot_", "trad_"]):
+                        st.session_state.pop(k, None)
+
+                st.rerun()
 
             if toutes_lignes_visibles_remplies:
                 st.session_state.nb_lignes_mots += 1
@@ -966,6 +994,7 @@ elif st.session_state.etat == "connecte":
                 if st.button("❌ Annuler", use_container_width=True):
                     st.session_state.action = "liste"
                     st.session_state.nb_lignes_mots = 2
+                    st.session_state.pop("mots_temp", None)
                     st.rerun()
 
             with col_sauvegarder:
@@ -977,7 +1006,7 @@ elif st.session_state.etat == "connecte":
                         listes_user = recuperer_listes_utilisateur(user_id)
                         derniere_liste_id = listes_user[-1][0]
 
-                        for art, inf_mot, pres, pret, pp, trad in mots_saisis:
+                        for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
                             if is_verbe:
                                 if inf_mot.strip() and trad.strip():
                                     ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
@@ -988,6 +1017,7 @@ elif st.session_state.etat == "connecte":
 
                         st.session_state.action = "liste"
                         st.session_state.nb_lignes_mots = 2
+                        st.session_state.pop("mots_temp", None)
                         st.rerun()
 
         # CAS E : VUE VOIR UNE LISTE (👁️)

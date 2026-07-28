@@ -1,0 +1,167 @@
+[33mabcf656[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Test bouton supression création
+[33mbe278fb[m visuel écran fin verbes 5
+[33mec193d1[m visuel écran fin verbes 4
+[33mc742a4a[m visuel écran fin verbes 3
+[33m7f39340[m visuel écran fin verbes"
+[33m7b0931b[m visuel écran fin verbes'
+[33mb584f75[m visuel écran fin verbe
+[33m5d6bdf7[m confirmation d'abandon et nouvelle logique de supression/abandon. Grosse MAJ
+[33mb6cb920[m Modification profil OP et réinitialisation BDD
+[33mc30ecfd[m test modif profil"
+[33m6845e7f[m test modif profil'
+[33mfcace93[m Test modif profil'
+[33m9b47610[m Test modification profil
+[33m50cb724[m Réinitialisation BDD'
+[33meea59ea[m réinitialisation BDD
+[33m7ffab29[m correctif 8 modification profil
+[33m4989829[m correctif 7 modification profil
+[33me4e6065[m correctif 6 modification profil
+[33m1157289[m correctif 5 modification profil
+[33m0a130c9[m correctif modification profil ""
+[33m2fdb401[m correctif modification profil"'
+[33m74d7d53[m correctif modification profil"
+[33m28c1c6a[m Correctif modification profil'
+[33mf675ed3[m Corectif modification profil
+[33m6a760f3[m Modification profil
+[33m62c97d6[m ajustement visuel
+[33m58e89e3[m test bouton compte
+[33me6d9f06[m Bouton site OP
+[33m9d25672[m Visu bouton site - test 8
+[33m911bf24[m Visu bouton site - test 7
+[33ma23d874[m Visu bouton site - test 6
+[33m93065f0[m Visu bouton site - test 5
+[33m2360694[m Visu bouton site - test 4
+[33m5c00fa1[m Visu bouton site - test 3
+[33m4fd54ee[m Visu bouton site - test 2
+[33mdaffb50[m Visu bouton site test 1
+[33m894dff2[m Logique bouton site OP
+[33m0dff857[m test 14
+[33m2755d1d[m test 13
+[33mf95a9df[m test 12
+[33mb8fbeaa[m test 11
+[33m69b67ea[m test 10
+[33m3b8877b[m test 9
+[33m877e22d[m test 8
+[33ma895d9d[m test 7
+[33mef2793a[m test 6
+[33m1ff8e92[m test 5
+[33m95808a8[m test 4
+[33m4ff058f[m test 3
+[33m2362167[m Test 2
+[33m09461e2[m test console déboggage
+[33me16f90c[m Test 1437
+[33m7d7bbb3[m Partie 2 de la réinitialisation
+[33m79d37ed[m Réinitialisation BDD sauf users
+[33m82f67b9[m visuel dans le code
+[33m7ffcde7[m patch visuel
+[33mfc25ae7[m Patch savegarde listes verbes'
+[33m0acf89f[m Patch sauvegarde listes verbes
+[33mfc385dc[m Bouton site 11
+[33m035750a[m bouton site 10
+[33m9410e68[m bouton site 9
+[33mcbb3185[m bouton site 8
+[33m847a868[m bouton site 7
+[33m7ee5290[m bouton site 6
+[33m9cda0b8[m Bouton site 5
+[33mb39cf9e[m bouton site 4
+[33m1f73708[m bouton site 3
+[33m859c6f3[m bouton site
+[33me775dad[m bouton du site
+[33m090ab68[m visuel
+[33m8e6186f[m patch visuels
+[33m4fe16b3[m patch visuel bouton suivant
+[33mb5a2a01[m test visuel écran fin"
+[33m12ac1c6[m test visuel écran fin'
+[33md6c9b87[m test visuel écran de fin
+[33m08803a7[m Patch du patch précédent
+[33mf3a67f1[m patch visuel mineur
+[33me7a5fdf[m patch visuel mineur
+[33mb7671e1[m Correctif du soulignement
+[33m4f27b4e[m patch visuel majeur
+[33md8d0a39[m 1 patch visuel mineur
+[33me68dac5[m Patch visuel majeur
+[33m8599393[m patch logique voc
+[33m116ceb5[m Bouton mettre en pause - logique
+[33m9e3008b[m Bouton mettre en pause - visuel
+[33mcf1b1b3[m réinitialiser score
+[33m1fe6780[m Patchage visuel
+[33ma1a8bf9[m Test entrainement verbes"
+[33m4d3aa8f[m Test entrainement verbes'
+[33m5c95b3b[m Test entrainement verbes
+[33m83ca0c9[m Patch visuel écran fin entrainement
+[33m7727fdc[m Test meilleur score écran fin entrainement"
+[33m3758e92[m Test meilleur score écran fin entrainement'
+[33md80b156[m Test meilleur score écran fin entrainement
+[33m5934c00[m Test meilleur score 13
+[33m585d2d7[m Test meilleur score 12
+[33me05d518[m Test meilleur score 11
+[33m64ed68c[m Test meilleur score 10
+[33ma6f44e6[m Test meilleur score 9
+[33mcb68283[m Test meilleur score """"
+[33m5587487[m Test meilleur score """'
+[33m5833539[m Test meilleur score """
+[33m1557538[m Test meilleur score ""'
+[33m2a1f6c9[m Test meilleur score""
+[33m37ba3ab[m Test meilleur score"'
+[33m58d3dcc[m Test meilleur score"
+[33md94e166[m Test meileur score'
+[33meec2a84[m Test mailleur score
+[33ma16c8a4[m bouton arrêter entrainement et mélange intelligent
+[33m4c443b9[m patch visuel - écran d'accueil"
+[33mb53c8e2[m patch visuel - écran d'accueil'
+[33m6df9ec6[m Patch visuel - écran acceuil
+[33me6bf01d[m Patch visuel mineur - écran récap d'erreurs
+[33m86744b5[m patch visuel mineur - écran récap d'érreurs
+[33mf422ba5[m Entrainement voc OP (léger patch visuel)
+[33mf7b3576[m Test entrainement voc+" - patch syst points
+[33m4ba4c04[m Test entrainement voc+'
+[33m1978051[m Test entrainement voc+
+[33m7c1ad5b[m Test entrainement voc
+[33mc4d7e72[m Ajout types verbes
+[33m9467dff[m Test prime partie 2 -Ultime Patch
+[33m028b79b[m Test prime partie 2 - Patch n°3
+[33mb85ceb5[m Test prime partie 2 - patch n°2
+[33mc15a669[m Test prime partie 2 patché
+[33m2f4cea8[m Test prime partie 2
+[33m675ae17[m test prime partie 1
+[33mf19f1aa[m Test ajout types verbes
+[33m128b581[m Importer depuis fichier txt
+[33m9e53222[m Partage direct
+[33m1457774[m patch d'affichage pendant confirmation supression
+[33me10d1bd[m sécurité supression compte'
+[33m661bdf5[m sécurité supression compte
+[33m51cb984[m BDD nickel
+[33m23a09fa[m Réinitialisation BDD
+[33ma74729d[m Connexion par pseudo et mdp
+[33m817bd52[m partage
+[33m3d7d6b2[m ordre case action des listes
+[33m487cc4b[m réagencement
+[33m40da9e8[m lignes épaisses'
+[33m1fe8033[m lignes épaisses
+[33m785932a[m modifier et supprimer listes'
+[33m7ebc8b4[m modifier et supprimer liste
+[33m150bdf4[m voir listes
+[33m1a02670[m créer listes ""
+[33m0dfd0a4[m créer listes '"
+[33m9de0e6f[m créer listes "
+[33m0cf379c[m créer listes'
+[33m879347b[m créer listes
+[33m91bb040[m ajout de 2 BDD
+[33m77d55e5[m Boutons page d'accueil
+[33mda183e1[m dif username & user id
+[33m30f1e42[m supprimer compte'
+[33m124aab2[m supprimer compte
+[33m226e918[m Renvoyer code
+[33mc0e8541[m CVC4'
+[33me662962[m Temp
+[33mfe8edcc[m CVC 4
+[33m0ea4d05[m Added Dev Container Folder
+[33m152337c[m code validation compte 3
+[33m96fbd85[m Code validation compte temp
+[33ma5cbe38[m Code validation email
+[33m06f8c97[m comptes''
+[33m02ca300[m comptes'
+[33m3209e3d[m Comptes
+[33m70f61e2[m 2
+[33mfbdd7b0[m 1
+[33m0e0e34a[m first commit
