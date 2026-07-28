@@ -1562,6 +1562,16 @@ elif st.session_state.etat == "connecte":
                     # Sauvegarde des erreurs en session
                     st.session_state[f"erreurs_liste_{liste_id}"] = st.session_state.erreurs_compteur
 
+                    score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
+                    est_nouveau_record = False
+
+                    if score_actuel_bdd is None:
+                        est_nouveau_record = True
+                    else:
+                        anc_score, _, _, _ = score_actuel_bdd
+                        if s_v > anc_score :
+                            est_nouveau_record = True
+
                     # Enregistrement du meilleur score
                     enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
 
@@ -1569,11 +1579,18 @@ elif st.session_state.etat == "connecte":
                     supprimer_sauvegarde_partie(liste_id)
 
                     st.write("### 📊 Tes résultats :")
-                    st.metric(label="⚡ Score global Verbes", value=f"{s_v:g} / {t_v:g}")
+
+                    if est_nouveau_record:
+                        st.success("🥳 **Nouveau meilleur score !**")
+                    elif score_actuel_bdd:
+                        anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
+                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+
+                    st.write("")
+                    st.divider()
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     err_details = st.session_state.get("erreurs_verbes_detail", [])
-                    st.divider()
 
                     if err_details:
                         st.write("### ❌ Récapitulatif des erreurs commises")
