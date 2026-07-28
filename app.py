@@ -908,28 +908,19 @@ elif st.session_state.etat == "connecte":
             st.write("")
 
             type_liste_choisi = st.radio(
-                "Type de liste :", 
+
+                "Type de liste :",
+
                 ["Vocabulaire (Article, Mot, Traduction)", "Verbes (5 formes)"],
+
                 horizontal=True
+
             )
-            
+           
             is_verbe = "Verbes" in type_liste_choisi
             type_code = "verbe" if is_verbe else "vocabulaire"
-            
+
             st.divider()
-
-            toutes_lignes_visibles_remplies = True
-
-            if "mots_temp" not in st.session_state :
-                st.session_state.mots_temp = {}
-            st.session_state.id_a_suppr = None
-            if "test" not in st.session_state :
-                st.session_state.test = []
-
-            st.session_state.test.append((st.session_state.id_a_suppr, "Début"))
-            st.write(st.session_state.mots_temp)
-
-
 
             if is_verbe:
                 cols_h = st.columns([2, 2, 2, 2, 2])
@@ -940,19 +931,30 @@ elif st.session_state.etat == "connecte":
                 cols_h = st.columns([1, 2, 2])
                 headers = ["Article", "Mot / Nom", "Traduction"]
                 for col, h in zip(cols_h, headers):
+
                     col.caption(h)
+
+
+            toutes_lignes_visibles_remplies = True
+            if "mots_temp" not in st.session_state :
+                st.session_state.mots_temp = {}
+            if "test" not in st.session_state :
+                st.session_state.test = None
+            st.session_state.id_a_suppr = None
+
 
             for i in range(st.session_state.nb_lignes_mots):
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
                     c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
+
                     inf = c1.text_input(f"inf_{i}", key=f"inf_{i}", label_visibility="collapsed", value=valeur[1])
                     pres = c2.text_input(f"pres_{i}", key=f"pres_{i}", label_visibility="collapsed", value=valeur[2])
                     pret = c3.text_input(f"pret_{i}", key=f"pret_{i}", label_visibility="collapsed", value=valeur[3])
                     pp = c4.text_input(f"pp_{i}", key=f"pp_{i}", label_visibility="collapsed", value=valeur[4])
                     trad = c5.text_input(f"trad_{i}", key=f"vtrad_{i}", label_visibility="collapsed", value=valeur[5])
-                    
+
                     st.session_state.mots_temp[i] = ("", inf, pres, pret, pp, trad)
 
                     if not (inf.strip() and trad.strip()):
@@ -960,10 +962,11 @@ elif st.session_state.etat == "connecte":
 
                 else:
                     c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
+
                     art = c1.text_input(f"art_{i}", key=f"art_{i}", label_visibility="collapsed", value=valeur[0])
                     mot = c2.text_input(f"mot_{i}", key=f"mot_{i}", label_visibility="collapsed", value=valeur[1])
                     trad = c3.text_input(f"trad_{i}", key=f"trad_{i}", label_visibility="collapsed", value=valeur[5])
-                    
+
                     st.session_state.mots_temp[i] = (art, mot, "", "", "", trad)
 
                     if not (mot.strip() and trad.strip()):
@@ -972,13 +975,15 @@ elif st.session_state.etat == "connecte":
                 with suppr :
                     if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                         st.session_state.id_a_suppr = i
-                        st.session_state.test.append((st.session_state.id_a_suppr, "bouton"))
 
-            if st.session_state.id_a_suppr is not None : 
-                st.session_state.test.append((st.session_state.id_a_suppr, "test"))
+
+            if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
+                    st.session_state.test.append((st.session_state.mots_temp, "avant"))
                     st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
-                    st.session_state.mots_temp = {(x if x < st.session_state.id_a_suppr else x - 1) : y for x, y in st.session_state.mots_temp.items()}
+                    st.session_state.test.append((st.session_state.mots_temp, "après"))
+                    st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
+                    st.session_state.test.append((st.session_state.mots_temp, "encore après"))
                     st.session_state.nb_lignes_mots -= 1
 
                 else :
@@ -997,37 +1002,63 @@ elif st.session_state.etat == "connecte":
 
             st.write("")
             st.write("")
+
             col_annuler, col_sauvegarder = st.columns(2)
-
             with col_annuler:
-                if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action = "liste"
-                    st.session_state.nb_lignes_mots = 2
-                    st.session_state.pop("mots_temp", None)
-                    st.rerun()
 
+                if st.button("❌ Annuler", use_container_width=True):
+
+                    st.session_state.action = "liste"
+
+                    st.session_state.nb_lignes_mots = 2
+
+                    st.session_state.pop("mots_temp", None)
+
+                    st.rerun()
             with col_sauvegarder:
+
                 if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
+
                     if not nom_liste.strip():
+
                         st.warning("Veuillez donner un nom à la liste.")
+
                     else:
+
                         ajouter_liste(user_id, nom_liste.strip(), type_code)
+
                         listes_user = recuperer_listes_utilisateur(user_id)
+
                         derniere_liste_id = listes_user[-1][0]
 
+
+
                         for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
+
                             if is_verbe:
+
                                 if inf_mot.strip() and trad.strip():
+
                                     ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
+
                             else:
+
                                 if inf_mot.strip() and trad.strip():
+
                                     mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
+
                                     ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
+
+
                         st.session_state.action = "liste"
+
                         st.session_state.nb_lignes_mots = 2
+
                         st.session_state.pop("mots_temp", None)
-                        st.rerun()
+
+                        st.rerun() 
+
 
         # CAS E : VUE VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
