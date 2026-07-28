@@ -926,7 +926,7 @@ elif st.session_state.etat == "connecte":
             st.session_state.test = []
 
             st.session_state.test.append((st.session_state.id_a_suppr, "Début"))
-            st.write(test)
+            st.write(st.session_state.test)
 
 
 
