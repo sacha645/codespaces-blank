@@ -73,6 +73,17 @@ def init_db():
         )
     ''')
 
+    # 6. Table des erreurs enregistrées par liste et utilisateur
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS erreurs_listes (
+            user_id INTEGER NOT NULL,
+            liste_id INTEGER NOT NULL,
+            erreurs_json TEXT NOT NULL,
+            PRIMARY KEY (user_id, liste_id),
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+            FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -443,6 +454,36 @@ def obtenir_type_liste(liste_id):
         return resultat[0]
     return None
 
+def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    
+    # On transforme le dictionnaire en chaîne de texte JSON
+    erreurs_texte = json.dumps(dictionnaire_erreurs)
+    
+    c.execute('''
+        INSERT INTO erreurs_listes (user_id, liste_id, erreurs_json)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id, liste_id) DO UPDATE SET erreurs_json = excluded.erreurs_json
+    ''', (user_id, liste_id, erreurs_texte))
+    
+    conn.commit()
+    conn.close()
+
+def charger_erreurs(user_id, liste_id):
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("SELECT erreurs_json FROM erreurs_listes WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
+    row = c.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        # On re-transforme le JSON texte en vrai dictionnaire Python
+        # Attention : JSON transforme les clés entières (ex: id du mot) en chaînes, on peut reconvertir si besoin :
+        data = json.loads(row[0])
+        return {int(k): v for k, v in data.items()}
+    return {}
+
 
 # --- APPARENCE ---
 def ligne_epaisse():
@@ -554,15 +595,14 @@ if st.session_state.etat == "connecte" :
 
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            st.session_state.action = "supprimer"
-            st.session_state.action_suppr = "compte"
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
                 
     with col_signup:
         if st.button("Déconnexion", use_container_width=True):
-            st.session_state.user = None
-            st.session_state.etat = "none"
-            st.session_state.pop("action", None)
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
 else : 
     col_title, col_action, col_signup = st.columns([6, 2, 2])
@@ -590,7 +630,7 @@ with col_title:
         </style>
     """, unsafe_allow_html=True)
 
-    if st.button("📘 Réviseur", key="btn_titre_accueil", type="tertiary"):
+    if st.button("📘 Réviseur", type="tertiary"):
         # 1. Si déconnecté
         if st.session_state.get("etat") in ["nouveau", "connect", "none", "None"]:
             st.session_state.etat = "none"
@@ -1049,7 +1089,7 @@ elif st.session_state.etat == "connecte":
             if not mots:
                 st.info("Cette liste ne contient aucun élément.")
             else:
-                compteur_err = st.session_state.get(f"erreurs_liste_{liste_id}", {})
+                compteur_err = charger_erreurs(user_id, liste_id)
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
@@ -1371,7 +1411,7 @@ elif st.session_state.etat == "connecte":
                             elif sens == "depuis_fr":
                                 mots_err[id_m]["depuis_fr"] = True
 
-                    st.session_state[f"erreurs_liste_{liste_id}"] = mots_err
+                    sauvegarder_erreurs(user_id, liste_id, mots_err)
 
                     st.write("### 📊 Tes résultats :")
 
@@ -1395,6 +1435,7 @@ elif st.session_state.etat == "connecte":
                         st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
                     erreurs = st.session_state.erreurs_commises
+                    st.session_state.pop("erreurs_commises", None)
                     st.divider()
 
                     if erreurs:
@@ -1635,7 +1676,8 @@ elif st.session_state.etat == "connecte":
                     t_v = st.session_state.total_verbes
 
                     # Sauvegarde des erreurs en session
-                    st.session_state[f"erreurs_liste_{liste_id}"] = st.session_state.erreurs_compteur
+                    sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
+                    st.session_state.pop("erreurs_compteur", None)
 
                     score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
                     est_nouveau_record = False
@@ -1669,6 +1711,7 @@ elif st.session_state.etat == "connecte":
                     st.divider()
 
                     err_details = st.session_state.get("erreurs_verbes_detail", [])
+                    st.session_state.pop("erreurs_verbes_detail", None)
 
                     if err_details:
                         st.write("### ❌ Récapitulatif des erreurs commises")
