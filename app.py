@@ -1435,7 +1435,6 @@ elif st.session_state.etat == "connecte":
                         st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
 
                     erreurs = st.session_state.erreurs_commises
-                    st.session_state.pop("erreurs_commises", None)
                     st.divider()
 
                     if erreurs:
@@ -1677,7 +1676,6 @@ elif st.session_state.etat == "connecte":
 
                     # Sauvegarde des erreurs en session
                     sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
-                    st.session_state.pop("erreurs_compteur", None)
 
                     score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
                     est_nouveau_record = False
@@ -2062,14 +2060,14 @@ elif st.session_state.etat == "connecte":
 
 
 # On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-   st.caption("Affiche en temps réel le contenu de st.session_state")
+# with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+#    st.caption("Affiche en temps réel le contenu de st.session_state")
    
-   # Affiche l'état complet sous forme JSON/dictionnaire lisible
-   st.json(dict(st.session_state))
+#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+#    st.json(dict(st.session_state))
    
-   # Optionnel : Bouton pour vider la session et recommencer à zéro
-   if st.button("🗑️ Vider le session_state"):
-       for key in list(st.session_state.keys()):
-           del st.session_state[key]
-       st.rerun()
+#    # Optionnel : Bouton pour vider la session et recommencer à zéro
+#    if st.button("🗑️ Vider le session_state"):
+#        for key in list(st.session_state.keys()):
+#            del st.session_state[key]
+#        st.rerun()
