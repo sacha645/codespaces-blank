@@ -925,6 +925,8 @@ elif st.session_state.etat == "connecte":
             st.session_state.id_a_suppr = None
             test=[]
             test.append((st.session_state.id_a_suppr, "Début"))
+            test=[]
+            test.append(st.session_state.id_a_suppr, "Début")
 
 
 
@@ -995,8 +997,6 @@ elif st.session_state.etat == "connecte":
             st.write("")
             st.write("")
             col_annuler, col_sauvegarder = st.columns(2)
-
-            st.write(test)
 
             with col_annuler:
                 if st.button("❌ Annuler", use_container_width=True):
