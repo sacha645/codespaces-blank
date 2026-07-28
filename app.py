@@ -1123,43 +1123,58 @@ elif st.session_state.etat == "connecte":
             st.write("")
             nouveau_nom = st.text_input("Nom de la liste", value=nom_actuel)
             st.divider()
+
             
+            toutes_lignes_visibles_remplies = True
+            if "mots_temp" not in st.session_state :
+                mots_existants = recuperer_mots_liste(liste_id)
+
+                if type_liste == "verbe":
+                    st.session_state.mots_temp = {x: (inf, pres, pret, participe, trad) for x, (_, inf, pres, pret, participe, trad) in enumerate(mots_existants)}
+
+                else :
+                    def séparer_article(mot_or, trad_val):                        
+                        parts = mot_or.split(" ", 1)
+    
+                        # Si on a 2 parties et que la première est un article
+                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"] :
+                            return (parts[0], parts[1], trad_val)
+                        
+                        # Sinon, tout le mot reste dans le champ mot
+                        return ("", mot_or, trad_val)
+                    st.session_state.mots_temp = {x : séparer_article(mot_or, trad_val) for x, (_, mot_or, _, _, _, trad_val) in enumerate(mots_existants)}
+
+                st.session_state.nb_lignes_mots = len(st.session_state.mots_temp) + 1
+            st.session_state.id_a_suppr = None
+
+
             if type_liste == "verbe":
                 cols_h = st.columns([2, 2, 2, 2, 2, 1])
                 headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
             else :
-                cols_h = st.columns([1, 2, 2])
-                headers = ["Article", "Mot / Nom", "Traduction"]
+                cols_h = st.columns([1, 2, 2, 1])
+                headers = ["Article", "Mot / Nom", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
-                
-            
-            toutes_lignes_visibles_remplies = True
-            if "mots_temp" not in st.session_state :
-                mots_existants = recuperer_mots_liste(liste_id)
-                st.session_state.mots_temp = {x: (b, c, d, e, f) for x, (a, b, c, d, e, f) in enumerate(mots_existants)}
-                st.session_state.nb_lignes_mots = len(st.session_state.mots_temp) + 1
-            st.session_state.id_a_suppr = None
 
 
             for i in range(st.session_state.nb_lignes_mots):
-                valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
-
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
-
                     if i < st.session_state.nb_lignes_mots-1 :
                         with suppr :
                             if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                                 st.session_state.id_a_suppr = i
 
-                    inf = c1.text_input(f"edit_inf_{i}", value=valeur[1], label_visibility="collapsed")
-                    pres = c2.text_input(f"edit_pres_{i}", value=valeur[2], label_visibility="collapsed")
-                    pret = c3.text_input(f"edit_pret_{i}", value=valeur[3], label_visibility="collapsed")
-                    pp = c4.text_input(f"edit_pp_{i}", value=valeur[4], label_visibility="collapsed")
-                    trad = c5.text_input(f"edit_vtrad_{i}", value=valeur[5], label_visibility="collapsed")
+
+                    valeur = st.session_state.mots_temp.get(i, ("", "", "", "", ""))
+                    inf = c1.text_input(f"edit_inf_{i}", value=valeur[0], label_visibility="collapsed")
+                    pres = c2.text_input(f"edit_pres_{i}", value=valeur[1], label_visibility="collapsed")
+                    pret = c3.text_input(f"edit_pret_{i}", value=valeur[2], label_visibility="collapsed")
+                    pp = c4.text_input(f"edit_pp_{i}", value=valeur[3], label_visibility="collapsed")
+                    trad = c5.text_input(f"edit_vtrad_{i}", value=valeur[4], label_visibility="collapsed")
 
                     st.session_state.mots_temp[i] = (inf, pres, pret, pp, trad)
 
@@ -1167,17 +1182,6 @@ elif st.session_state.etat == "connecte":
                         toutes_lignes_visibles_remplies = False
 
                 else :
-                    def séparer_article(mot_or, trad_val):                        
-                        parts = mot_or.split(" ", 1)
-
-                        # Si on a 2 parties et que la première est un article
-                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"] :
-                            return (parts[0], parts[1], trad_val)
-                        
-                        # Sinon, tout le mot reste dans le champ mot
-                        return ("", mot_or, trad_val)
-                    st.session_state.mots_temp = {x : séparer_article(mot_or, trad_val) for x, (_, mot_or, _, _, _, trad_val) in st.session_state.mots_temp.items()}
-
                     c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
                     if i < st.session_state.nb_lignes_mots-1 :
                         with suppr :
@@ -1185,9 +1189,10 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.id_a_suppr = i
 
 
+                    valeur = st.session_state.mots_temp.get(i, ("", "", ""))
                     art = c1.text_input(f"edit_art_{i}", value=valeur[0], label_visibility="collapsed")
                     mot = c2.text_input(f"edit_mot_{i}", value=valeur[1], label_visibility="collapsed")
-                    trad = c3.text_input(f"edit_trad_{i}", value=valeur[5], label_visibility="collapsed")
+                    trad = c3.text_input(f"edit_trad_{i}", value=valeur[2], label_visibility="collapsed")
 
                     st.session_state.mots_temp[i] = (art, mot, trad)
 
@@ -1202,10 +1207,15 @@ elif st.session_state.etat == "connecte":
                     st.session_state.nb_lignes_mots -= 1
 
                 else :
-                    st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "", "", "", "")
+                    if type_liste == "verbe" :
+                        st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "", "", "")
+                    else:
+                        st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "")
+
+                st.rerun()
 
             if toutes_lignes_visibles_remplies:
-                st.session_state.nb_lignes_mots = nb_lignes + 1
+                st.session_state.nb_lignes_mots += 1
                 st.rerun()
 
             st.write("")
@@ -1227,7 +1237,7 @@ elif st.session_state.etat == "connecte":
 
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
-                        remplacer_mots_liste(liste_id, st.session_state.mots_temps, type_liste)
+                        remplacer_mots_liste(liste_id, st.session_state.mots_temp, type_liste)
                         
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
