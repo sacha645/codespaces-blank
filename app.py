@@ -1233,7 +1233,7 @@ elif st.session_state.etat == "connecte":
 
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
-                        remplacer_mots_liste(liste_id, st.session_state.mots_temp, type_liste)
+                        remplacer_mots_liste(liste_id, st.session_state.mots_temp.values(), type_liste)
                         
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
