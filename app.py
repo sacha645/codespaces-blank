@@ -1586,11 +1586,15 @@ elif st.session_state.etat == "connecte":
                         anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
                         st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
 
-                    st.write("")
-                    st.divider()
+                    score_verbes = st.session_state.score_vers_fr
+                    total_verbes = st.session_state.total_vers_fr
+                    st.metric(label="🌐 Vers la langue étrangère", value=f"{score_verbes:g} / {total_verbes:g}")
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     err_details = st.session_state.get("erreurs_verbes_detail", [])
+
+                    st.write("")
+                    st.divider()
 
                     if err_details:
                         st.write("### ❌ Récapitulatif des erreurs commises")
