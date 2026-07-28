@@ -923,7 +923,8 @@ elif st.session_state.etat == "connecte":
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
             st.session_state.id_a_suppr = None
-            st.session_state.test = []
+            if "test" not in st.session_state :
+                st.session_state.test = []
 
             st.session_state.test.append((st.session_state.id_a_suppr, "Début"))
             st.write(st.session_state.test)
