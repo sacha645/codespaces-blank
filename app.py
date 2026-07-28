@@ -938,19 +938,17 @@ elif st.session_state.etat == "connecte":
             toutes_lignes_visibles_remplies = True
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
-            if "test" not in st.session_state :
-                st.session_state.test = []
             st.session_state.id_a_suppr = None
-            st.write(st.session_state.test)
 
 
-            teste = []
             for i in range(0, st.session_state.nb_lignes_mots):
-                teste.append(i)
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
-                    c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
+                    if i < st.session_state.nb_lignes_mots-1 :
+                        c1, c2, c3, c4, c5, suppr = st.columns([2, 2, 2, 2, 2, 1])
+                    else :
+                        c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
 
                     inf = c1.text_input(f"inf_{i}", label_visibility="collapsed", value=valeur[1])
                     pres = c2.text_input(f"pres_{i}", label_visibility="collapsed", value=valeur[2])
@@ -964,7 +962,10 @@ elif st.session_state.etat == "connecte":
                         toutes_lignes_visibles_remplies = False
 
                 else:
-                    c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
+                    if i < st.session_state.nb_lignes_mots-1 :
+                        c1, c2, c3, suppr = st.columns([1, 2, 2, 1])
+                    else : 
+                        c1, c2, c3 = st.columns([1, 2, 2])
 
                     art = c1.text_input(f"art_{i}", label_visibility="collapsed", value=valeur[0])
                     mot = c2.text_input(f"mot_{i}", label_visibility="collapsed", value=valeur[1])
@@ -978,16 +979,11 @@ elif st.session_state.etat == "connecte":
                 with suppr :
                     if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                         st.session_state.id_a_suppr = i
-            st.write(teste)
-            st.session_state.test.append((st.session_state.mots_temp, "encore avant", st.session_state.id_a_suppr, st.session_state.nb_lignes_mots))
 
             if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
-                    st.session_state.test.append((st.session_state.mots_temp, "avant", st.session_state.id_a_suppr, st.session_state.nb_lignes_mots))
                     st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
-                    st.session_state.test.append((st.session_state.mots_temp, "après"))
                     st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
-                    st.session_state.test.append((st.session_state.mots_temp, "encore après"))
                     st.session_state.nb_lignes_mots -= 1
 
                 else :
