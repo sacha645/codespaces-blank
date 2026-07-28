@@ -923,8 +923,9 @@ elif st.session_state.etat == "connecte":
             if "mots_temp" not in st.session_state :
                 st.session_state.mots_temp = {}
             st.session_state.id_a_suppr = None
-            test=[]
-            test.append((st.session_state.id_a_suppr, "Début"))
+            st.session_state.test = []
+
+            st.session_state.test.append((st.session_state.id_a_suppr, "Début"))
             st.write(test)
 
 
@@ -970,10 +971,10 @@ elif st.session_state.etat == "connecte":
                 with suppr :
                     if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                         st.session_state.id_a_suppr = i
-                        test.append((st.session_state.id_a_suppr, "bouton"))
+                        st.session_state.test.append((st.session_state.id_a_suppr, "bouton"))
 
             if st.session_state.id_a_suppr is not None : 
-                test.append((st.session_state.id_a_suppr, "test"))
+                st.session_state.test.append((st.session_state.id_a_suppr, "test"))
                 if st.session_state.nb_lignes_mots > 2:
                     st.session_state.mots_temp.pop(st.session_state.id_a_suppr, None)
                     st.session_state.mots_temp = {(x if x < st.session_state.id_a_suppr else x - 1) : y for x, y in st.session_state.mots_temp.items()}
