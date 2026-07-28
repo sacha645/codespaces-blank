@@ -1591,9 +1591,8 @@ elif st.session_state.etat == "connecte":
                     st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
-                    st.write("")
                     st.divider()
-                    
+
                     err_details = st.session_state.get("erreurs_verbes_detail", [])
 
                     if err_details:
