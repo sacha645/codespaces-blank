@@ -923,13 +923,13 @@ elif st.session_state.etat == "connecte":
             st.divider()
 
             if is_verbe:
-                cols_h = st.columns([2, 2, 2, 2, 2])
-                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction"]
+                cols_h = st.columns([2, 2, 2, 2, 2, 1])
+                headers = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
             else:
-                cols_h = st.columns([1, 2, 2])
-                headers = ["Article", "Mot / Nom", "Traduction"]
+                cols_h = st.columns([1, 2, 2, 1])
+                headers = ["Article", "Mot / Nom", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
 
                     col.caption(h)
@@ -951,9 +951,9 @@ elif st.session_state.etat == "connecte":
                         with suppr :
                             if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                                 st.session_state.id_a_suppr = i
-                                
+
                     else :
-                        c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
+                        c1, c2, c3, c4, c5, _ = st.columns([2, 2, 2, 2, 2, 1])
 
                     inf = c1.text_input(f"inf_{i}", label_visibility="collapsed", value=valeur[1])
                     pres = c2.text_input(f"pres_{i}", label_visibility="collapsed", value=valeur[2])
@@ -974,7 +974,7 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.id_a_suppr = i
 
                     else : 
-                        c1, c2, c3 = st.columns([1, 2, 2])
+                        c1, c2, c3, _ = st.columns([1, 2, 2, 1])
 
                     art = c1.text_input(f"art_{i}", label_visibility="collapsed", value=valeur[0])
                     mot = c2.text_input(f"mot_{i}", label_visibility="collapsed", value=valeur[1])
