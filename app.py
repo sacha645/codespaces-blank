@@ -947,7 +947,6 @@ elif st.session_state.etat == "connecte":
             teste = []
             for i in range(0, st.session_state.nb_lignes_mots):
                 teste.append(i)
-                st.write(teste)
                 valeur = st.session_state.mots_temp.get(i, ("", "", "", "", "", ""))
 
                 if is_verbe:
@@ -979,7 +978,8 @@ elif st.session_state.etat == "connecte":
                 with suppr :
                     if st.button("🗑️", key=i, help="Supprimer cette ligne"):
                         st.session_state.id_a_suppr = i
-
+            st.write(teste)
+            st.session_state.test.append((st.session_state.mots_temp, "encore avant", st.session_state.id_a_suppr, st.session_state.nb_lignes_mots))
 
             if st.session_state.id_a_suppr is not None :
                 if st.session_state.nb_lignes_mots > 2:
@@ -992,11 +992,6 @@ elif st.session_state.etat == "connecte":
 
                 else :
                     st.session_state.mots_temp[st.session_state.id_a_suppr] = ("", "", "", "", "", "")
-
-                # 4. Nettoyage des clés widgets Streamlit pour forcer le rafraîchissement
-                for k in list(st.session_state.keys()):
-                    if any(k.startswith(prefix) for prefix in ["inf_", "pres_", "pret_", "pp_", "vtrad_", "art_", "mot_", "trad_"]):
-                        st.session_state.pop(k, None)
 
                 st.rerun()
 
