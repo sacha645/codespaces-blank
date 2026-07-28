@@ -478,10 +478,16 @@ def charger_erreurs(user_id, liste_id):
     conn.close()
     
     if row and row[0]:
-        # On re-transforme le JSON texte en vrai dictionnaire Python
-        # Attention : JSON transforme les clés entières (ex: id du mot) en chaînes, on peut reconvertir si besoin :
         data = json.loads(row[0])
-        return {int(k): v for k, v in data.items()}
+        res = {}
+        for k, v in data.items():
+            id_mot = int(k)
+            if isinstance(v, dict):
+                # Convertit aussi les clés internes ("1", "2", etc.) en entiers (1, 2, etc.)
+                res[id_mot] = {int(sub_k): sub_v for sub_k, sub_v in v.items()}
+            else:
+                res[id_mot] = v
+        return res
     return {}
 
 
@@ -879,7 +885,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.action = "compte"
                     st.rerun()
 
-        # CAS C : VUE IMPORTER UNE LISTE (📥)
+        # CAS C : IMPORTER UNE LISTE (📥)
         elif st.session_state.action == "importer":
             st.subheader("📥 Importer une liste")
             
@@ -940,7 +946,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.action = "liste"
                 st.rerun()
 
-        # CAS D : VUE FORMULAIRE DE CRÉATION DE LISTE
+        # CAS D : FORMULAIRE DE CRÉATION DE LISTE
         elif st.session_state.action == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             ligne_epaisse()
@@ -1071,7 +1077,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.pop("id_a_suppr", None)
                         st.rerun() 
 
-        # CAS E : VUE VOIR UNE LISTE (👁️)
+        # CAS E : VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
             liste_id = st.session_state.liste_active_id
             
@@ -1149,7 +1155,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # CAS F : VUE ÉDITER UNE LISTE (✏️)
+        # CAS F : ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
@@ -1283,7 +1289,7 @@ elif st.session_state.etat == "connecte":
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
-        # CAS G : VUE ENTRAÎNEMENT (🎯)
+        # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
