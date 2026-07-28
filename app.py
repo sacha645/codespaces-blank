@@ -941,6 +941,7 @@ elif st.session_state.etat == "connecte":
             if "test" not in st.session_state :
                 st.session_state.test = None
             st.session_state.id_a_suppr = None
+            st.write(st.session_state.test)
 
 
             for i in range(st.session_state.nb_lignes_mots):
