@@ -1725,7 +1725,7 @@ elif st.session_state.etat == "connecte":
                             if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
                                 reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
                             else:
-                                st.text_input(f"{nom_f} (donné) :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
+                                st.text_input(f"{nom_f} :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
@@ -2019,14 +2019,14 @@ elif st.session_state.etat == "connecte":
 
 
 # On utilise un expander pour garder l'interface propre
-# with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-#    st.caption("Affiche en temps réel le contenu de st.session_state")
+with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+   st.caption("Affiche en temps réel le contenu de st.session_state")
    
-#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
-#    st.json(dict(st.session_state))
+   # Affiche l'état complet sous forme JSON/dictionnaire lisible
+   st.json(dict(st.session_state))
    
-#    # Optionnel : Bouton pour vider la session et recommencer à zéro
-#    if st.button("🗑️ Vider le session_state"):
-#        for key in list(st.session_state.keys()):
-#            del st.session_state[key]
-#        st.rerun()
+   # Optionnel : Bouton pour vider la session et recommencer à zéro
+   if st.button("🗑️ Vider le session_state"):
+       for key in list(st.session_state.keys()):
+           del st.session_state[key]
+       st.rerun()
