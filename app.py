@@ -821,7 +821,6 @@ elif st.session_state.etat == "connecte":
                             else :
                                 # Mise à jour de la session
                                 username = final_username
-                                st.toast("Profil mis à jour avec succès !", icon="✅")
 
                                 # Nettoyage des données temporaires et retour accueil
                                 st.session_state.pop("temp_new_username", None)
@@ -1601,7 +1600,7 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
-                        col_v.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
+                        col_v.markdown("<u>**Verbes :**</u>", unsafe_allow_html=True)
                         col_f.markdown("<u>**Forme demandée :**</u>", unsafe_allow_html=True)
                         col_rep.markdown("<u>**Ta réponse :**</u>", unsafe_allow_html=True)
                         col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
