@@ -969,7 +969,7 @@ elif st.session_state.etat == "connecte":
             if id_a_suppr is not None : 
                 if st.session_state.nb_lignes_mots > 2:
                     st.session_state.mots_temp.pop(id_a_suppr, None)
-                    st.session_state.mots_temp = {x:y for x, y in enumerate(list(st.session_state.mots_temp.values()))}
+                    st.session_state.mots_temp = {(x if x < id_a_suppr else x - 1) : y for x, y in st.session_state.mots_temp.items()}
                     st.session_state.nb_lignes_mots -= 1
 
                 else :
