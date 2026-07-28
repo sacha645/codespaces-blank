@@ -5,19 +5,7 @@ import bcrypt
 import json
 
 st.set_page_config(page_title="Réviseur", layout="wide")
-def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
-    c.execute("DROP TABLE IF EXISTS users")
-    c.execute("DROP TABLE IF EXISTS mots")
-    c.execute("DROP TABLE IF EXISTS listes")
-    c.execute("DROP TABLE IF EXISTS scores")
-    c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
-    conn.commit()
-    conn.close()
 
-# Décommente cette ligne, lance l'application une fois, puis recommente-la :
-reinitialiser_toutes_les_bdd()
 
 # --- BASE DE DONNÉES ---
 def init_db():
@@ -566,7 +554,8 @@ if st.session_state.etat == "connecte" :
 
     with col_action:
         if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            st.session_state.action = "suppr_compte"
+            st.session_state.action = "supprimer"
+            st.session_state.action_suppr = "compte"
             st.rerun()
                 
     with col_signup:
@@ -645,7 +634,7 @@ with col_title:
                     clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                     for clef in clefs_a_supprimer:
                         if clef in st.session_state:
-                            del st.session_state[clef]
+                            st.session_state.pop(clef, None)
 
             st.session_state.action = "liste"
 
@@ -849,29 +838,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.action = "compte"
                     st.rerun()
 
-        # CAS C : CONFIRMATION DE SUPPRESSION DE COMPTE
-        elif st.session_state.action == "suppr_compte":
-
-            st.write("")
-            st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
-            st.write("")
-
-            col_annuler_compte, col_confirmer_compte = st.columns(2)
-            
-            with col_annuler_compte:
-                if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action = "liste"
-                    st.rerun()
-
-            with col_confirmer_compte:
-                if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
-                    supprimer_compte(user_id)
-                    st.session_state.user = None
-                    st.session_state.etat = "none"
-                    st.session_state.action = "liste"
-                    st.rerun()
-
-        # CAS D : VUE IMPORTER UNE LISTE (📥)
+        # CAS C : VUE IMPORTER UNE LISTE (📥)
         elif st.session_state.action == "importer":
             st.subheader("📥 Importer une liste")
             
@@ -932,7 +899,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.action = "liste"
                 st.rerun()
 
-        # CAS E : VUE FORMULAIRE DE CRÉATION DE LISTE
+        # CAS D : VUE FORMULAIRE DE CRÉATION DE LISTE
         elif st.session_state.action == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             ligne_epaisse()
@@ -1024,7 +991,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.nb_lignes_mots = 2
                         st.rerun()
 
-        # CAS F : VUE VOIR UNE LISTE (👁️)
+        # CAS E : VUE VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
             liste_id = st.session_state.liste_active_id
             
@@ -1102,7 +1069,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # CAS G : VUE ÉDITER UNE LISTE (✏️)
+        # CAS F : VUE ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
             liste_id = st.session_state.liste_active_id
             
@@ -1201,7 +1168,7 @@ elif st.session_state.etat == "connecte":
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
 
-        # CAS H : VUE ENTRAÎNEMENT (🎯)
+        # CAS G : VUE ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
@@ -1291,8 +1258,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_liste_id = liste_id
 
                     # Nettoyage du choix temporaire
-                    if "choix_reprise" in st.session_state:
-                        del st.session_state.choix_reprise
+                    st.session_state.pop("choix_reprise", None)
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
@@ -1380,14 +1346,12 @@ elif st.session_state.etat == "connecte":
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
-                            if "quiz_mots" in st.session_state:
-                                del st.session_state.quiz_mots
+                            st.session_state.pop("quiz_mots", None)
                             st.session_state.action = "liste"
                             st.rerun()
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
-                            if "quiz_mots" in st.session_state:
-                                del st.session_state.quiz_mots
+                            st.session_state.pop("quiz_mots", None)
                             st.rerun()
 
                 # 3. VUE DE QUESTION EN COURS
@@ -1525,7 +1489,7 @@ elif st.session_state.etat == "connecte":
                             ]
                             for clef in clefs_a_supprimer:
                                 if clef in st.session_state:
-                                    del st.session_state[clef]
+                                    st.session_state.pop(clef, None)
                             
 
                             st.session_state.action = "liste"
@@ -1533,17 +1497,8 @@ elif st.session_state.etat == "connecte":
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
-                            clefs_a_supprimer = [
-                                "quiz_mots", "quiz_index", "quiz_liste_id", 
-                                "score_vers_fr", "total_vers_fr", 
-                                "score_depuis_fr", "total_depuis_fr", "erreurs_commises"
-                            ]
-                            for clef in clefs_a_supprimer:
-                                if clef in st.session_state:
-                                    del st.session_state[clef]
-
-                            st.session_state.action = "liste"
-                            supprimer_sauvegarde_partie(liste_id)
+                            st.session_state.action = "supprimer"
+                            st.session_state.action_suppr = "abandon"
                             st.rerun()
 
             # --- S'IL S'AGIT D'UNE LISTE DE VERBES ---
@@ -1594,8 +1549,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_liste_id = liste_id
 
                     # Nettoyage de la variable de choix temporaire
-                    if "choix_reprise" in st.session_state:
-                        del st.session_state.choix_reprise
+                    st.session_state.pop("choix_reprise", None)
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
@@ -1647,12 +1601,12 @@ elif st.session_state.etat == "connecte":
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
-                            del st.session_state.quiz_mots
+                            st.session_state.pop("quiz_mots", None)
                             st.session_state.action = "liste"
                             st.rerun()
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
-                            del st.session_state.quiz_mots
+                            st.session_state.pop("quiz_mots", None)
                             st.rerun()
                     
 
@@ -1744,23 +1698,17 @@ elif st.session_state.etat == "connecte":
                             clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                             for clef in clefs_a_supprimer:
                                 if clef in st.session_state:
-                                    del st.session_state[clef]
+                                    st.session_state.pop(clef, None)
                             
                             st.session_state.action = "liste"
                             st.rerun()
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
-                            clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
-                            for clef in clefs_a_supprimer:
-                                if clef in st.session_state:
-                                    del st.session_state[clef]
+                            st.session_state.action = "supprimer"
+                            st.session_state.action_suppr = "abandon"
 
-                            st.session_state.action = "liste"
-                            supprimer_sauvegarde_partie(liste_id)
-                            st.rerun()
-
-        # CAS I : VUE PARTAGER UNE LISTE (🔗)
+        # CAS H : VUE PARTAGER UNE LISTE (🔗)
         elif st.session_state.action == "partager":
             liste_id = st.session_state.liste_active_id
             st.subheader("🔗 Partager la liste")
@@ -1793,33 +1741,90 @@ elif st.session_state.etat == "connecte":
                 st.session_state.liste_active_id = None
                 st.rerun()
 
-        # CAS J : CONFIRMATION DE SUPPRESSION (🗑️)
-        elif st.session_state.action == "supprimer":
-            liste_id = st.session_state.liste_active_id
-            
-            listes_user = recuperer_listes_utilisateur(user_id)
-            nom_actuel = next((nom for lid, nom, _ in listes_user if lid == liste_id), "cette liste")
+        # CAS I : SUPRESSION/ABANDON
+        elif st.session_state.action == "supprimer" :
+            # CAS I.A : SUPPRIMER UN COMPTE
+            if st.session_state.action_suppr == "compte":
+                st.write("")
+                st.error("⚠️ **ATTENTION :** Es-tu vraiment sûr de vouloir supprimer ton compte ? Toutes tes listes et tous tes mots seront définitivement perdus.")
+                st.write("")
 
-            st.write("")
-            st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
-            st.write("")
+            # CAS I.B : SUPPRIMER UNE LISTE
+            elif st.session_state.action_suppr == "liste":
+                liste_id = st.session_state.liste_active_id
+                nom_actuel = next((nom for lid, nom, _ in recuperer_listes_utilisateur(user_id) if lid == liste_id), "cette liste")
 
-            col_non, col_oui = st.columns(2)
-            
-            with col_non:
+                st.write("")
+                st.warning(f"⚠️ Es-tu sûr de vouloir supprimer la liste **'{nom_actuel}'** ? Cette action est irréversible.")
+                st.write("")
+
+            # CAS I.C : ABANDONNER UN ENTRAINEMENT
+            elif st.session_state.action_suppr == "abandon":
+                st.write("")
+                st.warning("⚠️ **Es-tu sûr de vouloir abandonner ?** Ta progression actuelle sera perdue.")
+                st.write("")
+
+            # CAS I.D : AUTRE
+            else:
+                st.session_state.action = "liste"
+                st.rerun()
+
+
+            col_confirmer, col_annuler = st.columns(2)
+
+            with col_confirmer : 
+                if st.session_state.action_suppr == "compte":
+                    if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
+                        supprimer_compte(user_id)
+                        st.session_state.user = None
+                        st.session_state.etat = "none"
+                        st.session_state.action = "liste"
+                        st.session_state.pop("action_suppr", None)
+                        st.rerun()
+
+                elif st.session_state.action_suppr == "liste":
+                    if st.button("🗑️ Oui, supprimer la liste", type="primary", use_container_width=True):
+                        supprimer_liste(liste_id)
+                        st.session_state.action = "liste"
+                        st.session_state.liste_active_id = None
+                        st.session_state.pop("action_suppr", None)
+                        st.rerun()
+
+                elif st.session_state.action_suppr == "abandon":
+                    if st.button("💥 Oui, abandonner", type="primary", use_container_width=True):
+                        # A. Suppression de la sauvegarde BDD si elle existe
+                        liste_id = st.session_state.get("liste_active_id")
+                        if liste_id:
+                            supprimer_sauvegarde_partie(liste_id)
+
+                        # B. Nettoyage explicite des variables de quiz dans st.session_state
+                        clefs = [
+                            "quiz_mots", "quiz_index", "quiz_liste_id", 
+                            "score_vers_fr", "total_vers_fr", "score_depuis_fr", "total_depuis_fr", 
+                            "score_verbes", "total_verbes", "erreurs_commises", 
+                            "erreurs_compteur", "erreurs_verbes_detail", "abandon_en_cours", "action_suppr"
+                        ]
+                        for clef in clefs:
+                            st.session_state.pop(clef, None)
+
+                        # C. Retour à la liste des listes
+                        st.session_state.action = "liste"
+                        st.session_state.liste_active_id = None
+                        st.rerun()
+
+            with col_annuler :
                 if st.button("❌ Annuler", use_container_width=True):
-                    st.session_state.action = "liste"
-                    st.session_state.liste_active_id = None
+                    if st.session_state.action_suppr == "abandon" :
+                        st.session_state.action = "entrainer"
+
+                    else: 
+                        st.session_state.liste_active_id = None
+                        st.session_state.action = "liste"
+
+                    st.session_state.pop("action_suppr", None)
                     st.rerun()
 
-            with col_oui:
-                if st.button("🗑️ Oui, supprimer", type="primary", use_container_width=True):
-                    supprimer_liste(liste_id)
-                    st.session_state.action = "liste"
-                    st.session_state.liste_active_id = None
-                    st.rerun()
-        
-        # CAS K : VUE NORMALE (AFFICHAGE DES LISTES)
+        # CAS J : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             st.write("")
             col_titre, col_import, col_ajout = st.columns([3, 1, 1])
@@ -1887,8 +1892,10 @@ elif st.session_state.etat == "connecte":
                             st.write("")
                             if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
                                 st.session_state.action = "supprimer"
+                                st.session_state.action_suppr = "liste"
                                 st.session_state.liste_active_id = liste_id
                                 st.rerun()
+
 
                         # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ AVEC INFOBULLES ---
                         score_record = recuperer_score_liste(user_id, liste_id)
