@@ -359,7 +359,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         return 0, None
 
     # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
-    for num_ligne, ligne in mots_a_inserer :
+    for num_ligne, ligne in enumerate(mots_a_inserer) :
         if is_voc :
             for x in ligne :
                 if len(x[0]) > 7 :
