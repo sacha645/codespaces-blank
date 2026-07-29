@@ -901,8 +901,8 @@ elif st.session_state.etat == "connecte":
                     type="password",
                     placeholder="Veuillez confirmer votre mot de passe"
                 )
-                confirm_mdp = None  # Non nécessaire dans ce cas
                 placer_curseur()
+                confirm_mdp = None  # Non nécessaire dans ce cas
 
             # Cas B : Le mot de passe (ou les deux) a été modifié
             else:
@@ -912,12 +912,12 @@ elif st.session_state.etat == "connecte":
                     type="password",
                     placeholder="Saisissez à nouveau votre nouveau mot de passe"
                 )
+                placer_curseur()
                 mdp_actuel = st.text_input(
                     "Mot de passe actuel",
                     type="password",
                     placeholder="Veuillez confirmer votre mot de passe actuel"
                 )
-                placer_curseur()
 
             st.write("")
 
