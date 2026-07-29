@@ -785,7 +785,6 @@ elif st.session_state.etat == "nouveau":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
-            placer_curseur()
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
 
@@ -818,7 +817,6 @@ elif st.session_state.etat == "connect":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
-            placer_curseur()
             mot_de_passe = st.text_input("Mot de passe", type="password")
 
             st.write("")
@@ -855,9 +853,10 @@ elif st.session_state.etat == "connecte":
         if st.session_state.action == "compte":
             st.subheader("👤 Mon Profil")
 
+            st.write("")
+
             # 1. Champs de saisie
             nouveau_pseudo = st.text_input("Pseudo", value=st.session_state.temp_new_username) if "temp_new_username" in st.session_state else st.text_input("Pseudo", value=username)
-            placer_curseur()
             nouveau_mdp = st.text_input("Nouveau mot de passe", value=st.session_state.temp_new_password, type="password", placeholder="Entrer un nouveau mot de passe") if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
 
             # 2. Vérification des modifications
@@ -901,7 +900,6 @@ elif st.session_state.etat == "connecte":
                     type="password",
                     placeholder="Veuillez confirmer votre mot de passe"
                 )
-                placer_curseur()
                 confirm_mdp = None  # Non nécessaire dans ce cas
 
             # Cas B : Le mot de passe (ou les deux) a été modifié
@@ -912,7 +910,6 @@ elif st.session_state.etat == "connecte":
                     type="password",
                     placeholder="Saisissez à nouveau votre nouveau mot de passe"
                 )
-                placer_curseur()
                 mdp_actuel = st.text_input(
                     "Mot de passe actuel",
                     type="password",
@@ -1060,8 +1057,6 @@ elif st.session_state.etat == "connecte":
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action = "liste"
                 st.rerun()
-
-            placer_curseur()
 
         # CAS D : FORMULAIRE DE CRÉATION DE LISTE
         elif st.session_state.action == "creer":
@@ -1234,8 +1229,6 @@ elif st.session_state.etat == "connecte":
                             st.session_state.pop("id_a_suppr", None)
                             st.session_state.pop("liste_valide", None)
                             st.rerun() 
-
-            placer_curseur()
 
         # CAS E : VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
@@ -1448,8 +1441,6 @@ elif st.session_state.etat == "connecte":
                         st.session_state.pop("id_a_suppr", None)
                         reinitialiser_score_liste(user_id, liste_id)
                         st.rerun()
-
-            placer_curseur()
 
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
@@ -2012,8 +2003,6 @@ elif st.session_state.etat == "connecte":
                             st.session_state.action = "supprimer"
                             st.session_state.action_suppr = "abandon"
 
-            placer_curseur()
-
         # CAS H : VUE PARTAGER UNE LISTE (🔗)
         elif st.session_state.action == "partager":
             liste_id = st.session_state.liste_active_id
@@ -2040,7 +2029,6 @@ elif st.session_state.etat == "connecte":
                 st.write("")
 
                 id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
-                placer_curseur()
 
                 st.write("")
 
@@ -2243,6 +2231,7 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
+placer_curseur()
 
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
