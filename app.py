@@ -357,11 +357,13 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
         return 0, None
-    st.write(mots_a_inserer)
+    st.write(mots_a_inserer, "a")
     # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
     for num_ligne, ligne in enumerate(mots_a_inserer) :
+        st.write(num_ligne, ligne, "b")
         if is_voc :
             for x in ligne :
+                st.write(x, "c")
                 if len(x[0].strip()) > 7 :
                     return 1, num_ligne
 
