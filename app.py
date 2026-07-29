@@ -359,22 +359,22 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         return 0, None
     
     # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
-    for num_ligne, ligne in enumerate(mots_a_inserer) :
+    for num_ligne, ligne in enumerate(mots_a_inserer, 1) :
         if is_voc :
             if len(ligne[0].strip()) > 7 :
-                return 1, num_ligne + 1
+                return 1, num_ligne
 
             if not(0 < len(ligne[1].strip()) <= 30) :
-                return 2, num_ligne + 1
+                return 2, num_ligne 
 
 
             if not(0 < len(ligne[4].strip()) <= 30) :
-                return 3, num_ligne + 1
+                return 3, num_ligne 
                 
         else:
             for x in ligne :
                 if not(0 < len(x.strip()) <= 30) :
-                    return 4, num_ligne + 1
+                    return 4, num_ligne
 
     # 4. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
@@ -973,7 +973,7 @@ elif st.session_state.etat == "connecte":
                     st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne). L'article est facultatif")
                 
                 nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
-                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
+                fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
                 
                 if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
                     if not (0 < len(nom_nouvelle_liste.strip()) <= 40) :
