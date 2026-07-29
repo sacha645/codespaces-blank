@@ -2014,8 +2014,9 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un ID d'utilisateur valide.")
 
-            ligne_epaisse()
             st.write("")
+            ligne_epaisse()
+
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action = "liste"
                 st.session_state.liste_active_id = None
