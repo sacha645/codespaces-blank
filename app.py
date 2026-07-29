@@ -1056,6 +1056,9 @@ elif st.session_state.etat == "connecte":
                     if not nom_liste.strip():
                         st.warning("Veuillez donner un nom à la liste.")
 
+                    elif len(nom_liste.strip()) > 10 :
+                        st.warning("Le nom de la liste est trop long !")
+
                     else:
                         ajouter_liste(user_id, nom_liste.strip(), type_code)
                         listes_user = recuperer_listes_utilisateur(user_id)
@@ -1275,7 +1278,10 @@ elif st.session_state.etat == "connecte":
             with col_sauvegarder:
                 if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
                     if not nouveau_nom.strip():
-                        st.warning("Le nom de la liste ne peut pas être vide.")
+                        st.warning("Le nom de la liste ne peut pas être vide !")
+
+                    elif len(nouveau_nom.strip()) > 10 :
+                        st.warning("Le nom de la liste est trop long !")
 
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
