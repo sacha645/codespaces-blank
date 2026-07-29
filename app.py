@@ -1085,7 +1085,7 @@ elif st.session_state.etat == "connecte":
                                     toutes_lignes_visibles_remplies = False
                         else :
                             if len(last_ligne) >=6 :
-                                if bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[5]).strip()):
+                                if bool(str(last_ligne[1]).strip()) == bool(str(last_ligne[5]).strip()):
                                     toutes_lignes_visibles_remplies = False
 
 
