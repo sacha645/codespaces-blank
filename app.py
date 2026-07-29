@@ -357,27 +357,24 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
         return 0, None
-    st.write(mots_a_inserer, "a")
+    
     # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
     for num_ligne, ligne in enumerate(mots_a_inserer) :
-        st.write(num_ligne, ligne, "b")
         if is_voc :
-            for x in ligne :
-                st.write(x, "c")
-                if len(x[0].strip()) > 7 :
-                    return 1, num_ligne
+            if len(ligne[0].strip()) > 7 :
+                return 1, num_ligne + 1
 
-                if not(0 < len(x[1].strip()) <= 30) :
-                    return 2, num_ligne
+            if not(0 < len(ligne[1].strip()) <= 30) :
+                return 2, num_ligne + 1
 
 
-                if not(0 < len(x[4].strip()) <= 30) :
-                    return 3, num_ligne
+            if not(0 < len(ligne[4].strip()) <= 30) :
+                return 3, num_ligne + 1
                 
         else:
             for x in ligne :
                 if not(0 < len(x.strip()) <= 30) :
-                    return 4, num_ligne
+                    return 4, num_ligne + 1
 
     # 4. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
