@@ -622,22 +622,29 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-def test() :
-    components.html(
-        """
-        <script>
-        window.onload = function() {
-            // Sélectionne le premier champ de saisie de type texte
-            const firstInput = window.parent.document.querySelector('input[type="text"]');
-            if (firstInput) {
-                firstInput.focus();
-            }
+components.html(
+    """
+    <script>
+    function focusFirstInput() {
+        const firstInput = window.parent.document.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
         }
-        </script>
-        """,
-        height=0,  # Pas d'affichage visuel
-    )
-test()
+    }
+
+    // Observer les changements dans le DOM parent
+    const observer = new MutationObserver(() => {
+        focusFirstInput();
+    });
+
+    observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+    // Focus initial
+    focusFirstInput();
+    </script>
+    """,
+    height=0,
+)
 
 
 # --- INITIALISATION DU STATE ---
