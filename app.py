@@ -945,9 +945,9 @@ elif st.session_state.etat == "connecte":
             
             tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
 
-            st.write("")
-            
             with tab_id:
+                st.write("")
+
                 st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
 
                 st.write("")
@@ -968,7 +968,10 @@ elif st.session_state.etat == "connecte":
                         st.warning("Veuillez entrer un ID valide.")
 
             with tab_fichier:
+                st.write("")
+                
                 st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
+
                 st.write("")
                 
                 type_import = st.radio(
@@ -1987,10 +1990,10 @@ elif st.session_state.etat == "connecte":
             st.write("")
 
             tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
-
-            st.write("")
             
             with tab_id:
+                st.write("")
+
                 st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
 
                 st.write("")
@@ -1998,6 +2001,8 @@ elif st.session_state.etat == "connecte":
                 st.code(str(liste_id), language="text")
             
             with tab_direct:
+                st.write("")
+                
                 st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
 
                 st.write("")
