@@ -1078,7 +1078,19 @@ elif st.session_state.etat == "connecte":
                         else : 
                             st.session_state.liste_valide = True
 
-                        for ligne in list(st.session_state.mots_temp.values())[:-1]:
+                        last_ligne = st.session_state.get("mots_temp", {}).get(st.session_state.get("nb_lignes_mots", 1) - 1, ())
+                        if is_verbe :
+                            for case in last_ligne[1:] :
+                                if not case.strip() :
+                                    toutes_lignes_visibles_remplies = False
+                        else :
+                            if len(last_ligne) >=6 :
+                                for idx in [0, 1, 5]:
+                                    if not str(last_ligne[idx]).strip():
+                                        toutes_lignes_visibles_remplies = False
+                                        break
+
+                        for ligne in (list(st.session_state.mots_temp.values())[:-1] if toutes_lignes_visibles_remplies else list(st.session_state.mots_temp.values())):
                             if is_verbe:
                                 for case in ligne[1:] :
                                     if not(0 < len(case.strip()) <= 30) :
