@@ -940,13 +940,20 @@ elif st.session_state.etat == "connecte":
         # CAS C : IMPORTER UNE LISTE (📥)
         elif st.session_state.action == "importer":
             st.subheader("📥 Importer une liste")
+
+            st.write("")
             
             tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
             
             with tab_id:
                 st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
+
+                st.write("")
+
                 id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
-                
+
+                st.write("")
+
                 if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
                     if id_saisi.isdigit():
                         succes, msg = importer_liste_par_id(int(id_saisi), user_id)
@@ -960,6 +967,7 @@ elif st.session_state.etat == "connecte":
 
             with tab_fichier:
                 st.write("Téléverse un fichier texte (`.txt`) contenant tes mots ou verbes.")
+                st.write("")
                 
                 type_import = st.radio(
                     "Type de liste à importer :", 
@@ -969,13 +977,21 @@ elif st.session_state.etat == "connecte":
                 )
                 type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
 
-                if type_import_code == "verbe":
-                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`\n(un verbe par ligne)")
-                else:
-                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne). L'article est facultatif")
-                
+
+                st.write("")
+
                 nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
+
+                st.write("")
+
+                if type_import_code == "verbe":
+                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`<br>(un verbe par ligne)")
+                else:
+                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne). <br>L'article est facultatif<br>Si une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
+
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
+
+                st.write("")
                 
                 if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
                     if not (0 < len(nom_nouvelle_liste.strip()) <= 40) :
@@ -997,16 +1013,16 @@ elif st.session_state.etat == "connecte":
                                 st.error("Aucun élément n'a pu être extrait. Vérifie que les séparateurs utilisés correspondent bien aux formats requis.")
 
                             elif succes == 1 :
-                                st.error(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max. \nProblème ligne : {pb}")
+                                st.error(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max. <br>Problème ligne : {pb}")
 
                             elif succes == 2 :
-                                st.error(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+                                st.error(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
 
                             elif succes == 3 :
-                                st.error(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+                                st.error(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
 
                             elif succes == 4 :
-                                st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+                                st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
 
             ligne_epaisse()
 
