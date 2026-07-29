@@ -594,9 +594,25 @@ if "user" not in st.session_state:
 if st.session_state.etat == "connecte" : 
     col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
-    with col_compte : 
-        if st.button("Profil", use_container_width=True):
-            st.session_state.action = "compte"
+    if st.session_state.action != "entrainement" :
+        col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
+
+        with col_compte : 
+            if st.button("Profil", use_container_width=True):
+                st.session_state.action = "compte"
+                st.session_state.nb_lignes_mots = 2
+                st.session_state.liste_active_id = None
+                st.session_state.pop("mots_temp", None)
+                st.session_state.pop("id_a_suppr", None)
+                st.session_state.pop("liste_valide", None)
+                st.rerun()
+    else :
+        col_title, col_signup, col_action = st.columns([4, 2, 2])
+
+    with col_signup:
+        if st.button("Déconnexion", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
 
     with col_action:
@@ -605,11 +621,6 @@ if st.session_state.etat == "connecte" :
             st.session_state.action_suppr = "compte"
             st.rerun()
                 
-    with col_signup:
-        if st.button("Déconnexion", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
 else : 
     col_title, col_action, col_signup = st.columns([6, 2, 2])
 
@@ -691,6 +702,7 @@ with col_title:
             st.session_state.liste_active_id = None
             st.session_state.pop("mots_temp", None)
             st.session_state.pop("id_a_suppr", None)
+            st.session_state.pop("liste_valide", None)
 
         st.rerun()
             
@@ -1050,6 +1062,7 @@ elif st.session_state.etat == "connecte":
                     st.session_state.nb_lignes_mots = 2
                     st.session_state.pop("mots_temp", None)
                     st.session_state.pop("id_a_suppr", None)
+                    st.session_state.pop("liste_valide", None)
                     st.rerun()
             with col_sauvegarder:
                 if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
@@ -1060,42 +1073,52 @@ elif st.session_state.etat == "connecte":
                         st.warning("Le nom de la liste est trop long !")
 
                     else:
+                        if "liste_valide" not in st.session_state :
+                            st.session_state.liste_valide = True
+                        else : 
+                            st.session_state.liste_valide = True
+
                         for ligne in list(st.session_state.mots_temp.values()) :
                             if is_verbe:
                                 for case in ligne[1:] :
                                     if not(0 < len(case.strip()) <= 30) :
+                                        st.session_state.liste_valide = False
                                         st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     
                             else:
                                 if len(ligne[0]) >= 7 :
                                     st.warning(f"Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
+                                    st.session_state.liste_valide = False
 
                                 if len(ligne[1]) >= 30 :
                                     st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+                                    st.session_state.liste_valide = False
 
                                 if len(ligne[5]) >= 30 :
                                     st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
+                                    st.session_state.liste_valide = False
 
+                        if st.session_state.liste_valide:
+                            ajouter_liste(user_id, nom_liste.strip(), type_code)
+                            listes_user = recuperer_listes_utilisateur(user_id)
+                            derniere_liste_id = listes_user[-1][0]
 
-                        ajouter_liste(user_id, nom_liste.strip(), type_code)
-                        listes_user = recuperer_listes_utilisateur(user_id)
-                        derniere_liste_id = listes_user[-1][0]
+                            for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
+                                if is_verbe:
+                                    if inf_mot.strip() and trad.strip():
+                                        ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
 
-                        for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
-                            if is_verbe:
-                                if inf_mot.strip() and trad.strip():
-                                    ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
+                                else:
+                                    if inf_mot.strip() and trad.strip():
+                                        mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
+                                        ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
 
-                            else:
-                                if inf_mot.strip() and trad.strip():
-                                    mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
-                                    ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
-
-                        st.session_state.action = "liste"
-                        st.session_state.nb_lignes_mots = 2
-                        st.session_state.pop("mots_temp", None)
-                        st.session_state.pop("id_a_suppr", None)
-                        st.rerun() 
+                            st.session_state.action = "liste"
+                            st.session_state.nb_lignes_mots = 2
+                            st.session_state.pop("mots_temp", None)
+                            st.session_state.pop("id_a_suppr", None)
+                            st.session_state.pop("liste_valide", None)
+                            st.rerun() 
 
         # CAS E : VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
