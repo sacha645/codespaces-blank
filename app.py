@@ -340,43 +340,45 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     is_voc = True if type_liste == "vocabulaire" else False
     
     # 1. Analyse et validation préalable du fichier
-    for ligne in lignes:
+    for num_ligne, ligne in enumerate(lignes, 1) :
         ligne = ligne.strip()
         if not ligne:
             continue
         
         parts = [p.strip() for p in ligne.split(",")]
         
-        # Vérification stricte : exactement 2 colonnes pour vocabulaire, 5 pour verbes
+        # Vérification stricte : exactement 2 colonnes pour vocabulaire, 5 pour verbes t si les mot font la bonne taille
         if is_voc and len(parts) == 2:
             mots_a_inserer.append((parts[0], "", "", "", parts[1]))
+
+            if not(0 < len(mots_a_inserer[-1][4].strip()) <= 30) :
+                return 3, num_ligne 
+
+
+            colonne_mot = mots_a_inserer[-1][0].strip()
+            if " " in colonne_mot and "!" not in colonne_mot[0] :
+                art, mot = colonne_mot.split(" ", 1)
+            else:
+                art, mot = "", colonne_mot
+
+            if len(art.strip()) > 7 :
+                return 1, num_ligne
+
+            if not(0 < len(mot.strip()) <= 30) :
+                return 2, num_ligne 
             
         elif not is_voc and len(parts) == 5:
             mots_a_inserer.append((parts[0], parts[1], parts[2], parts[3], parts[4]))
+
+            for x in mots_a_inserer[-1] :
+                if not(0 < len(x.strip()) <= 30) :
+                    return 4, num_ligne
 
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
         return 0, None
     
-    # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
-    for num_ligne, ligne in enumerate(mots_a_inserer, 1) :
-        if is_voc :
-            if len(ligne[0].strip()) > 7 :
-                return 1, num_ligne
-
-            if not(0 < len(ligne[1].strip()) <= 30) :
-                return 2, num_ligne 
-
-
-            if not(0 < len(ligne[4].strip()) <= 30) :
-                return 3, num_ligne 
-                
-        else:
-            for x in ligne :
-                if not(0 < len(x.strip()) <= 30) :
-                    return 4, num_ligne
-
-    # 4. Insertion en BDD uniquement si le format est correct
+    # 3. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
