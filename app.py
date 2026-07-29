@@ -992,7 +992,7 @@ elif st.session_state.etat == "connecte":
                 if type_import_code == "verbe":
                     st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`  \n(un verbe par ligne)")
                 else:
-                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne).   \nL'article est facultatif  \nSi une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
+                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne).  \nIMPORTANT :   \n- L'article est facultatif  \n- Si une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
 
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
 
@@ -2002,7 +2002,7 @@ elif st.session_state.etat == "connecte":
             
             with tab_direct:
                 st.write("")
-                
+
                 st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
 
                 st.write("")
