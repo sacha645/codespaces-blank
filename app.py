@@ -363,6 +363,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         if is_voc :
             for x in ligne :
                 if len(x[0].strip()) > 7 :
+                    st.write(mots_a_inserer)
                     return 1, num_ligne
 
                 if not(0 < len(x[1].strip()) <= 30) :
