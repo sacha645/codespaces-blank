@@ -953,7 +953,6 @@ elif st.session_state.etat == "connecte":
                 id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
 
                 st.write("")
-                st.write("")
 
                 if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
                     if id_saisi.isdigit():
@@ -982,6 +981,7 @@ elif st.session_state.etat == "connecte":
 
                 nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
 
+                st.write("")
                 st.write("")
 
                 if type_import_code == "verbe":
@@ -1025,7 +1025,6 @@ elif st.session_state.etat == "connecte":
                             elif succes == 4 :
                                 st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
-            st.write("")
             ligne_epaisse()
             st.write("")
 
@@ -2015,7 +2014,6 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un ID d'utilisateur valide.")
 
-            st.write("")
             ligne_epaisse()
             st.write("")
             if st.button("🔙 Retour", use_container_width=True):
