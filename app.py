@@ -480,13 +480,20 @@ def charger_erreurs(user_id, liste_id):
     if row and row[0]:
         data = json.loads(row[0])
         res = {}
-        for k, v in data.items():
-            id_mot = int(k)
-            if isinstance(v, dict):
-                # Convertit aussi les clés internes ("1", "2", etc.) en entiers (1, 2, etc.)
-                res[id_mot] = {int(sub_k): sub_v for sub_k, sub_v in v.items()}
-            else:
+        
+        if obtenir_type_liste(liste_id) == "verbe" :
+            for k, v in data.items():
+                id_mot = int(k)
+                if isinstance(v, dict):
+                    # Convertit aussi les clés internes ("1", "2", etc.) en entiers (1, 2, etc.)
+                    res[id_mot] = {int(sub_k): sub_v for sub_k, sub_v in v.items()}
+                else:
+                    res[id_mot] = v
+
+        else :
+            for k, v in data.items():
                 res[id_mot] = v
+
         return res
     return {}
 
@@ -1152,6 +1159,7 @@ elif st.session_state.etat == "connecte":
                 st.info("Cette liste ne contient aucun élément.")
             else:
                 compteur_err = charger_erreurs(user_id, liste_id)
+                st.write(compteur_err)
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
