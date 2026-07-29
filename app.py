@@ -1078,7 +1078,7 @@ elif st.session_state.etat == "connecte":
                         else : 
                             st.session_state.liste_valide = True
 
-                        for ligne in list(st.session_state.mots_temp.values()) :
+                        for ligne in list(st.session_state.mots_temp.values())[:-1]:
                             if is_verbe:
                                 for case in ligne[1:] :
                                     if not(0 < len(case.strip()) <= 30) :
