@@ -992,7 +992,7 @@ elif st.session_state.etat == "connecte":
                 if type_import_code == "verbe":
                     st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`  \n(un verbe par ligne)")
                 else:
-                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne)  \n"
+                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne)  \n\n"
                             "**IMPORTANT :**  \n"
                             "- L'article est facultatif  \n"
                             "- Si une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
