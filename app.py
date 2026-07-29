@@ -978,7 +978,6 @@ elif st.session_state.etat == "connecte":
                 )
                 type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
 
-
                 st.write("")
 
                 nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
@@ -990,10 +989,9 @@ elif st.session_state.etat == "connecte":
                 else:
                     st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne).   \nL'article est facultatif  \nSi une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
 
-                st.write("")
-
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
 
+                st.write("")
                 st.write("")
                 
                 if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
@@ -1027,7 +1025,9 @@ elif st.session_state.etat == "connecte":
                             elif succes == 4 :
                                 st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
+            st.write("")
             ligne_epaisse()
+            st.write("")
 
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action = "liste"
@@ -2015,7 +2015,9 @@ elif st.session_state.etat == "connecte":
                     else:
                         st.warning("Veuillez entrer un ID d'utilisateur valide.")
 
+            st.write("")
             ligne_epaisse()
+            st.write("")
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action = "liste"
                 st.session_state.liste_active_id = None
