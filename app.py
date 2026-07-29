@@ -362,14 +362,14 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     for num_ligne, ligne in enumerate(mots_a_inserer) :
         if is_voc :
             for x in ligne :
-                if len(x[0]) > 7 :
+                if len(x[0].strip()) > 7 :
                     return 1, num_ligne
 
-                if not(0 < len(x[1]) <= 30) :
+                if not(0 < len(x[1].strip()) <= 30) :
                     return 2, num_ligne
 
 
-                if not(0 < len(x[5]) <= 30) :
+                if not(0 < len(x[4].strip()) <= 30) :
                     return 3, num_ligne
                 
         else:
