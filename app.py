@@ -1085,10 +1085,9 @@ elif st.session_state.etat == "connecte":
                                     toutes_lignes_visibles_remplies = False
                         else :
                             if len(last_ligne) >=6 :
-                                for idx in [0, 1, 5]:
-                                    if not str(last_ligne[idx]).strip():
-                                        toutes_lignes_visibles_remplies = False
-                                        break
+                                if bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[5]).strip()):
+                                    toutes_lignes_visibles_remplies = False
+
 
                         for ligne in (list(st.session_state.mots_temp.values())[:-1] if toutes_lignes_visibles_remplies else list(st.session_state.mots_temp.values())):
                             if is_verbe:
