@@ -953,6 +953,7 @@ elif st.session_state.etat == "connecte":
                 id_saisi = st.text_input("ID de la liste :", placeholder="Ex: 12", key="import_id_input")
 
                 st.write("")
+                st.write("")
 
                 if st.button("📥 Importer la liste via ID", type="primary", use_container_width=True):
                     if id_saisi.isdigit():
@@ -985,9 +986,11 @@ elif st.session_state.etat == "connecte":
                 st.write("")
 
                 if type_import_code == "verbe":
-                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`<br>(un verbe par ligne)")
+                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`  \n(un verbe par ligne)")
                 else:
-                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne). <br>L'article est facultatif<br>Si une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
+                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne).   \nL'article est facultatif  \nSi une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
+
+                st.write("")
 
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
 
@@ -1013,16 +1016,16 @@ elif st.session_state.etat == "connecte":
                                 st.error("Aucun élément n'a pu être extrait. Vérifie que les séparateurs utilisés correspondent bien aux formats requis.")
 
                             elif succes == 1 :
-                                st.error(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max. <br>Problème ligne : {pb}")
+                                st.error(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max.   \nProblème ligne : {pb}")
 
                             elif succes == 2 :
-                                st.error(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
+                                st.error(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
                             elif succes == 3 :
-                                st.error(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
+                                st.error(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
                             elif succes == 4 :
-                                st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. <br>Problème ligne : {pb}")
+                                st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
             ligne_epaisse()
 
@@ -1979,17 +1982,27 @@ elif st.session_state.etat == "connecte":
         elif st.session_state.action == "partager":
             liste_id = st.session_state.liste_active_id
             st.subheader("🔗 Partager la liste")
-            
+
+            st.write("")
+
             tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
             
             with tab_id:
                 st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
+
+                st.write("")
+
                 st.code(str(liste_id), language="text")
             
             with tab_direct:
                 st.write("Saisis l'**ID de ton ami(e)** pour lui envoyer une copie directement dans son compte :")
+
+                st.write("")
+
                 id_ami = st.text_input("ID de l'utilisateur destinataire :", placeholder="Ex: 5")
-                
+
+                st.write("")
+
                 if st.button("📤 Envoyer la liste", type="primary", use_container_width=True):
                     if id_ami.isdigit():
                         succes, msg = partager_liste_a_utilisateur(liste_id, int(id_ami))
