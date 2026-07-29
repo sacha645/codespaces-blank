@@ -1086,15 +1086,15 @@ elif st.session_state.etat == "connecte":
                                         st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     
                             else:
-                                if len(ligne[0]) >= 7 :
+                                if len(ligne[0]) > 7 :
                                     st.warning(f"Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
                                     st.session_state.liste_valide = False
 
-                                if len(ligne[1]) >= 30 :
+                                if not(0 < len(ligne[1]) <= 30) :
                                     st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
-                                if len(ligne[5]) >= 30 :
+                                if not(0 < len(ligne[5]) <= 30) :
                                     st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
