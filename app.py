@@ -480,7 +480,7 @@ def charger_erreurs(user_id, liste_id):
     if row and row[0]:
         data = json.loads(row[0])
         res = {}
-        
+
         if obtenir_type_liste(liste_id) == "verbe" :
             for k, v in data.items():
                 id_mot = int(k)
@@ -601,20 +601,21 @@ if "user" not in st.session_state:
 if st.session_state.etat == "connecte" : 
     col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
-    if st.session_state.action != "entrainement" :
-        col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
+    if "action" in st.session_state:
+        if st.session_state.action != "entrainer" :
+            col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
-        with col_compte : 
-            if st.button("Profil", use_container_width=True):
-                st.session_state.action = "compte"
-                st.session_state.nb_lignes_mots = 2
-                st.session_state.liste_active_id = None
-                st.session_state.pop("mots_temp", None)
-                st.session_state.pop("id_a_suppr", None)
-                st.session_state.pop("liste_valide", None)
-                st.rerun()
-    else :
-        col_title, col_signup, col_action = st.columns([4, 2, 2])
+            with col_compte : 
+                if st.button("Profil", use_container_width=True):
+                    st.session_state.action = "compte"
+                    st.session_state.nb_lignes_mots = 2
+                    st.session_state.liste_active_id = None
+                    st.session_state.pop("mots_temp", None)
+                    st.session_state.pop("id_a_suppr", None)
+                    st.session_state.pop("liste_valide", None)
+                    st.rerun()
+        else :
+            col_title, col_signup, col_action = st.columns([4, 2, 2])
 
     with col_signup:
         if st.button("Déconnexion", use_container_width=True):
@@ -791,6 +792,7 @@ elif st.session_state.etat == "connecte":
 
     if "action" not in st.session_state:
         st.session_state.action = "liste"
+        st.rerun()
     if "liste_active_id" not in st.session_state:
         st.session_state.liste_active_id = None
     if "nb_lignes_mots" not in st.session_state:
@@ -945,8 +947,9 @@ elif st.session_state.etat == "connecte":
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
                 
                 if st.button("📥 Importer depuis le fichier", type="primary", use_container_width=True):
-                    if not nom_nouvelle_liste.strip():
-                        st.warning("Donne un nom à la nouvelle liste.")
+                    if not (0 < len(nom_nouvelle_liste.strip()) <= 40) :
+                        st.warning("Veuillez donner un nom valide à la liste. (1 à 40 caractères max)")
+                        
                     elif fichier_uploade is None:
                         st.warning("Veuillez sélectionner un fichier.")
                     else:
@@ -1073,11 +1076,8 @@ elif st.session_state.etat == "connecte":
                     st.rerun()
             with col_sauvegarder:
                 if st.button("💾 Sauvegarder", type="primary", use_container_width=True):
-                    if not nom_liste.strip():
-                        st.warning("Veuillez donner un nom à la liste.")
-
-                    elif len(nom_liste.strip()) > 40 :
-                        st.warning("Le nom de la liste est trop long !")
+                    if not (0 < len(nom_liste.strip()) <= 40) :
+                        st.warning("Veuillez donner un nom valide à la liste. (1 à 40 caractères max)")
 
                     else:
                         if "liste_valide" not in st.session_state :
@@ -1159,7 +1159,6 @@ elif st.session_state.etat == "connecte":
                 st.info("Cette liste ne contient aucun élément.")
             else:
                 compteur_err = charger_erreurs(user_id, liste_id)
-                st.write(compteur_err)
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
@@ -1338,11 +1337,8 @@ elif st.session_state.etat == "connecte":
                     st.rerun()
             with col_sauvegarder:
                 if st.button("💾 Enregistrer les modifications", type="primary", use_container_width=True):
-                    if not nouveau_nom.strip():
-                        st.warning("Le nom de la liste ne peut pas être vide !")
-
-                    elif len(nouveau_nom.strip()) > 40 :
-                        st.warning("Le nom de la liste est trop long !")
+                    if not (0 < len(nouveau_nom.strip()) <= 40) :
+                        st.warning("Veuillez donner un nom valide à la liste. (1 à 40 caractères max)")
 
                     else:
                         renommer_liste(liste_id, nouveau_nom.strip())
