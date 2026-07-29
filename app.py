@@ -1085,7 +1085,7 @@ elif st.session_state.etat == "connecte":
                                     toutes_lignes_visibles_remplies = False
                         else :
                             if len(last_ligne) >=6 :
-                                if bool(str(last_ligne[1]).strip()) == bool(str(last_ligne[5]).strip()):
+                                if bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[5]).strip()):
                                     toutes_lignes_visibles_remplies = False
 
 
@@ -1104,6 +1104,7 @@ elif st.session_state.etat == "connecte":
                                 if not(0 < len(ligne[1]) <= 30) :
                                     st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
+                                    st.write(ligne)
 
                                 if not(0 < len(ligne[5]) <= 30) :
                                     st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
