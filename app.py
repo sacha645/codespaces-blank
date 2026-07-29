@@ -492,8 +492,8 @@ def charger_erreurs(user_id, liste_id):
 
         else :
             for k, v in data.items():
-                res[id_mot] = v
-
+                res[int(k)] = v
+                
         return res
     return {}
 
