@@ -1056,7 +1056,7 @@ elif st.session_state.etat == "connecte":
                     if not nom_liste.strip():
                         st.warning("Veuillez donner un nom à la liste.")
 
-                    elif len(nom_liste.strip()) > 10 :
+                    elif len(nom_liste.strip()) > 20 :
                         st.warning("Le nom de la liste est trop long !")
 
                     else:
@@ -1280,7 +1280,7 @@ elif st.session_state.etat == "connecte":
                     if not nouveau_nom.strip():
                         st.warning("Le nom de la liste ne peut pas être vide !")
 
-                    elif len(nouveau_nom.strip()) > 10 :
+                    elif len(nouveau_nom.strip()) > 20 :
                         st.warning("Le nom de la liste est trop long !")
 
                     else:
