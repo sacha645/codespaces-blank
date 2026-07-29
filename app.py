@@ -986,7 +986,11 @@ elif st.session_state.etat == "connecte":
                         contenu = fichier_uploade.getvalue().decode("utf-8")
                         succes, pb = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
                         
-                        if not succes :
+                        if succes is True :
+                            st.session_state.action = "liste"
+                            st.rerun()
+
+                        else :
                             if succes == 0 :
                                 st.error("Aucun élément n'a pu être extrait. Vérifie que les séparateurs utilisés correspondent bien aux formats requis.")
 
@@ -1001,10 +1005,6 @@ elif st.session_state.etat == "connecte":
 
                             elif succes == 4 :
                                 st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
-
-                        else :
-                            st.session_state.action = "liste"
-                            st.rerun()
 
             ligne_epaisse()
 
