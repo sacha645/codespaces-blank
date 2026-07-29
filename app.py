@@ -325,8 +325,19 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
 def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichier):
+    """
+    Return des code d'erreur. Si pas d'erreur, return True :
+    - True : liste créée
+    - 0 : mauvais séparateur (voc et verbes)
+    - 1 : article trop long (voc)
+    - 2 : mot inexistant ou trop long (voc)
+    - 3 : traduction inexistante ou trop long (voc)
+    - 4 : forme manquante ou trop longue (verbe)
+    """
+
     lignes = contenu_fichier.splitlines()
     mots_a_inserer = []
+    is_voc = True if type_liste == "vocabulaire" else False
     
     # 1. Analyse et validation préalable du fichier
     for ligne in lignes:
@@ -337,17 +348,36 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         parts = [p.strip() for p in ligne.split(",")]
         
         # Vérification stricte : exactement 2 colonnes pour vocabulaire, 5 pour verbes
-        if type_liste == "vocabulaire" and len(parts) == 2:
+        if is_voc and len(parts) == 2:
             mots_a_inserer.append((parts[0], "", "", "", parts[1]))
             
-        elif type_liste == "verbe" and len(parts) == 5:
+        elif not is_voc and len(parts) == 5:
             mots_a_inserer.append((parts[0], parts[1], parts[2], parts[3], parts[4]))
 
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
         return 0
 
-    # 3. Insertion en BDD uniquement si le format est correct
+    # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
+    for num_ligne, ligne in mots_a_inserer :
+        if is_voc :
+            for x in ligne :
+                if len(x[0]) > 7 :
+                    return 1, num_ligne
+
+                if not(0 < len(x[1]) <= 30) :
+                    return 2, num_ligne
+
+
+                if not(0 < len(x[5]) <= 30) :
+                    return 3, num_ligne
+                
+        else:
+            for x in ligne :
+                if not(0 < len(x.strip()) <= 30) :
+                    return 4, num_ligne
+
+    # 4. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     
@@ -364,7 +394,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     conn.commit()
     conn.close()
     
-    return len(mots_a_inserer)
+    return True
 
 def demeler_questions(questions):
     n = len(questions)
@@ -939,9 +969,9 @@ elif st.session_state.etat == "connecte":
                 type_import_code = "verbe" if type_import == "Verbes" else "vocabulaire"
 
                 if type_import_code == "verbe":
-                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction` (un verbe par ligne)")
+                    st.info("💡 **Format attendu :** `infinitif, présent, prétérit, participe passé, traduction en français`\n(un verbe par ligne)")
                 else:
-                    st.info("💡 **Format attendu :** `mot, traduction` (un mot par ligne)")
+                    st.info("💡 **Format attendu :** `article mot, traduction en français` (un mot par ligne). L'article est facultatif")
                 
                 nom_nouvelle_liste = st.text_input("Nom de la nouvelle liste :", placeholder="Ex: Verbes Irréguliers")
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt", "csv"])
@@ -952,15 +982,30 @@ elif st.session_state.etat == "connecte":
                         
                     elif fichier_uploade is None:
                         st.warning("Veuillez sélectionner un fichier.")
+
                     else:
                         contenu = fichier_uploade.getvalue().decode("utf-8")
-                        nb_mots = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
+                        succes, pb = importer_liste_depuis_fichier(user_id, nom_nouvelle_liste.strip(), type_import_code, contenu)
                         
-                        if nb_mots > 0:
+                        if not succes :
+                            if succes == 0 :
+                                st.error("Aucun élément n'a pu être extrait. Vérifie que les séparateurs utilisés correspondent bien aux formats requis.")
+
+                            elif succes == 1 :
+                                st.error(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max. \nProblème ligne : {pb}")
+
+                            elif succes == 2 :
+                                st.error(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+
+                            elif succes == 3 :
+                                st.error(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+
+                            elif succes == 4 :
+                                st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max. \nProblème ligne : {pb}")
+
+                        else :
                             st.session_state.action = "liste"
                             st.rerun()
-                        else:
-                            st.error("Aucun élément n'a pu être extrait. Vérifie que le format correspond bien aux consignes.")
 
             ligne_epaisse()
 
@@ -1102,20 +1147,20 @@ elif st.session_state.etat == "connecte":
                                 for case in ligne[1:] :
                                     if not(0 < len(case.strip()) <= 30) :
                                         st.session_state.liste_valide = False
-                                        st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+                                        st.warning("Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     
                             else:
-                                if len(ligne[0]) > 7 :
-                                    st.warning(f"Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
+                                if len(ligne[0].strip()) > 7 :
+                                    st.warning("Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
                                     st.session_state.liste_valide = False
 
-                                if not(0 < len(ligne[1]) <= 30) :
-                                    st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+                                if not(0 < len(ligne[1].strip()) <= 30) :
+                                    st.warning("Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
 
-                                if not(0 < len(ligne[5]) <= 30) :
-                                    st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
+                                if not(0 < len(ligne[5].strip()) <= 30) :
+                                    st.warning("Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
                         if st.session_state.liste_valide:
