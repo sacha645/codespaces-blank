@@ -356,7 +356,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
 
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
-        return 0
+        return 0, None
 
     # 3. Si les mots sont trop long ou absent, on n'insère rien en BDD
     for num_ligne, ligne in mots_a_inserer :
@@ -394,7 +394,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     conn.commit()
     conn.close()
     
-    return True
+    return True, None
 
 def demeler_questions(questions):
     n = len(questions)
