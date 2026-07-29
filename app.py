@@ -620,6 +620,21 @@ def supprimer_sauvegarde_partie(liste_id):
     conn.close()
 
 
+# --- Placement automatique du curseur ---
+def placer_curseur(index=0):
+    components.html(
+        f"""
+        <script>
+            const inputs = window.parent.document.querySelectorAll('input[type="text"]');
+            if (inputs.length > {index}) {{
+                inputs[{index}].focus();
+            }}
+        </script>
+        """,
+        height=0,
+    )
+
+
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
@@ -769,6 +784,7 @@ elif st.session_state.etat == "nouveau":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
+            placer_curseur(0)
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
 
