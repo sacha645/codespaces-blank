@@ -622,7 +622,20 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-
+components.html(
+    """
+    <script>
+    window.onload = function() {
+        // Sélectionne le premier champ de saisie de type texte
+        const firstInput = window.parent.document.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+    </script>
+    """,
+    height=0,  # Pas d'affichage visuel
+)
 
 
 # --- INITIALISATION DU STATE ---
@@ -2219,21 +2232,6 @@ elif st.session_state.etat == "connecte":
                         st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
-
-components.html(
-    """
-    <script>
-    window.onload = function() {
-        // Sélectionne le premier champ de saisie de type texte
-        const firstInput = window.parent.document.querySelector('input[type="text"]');
-        if (firstInput) {
-            firstInput.focus();
-        }
-    }
-    </script>
-    """,
-    height=0,  # Pas d'affichage visuel
-)
 
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
