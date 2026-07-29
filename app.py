@@ -626,10 +626,12 @@ def placer_curseur(index=0):
     components.html(
         f"""
         <script>
-            const inputs = window.parent.document.querySelectorAll('input[type="text"]');
-            if (inputs.length > {index}) {{
-                inputs[{index}].focus();
-            }}
+            setTimeout(function() {{
+                const inputs = window.parent.document.querySelectorAll('input[type="text"], input[type="password"]');
+                if (inputs.length > {index}) {{
+                    inputs[{index}].focus();
+                }}
+            }}, 100); // ⏱️ Attend 100 millisecondes avant d'exécuter
         </script>
         """,
         height=0,
