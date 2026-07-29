@@ -622,20 +622,7 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-def placer_curseur(index=0):
-    components.html(
-        f"""
-        <script>
-            setTimeout(function() {{
-                const inputs = window.parent.document.querySelectorAll('input[type="text"], input[type="password"]');
-                if (inputs.length > {index}) {{
-                    inputs[{index}].focus();
-                }}
-            }}, 100); // ⏱️ Attend 100 millisecondes avant d'exécuter
-        </script>
-        """,
-        height=0,
-    )
+
 
 
 # --- INITIALISATION DU STATE ---
@@ -1645,12 +1632,10 @@ elif st.session_state.etat == "connecte":
                             if has_article:
                                 c_art, c_mot = st.columns([1, 3])
                                 user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
-                                placer_curseur()
                                 user_mot = c_mot.text_input("Mot / Nom", key=f"mot_in_{index}")
                             else:
                                 user_art = ""
                                 user_mot = st.text_input("Mot / Nom", key=f"mot_in_{index}")
-                                placer_curseur()
                             user_trad = ""
                         else:
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
@@ -1658,7 +1643,6 @@ elif st.session_state.etat == "connecte":
                             user_art = ""
                             user_mot = ""
                             user_trad = st.text_input("Traduction", key=f"trad_in_{index}")
-                            placer_curseur()
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
@@ -1929,10 +1913,8 @@ elif st.session_state.etat == "connecte":
                         for idx_t, nom_f in ordre_formes:
                             if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
                                 reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
-                                placer_curseur()
                             else:
                                 st.text_input(f"{nom_f} :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
-                                placer_curseur()
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
@@ -2237,7 +2219,21 @@ elif st.session_state.etat == "connecte":
                         st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
-st.rerun()
+
+components.html(
+    """
+    <script>
+    window.onload = function() {
+        // Sélectionne le premier champ de saisie de type texte
+        const firstInput = window.parent.document.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+    </script>
+    """,
+    height=0,  # Pas d'affichage visuel
+)
 
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
