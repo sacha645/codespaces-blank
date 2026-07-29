@@ -944,6 +944,8 @@ elif st.session_state.etat == "connecte":
             st.write("")
             
             tab_id, tab_fichier = st.tabs(["🔢 Par ID de liste", "📄 Depuis un fichier texte"])
+
+            st.write("")
             
             with tab_id:
                 st.write("Saisis l'**ID de la liste** qu'on t'a partagé :")
@@ -1025,8 +1027,8 @@ elif st.session_state.etat == "connecte":
                             elif succes == 4 :
                                 st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
-            ligne_epaisse()
             st.write("")
+            ligne_epaisse()
 
             if st.button("🔙 Retour", use_container_width=True):
                 st.session_state.action = "liste"
@@ -1985,6 +1987,8 @@ elif st.session_state.etat == "connecte":
             st.write("")
 
             tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
+
+            st.write("")
             
             with tab_id:
                 st.write("Donne cet **ID de liste** à ton ami(e) pour qu'il/elle puisse l'importer de son côté :")
