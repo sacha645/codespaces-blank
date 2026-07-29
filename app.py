@@ -1079,6 +1079,7 @@ elif st.session_state.etat == "connecte":
                             st.session_state.liste_valide = True
 
                         last_ligne = st.session_state.get("mots_temp", {}).get(st.session_state.get("nb_lignes_mots", 1) - 1, ())
+                        toutes_lignes_visibles_remplies = True
                         if is_verbe :
                             for case in last_ligne[1:] :
                                 if not case.strip() :
@@ -1104,7 +1105,7 @@ elif st.session_state.etat == "connecte":
                                 if not(0 < len(ligne[1]) <= 30) :
                                     st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
-                                    st.write(ligne, toutes_lignes_visibles_remplies, last_ligne)
+
 
                                 if not(0 < len(ligne[5]) <= 30) :
                                     st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
