@@ -1056,10 +1056,27 @@ elif st.session_state.etat == "connecte":
                     if not nom_liste.strip():
                         st.warning("Veuillez donner un nom à la liste.")
 
-                    elif len(nom_liste.strip()) > 20 :
+                    elif len(nom_liste.strip()) > 40 :
                         st.warning("Le nom de la liste est trop long !")
 
                     else:
+                        for ligne in list(st.session_state.mots_temp.values()) :
+                            if is_verbe:
+                                for case in ligne[1:] :
+                                    if not(0 < len(case.strip()) <= 30) :
+                                        st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+                                    
+                            else:
+                                if len(ligne[0]) >= 7 :
+                                    st.warning(f"Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
+
+                                if len(ligne[1]) >= 30 :
+                                    st.warning(f"Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+
+                                if len(ligne[5]) >= 30 :
+                                    st.warning(f"Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
+
+
                         ajouter_liste(user_id, nom_liste.strip(), type_code)
                         listes_user = recuperer_listes_utilisateur(user_id)
                         derniere_liste_id = listes_user[-1][0]
@@ -1280,7 +1297,7 @@ elif st.session_state.etat == "connecte":
                     if not nouveau_nom.strip():
                         st.warning("Le nom de la liste ne peut pas être vide !")
 
-                    elif len(nouveau_nom.strip()) > 20 :
+                    elif len(nouveau_nom.strip()) > 40 :
                         st.warning("Le nom de la liste est trop long !")
 
                     else:
