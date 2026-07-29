@@ -1,3 +1,4 @@
+import streamlit.components.v1 as components
 import streamlit as st
 import sqlite3
 import random
