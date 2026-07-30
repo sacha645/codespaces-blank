@@ -1780,7 +1780,7 @@ elif st.session_state.etat == "connecte":
                             user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
                             user_mot = c_mot.text_input("Mot", key=f"mot_in_{index}")
                             user_trad = ""
-                            
+
                         else:
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
                             st.markdown(f"### Traduis en français : **{mot_affiche}**")
@@ -1799,20 +1799,17 @@ elif st.session_state.etat == "connecte":
                         u_mot = user_mot.strip() if sens == "vers_francais" else user_trad.strip()
 
                         if sens == "vers_francais":
-                            art_correct = (u_art.lower() == item["article"].lower()) if has_article else True
+                            art_correct = (u_art.lower() == item["article"].lower())
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
                             q_txt = item['traduction']
                             rep_att = f"{item['article']} {item['mot']}".strip()
 
-                            if has_article:
-                                if art_correct:
-                                    points_gagnes += 0.5
-                                if mot_correct:
-                                    points_gagnes += 0.5
-                            else:
-                                if mot_correct:
-                                    points_gagnes += 1.0
+                            
+                            if art_correct:
+                                points_gagnes += 0.5
+                            if mot_correct:
+                                points_gagnes += 0.5
 
                             if points_gagnes < 1.0:
                                 partie_art_html = f"<span style='color:red;'>{u_art if u_art else '(vide)'}</span>" if not art_correct else u_art
