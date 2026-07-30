@@ -695,7 +695,7 @@ if st.session_state.etat == "connecte" :
     col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
     if "action" in st.session_state:
-        if st.session_state.action != "entrainer" :
+        if st.session_state.action != "entrainer" and st.session_state.action != "supprimer" :
             col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
             with col_compte : 
