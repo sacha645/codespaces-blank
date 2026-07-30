@@ -695,8 +695,7 @@ if st.session_state.etat == "connecte" :
     col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
     if "action" in st.session_state:
-        if st.session_state.action != "entrainer" and st.session_state.action != "supprimer" :
-            col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
+        if st.session_state.action == "liste" :
 
             with col_compte : 
                 if st.button("Profil", use_container_width=True):
@@ -707,21 +706,19 @@ if st.session_state.etat == "connecte" :
                     st.session_state.pop("id_a_suppr", None)
                     st.session_state.pop("liste_valide", None)
                     st.rerun()
-        else :
-            col_title, col_signup, col_action = st.columns([4, 2, 2])
 
-    with col_signup:
-        if st.button("Déconnexion", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
+            with col_signup:
+                if st.button("Déconnexion", use_container_width=True):
+                    for key in list(st.session_state.keys()):
+                        del st.session_state[key]
+                    st.rerun()
 
-    with col_action:
-        if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
-            st.session_state.action = "supprimer"
-            st.session_state.action_suppr = "compte"
-            st.rerun()
-                
+            with col_action:
+                if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
+                    st.session_state.action = "supprimer"
+                    st.session_state.action_suppr = "compte"
+                    st.rerun()
+       
 else : 
     col_title, col_action, col_signup = st.columns([6, 2, 2])
 
@@ -734,7 +731,6 @@ else :
         if st.button("S'inscrire", type="primary", use_container_width=True):
             st.session_state.etat = "nouveau"
             st.rerun()
-
 
 with col_title:
     st.markdown("""
@@ -1152,7 +1148,7 @@ elif st.session_state.etat == "connecte":
                     col.caption(h)
             else:
                 cols_h = st.columns([1, 2, 2, 1])
-                headers = ["Article", "Mot / Nom", "Traduction", ""]
+                headers = ["Article", "Mot", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
 
@@ -1415,7 +1411,7 @@ elif st.session_state.etat == "connecte":
                     col.caption(h)
             else :
                 cols_h = st.columns([1, 2, 2, 1])
-                headers = ["Article", "Mot / Nom", "Traduction", ""]
+                headers = ["Article", "Mot", "Traduction", ""]
                 for col, h in zip(cols_h, headers):
                     col.caption(h)
 
@@ -1706,10 +1702,10 @@ elif st.session_state.etat == "connecte":
                             if has_article:
                                 c_art, c_mot = st.columns([1, 3])
                                 user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
-                                user_mot = c_mot.text_input("Mot / Nom", key=f"mot_in_{index}")
+                                user_mot = c_mot.text_input("Mot", key=f"mot_in_{index}")
                             else:
                                 user_art = ""
-                                user_mot = st.text_input("Mot / Nom", key=f"mot_in_{index}")
+                                user_mot = st.text_input("Mot", key=f"mot_in_{index}")
                             user_trad = ""
                         else:
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
