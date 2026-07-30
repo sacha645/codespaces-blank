@@ -1802,16 +1802,15 @@ elif st.session_state.etat == "connecte":
                             art_correct = (u_art.lower() == item["article"].lower())
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
-                            q_txt = item['traduction']
-                            rep_att = f"{item['article']} {item['mot']}".strip()
-
-                            
                             if art_correct:
                                 points_gagnes += 0.5
                             if mot_correct:
                                 points_gagnes += 0.5
 
                             if points_gagnes < 1.0:
+                                q_txt = item['traduction']
+                                rep_att = f"{item['article']} {item['mot']}".strip()
+
                                 partie_art_html = f"<span style='color:red;'>{u_art if u_art else '(vide)'}</span>" if not art_correct else u_art
                                 partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>" if not mot_correct else u_mot
                                 
@@ -1828,12 +1827,13 @@ elif st.session_state.etat == "connecte":
                         else:
                             mot_correct = (u_mot.lower() == item["traduction"].lower())
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
-                            q_txt = mot_affiche
-                            rep_att = item["traduction"]
 
                             if mot_correct:
                                 points_gagnes = 1.0
                             else:
+                                q_txt = mot_affiche
+                                rep_att = item["traduction"]
+
                                 points_gagnes = 0.0
                                 partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>"
                                 
