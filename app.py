@@ -961,6 +961,7 @@ elif st.session_state.etat == "connecte":
                 )
 
             st.write("")
+            st.write("")
 
             col_confirm, col_cancel = st.columns(2)
 
