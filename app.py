@@ -1775,14 +1775,12 @@ elif st.session_state.etat == "connecte":
                     with st.form(key=f"form_quiz_{index}"):
                         if sens == "vers_francais":
                             st.markdown(f"### Traduis en langue étrangère : **{item['traduction']}**")
-                            if has_article:
-                                c_art, c_mot = st.columns([1, 3])
-                                user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
-                                user_mot = c_mot.text_input("Mot", key=f"mot_in_{index}")
-                            else:
-                                user_art = ""
-                                user_mot = st.text_input("Mot", key=f"mot_in_{index}")
+
+                            c_art, c_mot = st.columns([1, 3])
+                            user_art = c_art.text_input("Article (si présent)", key=f"art_in_{index}")
+                            user_mot = c_mot.text_input("Mot", key=f"mot_in_{index}")
                             user_trad = ""
+                            
                         else:
                             mot_affiche = f"{item['article']} {item['mot']}".strip()
                             st.markdown(f"### Traduis en français : **{mot_affiche}**")
