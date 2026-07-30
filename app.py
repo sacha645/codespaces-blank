@@ -256,7 +256,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
     else :
         for case in last_ligne :
-            if not case.strip() :
+            if case.strip() :
                 toutes_lignes_visibles_remplies = False
 
     for ligne in list(nouveaux_mots)[:-1] if toutes_lignes_visibles_remplies else nouveaux_mots:
@@ -1279,7 +1279,7 @@ elif st.session_state.etat == "connecte":
                         toutes_lignes_visibles_remplies = True
                         if is_verbe :
                             for case in last_ligne[1:] :
-                                if not case.strip() :
+                                if case.strip() :
                                     toutes_lignes_visibles_remplies = False
                         else :
                             if len(last_ligne) >=6 :
