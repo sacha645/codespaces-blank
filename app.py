@@ -696,7 +696,6 @@ def placer_curseur(index=0):
                 const dejaOccupe = active && (
                     active.tagName === 'INPUT' || 
                     active.tagName === 'TEXTAREA' || 
-                    active.tagName === 'BUTTON'
                 );
 
                 if (dejaOccupe) {{
@@ -904,8 +903,6 @@ elif st.session_state.etat == "nouveau":
                     else:
                         st.error("Ce nom d'utilisateur est déjà pris.")
 
-    placer_curseur(0)
-
 # 3. ÉTAT : CONNECT (Connexion)
 elif st.session_state.etat == "connect":
     st.write("")
@@ -932,7 +929,6 @@ elif st.session_state.etat == "connect":
                 else:
                     st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
-    placer_curseur(0)
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
