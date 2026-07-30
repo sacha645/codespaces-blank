@@ -245,8 +245,8 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
     # 1. Analyse et validation préalable du fichier
     is_voc = True if type_liste == "vocabulaire" else False
-    last_ligne = nouveaux_mots[-1]
-    
+    last_ligne = list(nouveaux_mots)[-1]
+
     if is_voc :
         if len(last_ligne) >=3 :
             if bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[2]).strip()):
