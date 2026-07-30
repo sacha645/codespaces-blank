@@ -298,10 +298,10 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
             art, mot, trad = item
 
             if mot.strip() and trad.strip():
-                inf_mot_strip = inf_mot.strip()
+                mot_strip = mot.strip()
                 art_strip = art.strip()
 
-                mot_complet = f"{art_strip} {inf_mot_strip}" if art_strip else "!" + inf_mot_strip if " " in inf_mot_strip else inf_mot_strip
+                mot_complet = f"{art_strip} {mot_strip}" if art_strip else "!" + mot_strip if " " in mot_strip and not mot_strip.startswith("!") else mot_strip
 
                 c.execute("""
                     INSERT INTO mots (liste_id, mot_original, traduction) 
@@ -1329,7 +1329,7 @@ elif st.session_state.etat == "connecte":
                                     inf_mot_strip = inf_mot.strip()
                                     art_strip = art.strip()
                                     if inf_mot.strip() and trad.strip():
-                                        mot_comp = f"{art_strip} {inf_mot_strip}" if art_strip else "!" + inf_mot_strip if " " in inf_mot_strip else inf_mot_strip
+                                        mot_comp = f"{art_strip} {inf_mot_strip}" if art_strip else "!" + inf_mot_strip if " " in inf_mot_strip and not inf_mot_strip.startswith("!") else inf_mot_strip
                                         ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad.strip())
 
                             st.session_state.action = "liste"
