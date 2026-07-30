@@ -622,7 +622,11 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-def test() :
+if "rerun" not in st.session_state :
+   st.session_state.rerun = True
+else :
+    st.session_state.rerun = True 
+if st.session_state.rerun :
     components.html(
         """
         <script>
@@ -649,7 +653,6 @@ def test() :
         """,
         height=0,
     )
-test()
 
 
 # --- INITIALISATION DU STATE ---
