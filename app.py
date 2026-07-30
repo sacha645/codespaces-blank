@@ -682,6 +682,10 @@ def placer_curseur(index=0):
     st.session_state.toggle_focus = not st.session_state.toggle_focus
     balise = "div" if st.session_state.toggle_focus else "span"
 
+    # On vérifie si l'utilisateur est sur la page de Connexion ou d'Inscription
+    est_page_auth = st.session_state.get("etat") in ["connect", "nouveau"]
+    verif_button = "" if est_page_auth else "|| active.tagName === 'BUTTON'"
+
     components.html(
         f"""
         <{balise}>
@@ -695,7 +699,7 @@ def placer_curseur(index=0):
                 // 🛑 VÉRIFICATION : Si le curseur est DÉJÀ dans un champ, textarea ou bouton, on stoppe !
                 const dejaOccupe = active && (
                     active.tagName === 'INPUT' || 
-                    active.tagName === 'TEXTAREA'
+                    active.tagName === 'TEXTAREA' {verif_button}
                 );
 
                 if (dejaOccupe) {{
