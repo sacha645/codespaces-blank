@@ -626,36 +626,40 @@ if "rerun" not in st.session_state :
    st.session_state.rerun = True
 else :
     st.session_state.rerun = True 
-# 2. Injection du script SEULEMENT si rerun == True
-if st.session_state.rerun:
-    components.html(
-        """
-        <script>
-        function focusFirstInputOnce(observer) {
-            const firstInput = window.parent.document.querySelector('input[type="text"]');
-            if (firstInput) {
-                firstInput.focus();
-                if (observer) {
-                    observer.disconnect(); // Stop après premier focus
-                }
-            }
-        }
+# Injection du script avec le drapeau Python → JS
+components.html(
+    f"""
+    <script>
+    const shouldFocus = {str(st.session_state.rerun).lower()}; // true ou false
 
-        const observer = new MutationObserver(() => {
+    function focusFirstInputOnce(observer) {{
+        const firstInput = window.parent.document.querySelector('input[type="text"]');
+        if (firstInput) {{
+            firstInput.focus();
+            if (observer) {{
+                observer.disconnect(); // Stop après premier focus
+            }}
+        }}
+    }}
+
+    if (shouldFocus) {{
+        // Créer un observer qui se déconnecte après le premier focus
+        const observer = new MutationObserver(() => {{
             focusFirstInputOnce(observer);
-        });
+        }});
 
-        observer.observe(window.parent.document.body, { childList: true, subtree: true });
+        observer.observe(window.parent.document.body, {{ childList: true, subtree: true }});
 
-        // Tentative immédiate
+        // Tentative initiale
         focusFirstInputOnce(observer);
-        </script>
-        """,
-        height=0,
-    )
+    }}
+    </script>
+    """,
+    height=0,
+)
 
-    # 3. On désactive le drapeau pour éviter un refocus au prochain rerun
-    st.session_state.rerun = False
+# Après injection, on désactive le drapeau pour éviter un refocus au prochain rerun
+st.session_state.rerun = False
 
 
 # --- INITIALISATION DU STATE ---
