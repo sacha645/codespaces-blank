@@ -194,8 +194,6 @@ def supprimer_compte(user_id):
 
 init_db()
 
-reinitialiser_toutes_les_bdd()
-
 # --- FONCTIONS BDD LISTES ET MOTS ---
 def recuperer_listes_utilisateur(user_id):
     conn = sqlite3.connect("utilisateurs.db")
