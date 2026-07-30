@@ -695,7 +695,7 @@ def placer_curseur(index=0):
                 // 🛑 VÉRIFICATION : Si le curseur est DÉJÀ dans un champ, textarea ou bouton, on stoppe !
                 const dejaOccupe = active && (
                     active.tagName === 'INPUT' || 
-                    active.tagName === 'TEXTAREA' || 
+                    active.tagName === 'TEXTAREA'
                 );
 
                 if (dejaOccupe) {{
