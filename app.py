@@ -251,7 +251,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
     if is_voc :
         if len(last_ligne) >=3 :
-            if not bool(str(last_ligne[0]).strip()) or bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[2]).strip()):
+            if bool(str(last_ligne[0]).strip()) or (bool(str(last_ligne[1]).strip()) != bool(str(last_ligne[2]).strip())) :
                 toutes_lignes_visibles_remplies = False
 
     else :
