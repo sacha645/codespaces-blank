@@ -1535,16 +1535,16 @@ elif st.session_state.etat == "connecte":
 
                         else :
                             if succes == 0 :
-                                st.warning(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max.   \nProblème ligne : {pb}")
+                                st.warning(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max.")
 
                             elif succes == 1 :
-                                st.warning(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+                                st.warning(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max.")
 
                             elif succes == 2 :
-                                st.warning(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+                                st.warning(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
 
                             elif succes == 3 :
-                                st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+                                st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
 
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
