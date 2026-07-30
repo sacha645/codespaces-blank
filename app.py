@@ -88,6 +88,18 @@ def init_db():
     conn.commit()
     conn.close()
 
+def reinitialiser_toutes_les_bdd():
+    conn = sqlite3.connect("utilisateurs.db")
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS users")
+    c.execute("DROP TABLE IF EXISTS listes")
+    c.execute("DROP TABLE IF EXISTS mots")
+    c.execute("DROP TABLE IF EXISTS scores")
+    c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
+    c.execute("DROP TABLE IF EXISTS erreurs_listes")
+    conn.commit()
+    conn.close()
+
 def inscrire_utilisateur(username, password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
@@ -182,6 +194,7 @@ def supprimer_compte(user_id):
 
 init_db()
 
+reinitialiser_toutes_les_bdd()
 
 # --- FONCTIONS BDD LISTES ET MOTS ---
 def recuperer_listes_utilisateur(user_id):
@@ -2365,6 +2378,9 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
+
+
+# --- On place l'autofocus ---
 placer_curseur(0)
 
 # On utilise un expander pour garder l'interface propre
