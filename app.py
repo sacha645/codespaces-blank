@@ -710,7 +710,8 @@ if st.session_state.etat == "connecte" :
             with col_signup:
                 if st.button("Déconnexion", use_container_width=True):
                     for key in list(st.session_state.keys()):
-                        del st.session_state[key]
+                        if key != "toggle_focus" :
+                            del st.session_state[key]
                     st.rerun()
 
             with col_action:
@@ -2147,7 +2148,8 @@ elif st.session_state.etat == "connecte":
                     if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
                         supprimer_compte(user_id)
                         for key in list(st.session_state.keys()):
-                            del st.session_state[key]
+                            if key != "toggle_focus" :
+                                del st.session_state[key]
                         st.rerun()
 
                 elif st.session_state.action_suppr == "liste":
