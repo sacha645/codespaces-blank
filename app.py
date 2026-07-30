@@ -673,6 +673,38 @@ def supprimer_sauvegarde_partie(liste_id):
 #     height=0,
 # )
 
+# components.html(
+#     """
+#     <script>
+#     function setFocusIfFree() {
+#         const active = doc.activeElement;
+
+#         // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
+#         const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
+
+#         // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
+#         if (!isUserInteracting) {
+#             const firstInput = window.parent.document.querySelector('input[type="text"]');
+#             if (firstInput) {
+#                 firstInput.focus();
+#             }
+#         }
+#     }
+
+#     // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
+#     const observer = new MutationObserver(() => {
+#         setFocusIfFree();
+#     });
+
+#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+#     // Tentative initiale
+#     setFocusIfFree();
+#     </script>
+#     """,
+#     height=0,
+# )
+
 
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
@@ -2269,42 +2301,6 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
-import streamlit as st
-import streamlit.components.v1 as components
-
-components.html(
-    """
-    <script>
-    function setFocusIfFree() {
-        const doc = window.parent.document;
-        const active = doc.activeElement;
-
-        // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
-        const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
-
-        // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
-        if (!isUserInteracting) {
-            const firstInput = doc.querySelector('input[type="text"], input[type="password"]');
-            if (firstInput) {
-                firstInput.focus();
-            }
-        }
-    }
-
-    // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
-    const observer = new MutationObserver(() => {
-        setFocusIfFree();
-    });
-
-    observer.observe(window.parent.document.body, { childList: true, subtree: true });
-
-    // Tentative initiale
-    setFocusIfFree();
-    </script>
-    """,
-    height=0,
-)
-
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
 #    st.caption("Affiche en temps réel le contenu de st.session_state")
@@ -2317,3 +2313,35 @@ components.html(
 #        for key in list(st.session_state.keys()):
 #            del st.session_state[key]
 #        st.rerun()
+
+# components.html(
+#     """
+#     <script>
+#     function setFocusIfFree() {
+#         const active = doc.activeElement;
+
+#         // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
+#         const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
+
+#         // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
+#         if (!isUserInteracting) {
+#             const firstInput = window.parent.document.querySelector('input[type="text"]');
+#             if (firstInput) {
+#                 firstInput.focus();
+#             }
+#         }
+#     }
+
+#     // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
+#     const observer = new MutationObserver(() => {
+#         setFocusIfFree();
+#     });
+
+#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+#     // Tentative initiale
+#     setFocusIfFree();
+#     </script>
+#     """,
+#     height=0,
+# )
