@@ -1635,7 +1635,7 @@ elif st.session_state.etat == "connecte":
                             else:
                                 parts = mot_or_strip.split(" ", 1) 
 
-                                art, mot = parts[0], parts[1] if len(parts) == 2 else "", parts[0]
+                                art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
                             
                             mots_traites.append({
                                 "id_mot": id_m,
