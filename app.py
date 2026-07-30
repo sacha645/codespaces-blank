@@ -743,7 +743,6 @@ if "user" not in st.session_state:
 
 if "toggle_focus" not in st.session_state:
     st.session_state.toggle_focus = False
-    st.rerun()
 
 
 # --- BARRE DE NAVIGATION ---
@@ -905,6 +904,8 @@ elif st.session_state.etat == "nouveau":
                     else:
                         st.error("Ce nom d'utilisateur est déjà pris.")
 
+    placer_curseur(0)
+
 # 3. ÉTAT : CONNECT (Connexion)
 elif st.session_state.etat == "connect":
     st.write("")
@@ -931,6 +932,7 @@ elif st.session_state.etat == "connect":
                 else:
                     st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
+    placer_curseur(0)
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
