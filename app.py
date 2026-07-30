@@ -2269,28 +2269,37 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
+import streamlit as st
+import streamlit.components.v1 as components
+
 components.html(
     """
     <script>
-    function focusFirstInputOnce(observer) {
-        const firstInput = window.parent.document.querySelector('input[type="text"]');
-        if (firstInput) {
-            firstInput.focus();
-            if (observer) {
-                observer.disconnect(); // Stopper l'observation après le premier focus
+    function setFocusIfFree() {
+        const doc = window.parent.document;
+        const active = doc.activeElement;
+
+        // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
+        const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
+
+        // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
+        if (!isUserInteracting) {
+            const firstInput = doc.querySelector('input[type="text"], input[type="password"]');
+            if (firstInput) {
+                firstInput.focus();
             }
         }
     }
 
-    // Créer un observer qui se déconnecte après le premier focus
+    // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
     const observer = new MutationObserver(() => {
-        focusFirstInputOnce(observer);
+        setFocusIfFree();
     });
 
     observer.observe(window.parent.document.body, { childList: true, subtree: true });
 
-    // Tentative initiale au cas où le champ est déjà présent
-    focusFirstInputOnce(observer);
+    // Tentative initiale
+    setFocusIfFree();
     </script>
     """,
     height=0,
