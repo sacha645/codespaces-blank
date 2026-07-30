@@ -1127,15 +1127,7 @@ elif st.session_state.etat == "connecte":
             nom_liste = st.text_input("Nom de la liste", placeholder="Nom de la liste")
             st.write("")
 
-            type_liste_choisi = st.radio(
-
-                "Type de liste :",
-
-                ["Vocabulaire (Article, Mot, Traduction)", "Verbes (5 formes)"],
-
-                horizontal=True
-
-            )
+            type_liste_choisi = st.radio("Type de liste :", ["Vocabulaire (Article, Mot, Traduction)", "Verbes (5 formes)"], horizontal=True, on_change=lambda: st.session_state.update({"mots_temp": {}} if "mots_temp" in st.session_state else {}))
            
             is_verbe = "Verbes" in type_liste_choisi
             type_code = "verbe" if is_verbe else "vocabulaire"
@@ -1342,6 +1334,9 @@ elif st.session_state.etat == "connecte":
 
                     for mot in mots:
                         id_m, mot_or, _, _, _, trad = mot
+
+                        # Supprime les éventuels "!"
+                        mot_or = mot_or.removeprefix("!")
                         
                         # Récupération des erreurs spécifiques par sens
                         # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
