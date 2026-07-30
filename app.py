@@ -623,11 +623,8 @@ def supprimer_sauvegarde_partie(liste_id):
 
 # --- Placement automatique du curseur ---
 def placer_curseur(index=0):
-    # On inverse le booléen à chaque exécution
+    # Alternance div/span pour forcer React/Streamlit à exécuter le JS à chaque rechargement
     st.session_state.toggle_focus = not st.session_state.toggle_focus
-
-    # Si True -> <div>, Si False -> <span>
-    # Forcer un changement de balise oblige React à détruire et recréer le bloc dans la page
     balise = "div" if st.session_state.toggle_focus else "span"
 
     components.html(
@@ -638,22 +635,42 @@ def placer_curseur(index=0):
             const doc = window.parent.document;
 
             function appliquerFocus() {{
+                const active = doc.activeElement;
+                
+                // 🛑 VÉRIFICATION : Si le curseur est DÉJÀ dans un champ, textarea ou bouton, on stoppe !
+                const dejaOccupe = active && (
+                    active.tagName === 'INPUT' || 
+                    active.tagName === 'TEXTAREA' || 
+                    active.tagName === 'BUTTON'
+                );
+
+                if (dejaOccupe) {{
+                    return true; // Indique qu'on n'a pas besoin de toucher au focus
+                }}
+
+                // Sinon, on cherche le champ cible et on y met le focus
                 const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
                 if (inputs.length > {index}) {{
                     inputs[{index}].focus();
+                    return true;
                 }}
+                
+                return false;
             }}
 
-            // 1. Essai immédiat
-            appliquerFocus();
+            // 1. Tentative immédiate
+            const fait = appliquerFocus();
 
-            // 2. Observer de secours au cas où le champ met quelques millisecondes à s'afficher
-            const observer = new MutationObserver((mutations, obs) => {{
-                appliquerFocus();
-                obs.disconnect(); // Se coupe aussitôt
-            }});
+            // 2. Observer de secours au cas où le champ met un instant à apparaître
+            if (!fait) {{
+                const observer = new MutationObserver((mutations, obs) => {{
+                    if (appliquerFocus()) {{
+                        obs.disconnect(); // Dès que le focus est géré ou ignoré, on stoppe l'observer
+                    }}
+                }});
 
-            observer.observe(doc.body, {{ childList: true, subtree: true }});
+                observer.observe(doc.body, {{ childList: true, subtree: true }});
+            }}
         }})();
         </script>
         </{balise}>
@@ -896,7 +913,8 @@ elif st.session_state.etat == "connecte":
             mdp_modifie = len(nouveau_mdp.strip()) > 0 
             a_modifie = pseudo_modifie or mdp_modifie
 
-            st.write("") # Espacement
+            st.write("") 
+            st.write("")
 
             # 3. Boutons d'action
             col_save, col_back = st.columns(2)
