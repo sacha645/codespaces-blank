@@ -648,29 +648,31 @@ def supprimer_sauvegarde_partie(liste_id):
 #     """,
 #     height=0,
 # )
-components.html(
-    """
-    <script>
-    function focusFirstInput() {
-        const firstInput = window.parent.document.querySelector('input[type="text"]');
-        if (firstInput) {
-            firstInput.focus();
-        }
-    }
 
-    // Observer les changements dans le DOM parent
-    const observer = new MutationObserver(() => {
-        focusFirstInput();
-    });
+# components.html(
+#     """
+#     <script>
+#     function focusFirstInput() {
+#         const firstInput = window.parent.document.querySelector('input[type="text"]');
+#         if (firstInput) {
+#             firstInput.focus();
+#         }
+#     }
 
-    observer.observe(window.parent.document.body, { childList: true, subtree: true });
+#     // Observer les changements dans le DOM parent
+#     const observer = new MutationObserver(() => {
+#         focusFirstInput();
+#     });
 
-    // Focus initial
-    focusFirstInput();
-    </script>
-    """,
-    height=0,
-)
+#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+#     // Focus initial
+#     focusFirstInput();
+#     </script>
+#     """,
+#     height=0,
+# )
+
 
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
@@ -2266,6 +2268,33 @@ elif st.session_state.etat == "connecte":
                         st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
 
                         st.divider()
+
+components.html(
+    """
+    <script>
+    function focusFirstInputOnce(observer) {
+        const firstInput = window.parent.document.querySelector('input[type="text"]');
+        if (firstInput) {
+            firstInput.focus();
+            if (observer) {
+                observer.disconnect(); // Stopper l'observation après le premier focus
+            }
+        }
+    }
+
+    // Créer un observer qui se déconnecte après le premier focus
+    const observer = new MutationObserver(() => {
+        focusFirstInputOnce(observer);
+    });
+
+    observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+    // Tentative initiale au cas où le champ est déjà présent
+    focusFirstInputOnce(observer);
+    </script>
+    """,
+    height=0,
+)
 
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
