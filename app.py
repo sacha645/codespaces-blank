@@ -234,6 +234,39 @@ def renommer_liste(liste_id, nouveau_nom):
     conn.close()
 
 def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
+    """
+    Return des code d'erreur. Si pas d'erreur, return True :
+    - True : liste créée
+    - 0 : article trop long (voc)
+    - 1 : mot inexistant ou trop long (voc)
+    - 2 : traduction inexistante ou trop long (voc)
+    - 3 : forme manquante ou trop longue (verbe)
+    """
+
+    # 1. Analyse et validation préalable du fichier
+    is_voc = True if type_liste == "vocabulaire" else False
+
+    for ligne in nouveaux_mots :
+        if is_voc :
+            art, mot, trad = ligne
+
+            if not(0 < len(art.strip()) <= 7) :
+                return 0
+
+            if not(0 < len(mot.strip()) <= 30) :
+                return 1
+
+            if not(0 < len(trad.strip()) <= 30) :
+                return 2
+
+        else :
+            inf, pres, pret, pp, trad = ligne
+            variables = [inf, pres, pret, pp, trad]
+
+            if any(not (0 < len(v.strip()) <= 30) for v in variables):
+                return 3
+
+    # 3. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
@@ -257,6 +290,8 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
                 
     conn.commit()
     conn.close()
+
+    return True
 
 def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn = sqlite3.connect("utilisateurs.db")
@@ -1486,16 +1521,30 @@ elif st.session_state.etat == "connecte":
                         st.warning("Veuillez donner un nom valide à la liste. (1 à 40 caractères max)")
 
                     else:
-                        renommer_liste(liste_id, nouveau_nom.strip())
-                        remplacer_mots_liste(liste_id, st.session_state.mots_temp.values(), type_liste)
-                        
-                        st.session_state.action = "liste"
-                        st.session_state.liste_active_id = None
-                        st.session_state.nb_lignes_mots = 2
-                        st.session_state.pop("mots_temp", None)
-                        st.session_state.pop("id_a_suppr", None)
-                        reinitialiser_score_liste(user_id, liste_id)
-                        st.rerun()
+                        succes = remplacer_mots_liste(liste_id, st.session_state.mots_temp.values(), type_liste)
+
+                        if succes is True :
+                            renommer_liste(liste_id, nouveau_nom.strip())
+                            st.session_state.action = "liste"
+                            st.session_state.liste_active_id = None
+                            st.session_state.nb_lignes_mots = 2
+                            st.session_state.pop("mots_temp", None)
+                            st.session_state.pop("id_a_suppr", None)
+                            reinitialiser_score_liste(user_id, liste_id)
+                            st.rerun()
+
+                        else :
+                            if succes == 0 :
+                                st.warning(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max.   \nProblème ligne : {pb}")
+
+                            elif succes == 1 :
+                                st.warning(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+
+                            elif succes == 2 :
+                                st.warning(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+
+                            elif succes == 3 :
+                                st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
 
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
