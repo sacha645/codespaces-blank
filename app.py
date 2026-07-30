@@ -250,7 +250,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
         if is_voc :
             art, mot, trad = ligne
 
-            if not(0 < len(art.strip()) <= 7) :
+            if len(art.strip()) > 7 :
                 return 0
 
             if not(0 < len(mot.strip()) <= 30) :
@@ -1279,11 +1279,11 @@ elif st.session_state.etat == "connecte":
                                 for case in ligne[1:] :
                                     if not(0 < len(case.strip()) <= 30) :
                                         st.session_state.liste_valide = False
-                                        st.warning("Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
+                                        st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
                                     
                             else:
                                 if len(ligne[0].strip()) > 7 :
-                                    st.warning("Tous les articles ne sont pas valides ! (1 à 7 caractères max)")
+                                    st.warning("Tous les articles ne sont pas valides ! (7 caractères max)")
                                     st.session_state.liste_valide = False
 
                                 if not(0 < len(ligne[1].strip()) <= 30) :
@@ -1535,13 +1535,13 @@ elif st.session_state.etat == "connecte":
 
                         else :
                             if succes == 0 :
-                                st.warning(f"Tous les articles ne sont pas valides ! Ils doivent faire entre 1 et 7 caractères max.")
+                                st.warning("Tous les articles ne sont pas valides ! (7 caractères max)")
 
                             elif succes == 1 :
-                                st.warning(f"Mot manquant ou trop long ! Ils doivent faire entre 1 et 30 caractères max.")
+                                st.warning("Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
 
                             elif succes == 2 :
-                                st.warning(f"Traduction manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
+                                st.warning("Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
 
                             elif succes == 3 :
                                 st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
