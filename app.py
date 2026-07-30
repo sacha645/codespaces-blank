@@ -625,22 +625,25 @@ def supprimer_sauvegarde_partie(liste_id):
 components.html(
     """
     <script>
-    function focusFirstInput() {
+    function focusFirstInputOnce(observer) {
         const firstInput = window.parent.document.querySelector('input[type="text"]');
         if (firstInput) {
             firstInput.focus();
+            if (observer) {
+                observer.disconnect(); // Stopper l'observation après le premier focus
+            }
         }
     }
 
-    // Observer les changements dans le DOM parent
+    // Créer un observer qui se déconnecte après le premier focus
     const observer = new MutationObserver(() => {
-        focusFirstInput();
+        focusFirstInputOnce(observer);
     });
 
     observer.observe(window.parent.document.body, { childList: true, subtree: true });
 
-    // Focus initial
-    focusFirstInput();
+    // Tentative initiale au cas où le champ est déjà présent
+    focusFirstInputOnce(observer);
     </script>
     """,
     height=0,
