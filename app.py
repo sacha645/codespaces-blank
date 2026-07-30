@@ -743,6 +743,7 @@ if "user" not in st.session_state:
 
 if "toggle_focus" not in st.session_state:
     st.session_state.toggle_focus = False
+    st.rerun()
 
 
 # --- BARRE DE NAVIGATION ---
