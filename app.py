@@ -883,6 +883,7 @@ elif st.session_state.etat == "nouveau":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
+            placer_curseur(0)
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
 
@@ -915,6 +916,7 @@ elif st.session_state.etat == "connect":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
+            placer_curseur(0)
             mot_de_passe = st.text_input("Mot de passe", type="password")
 
             st.write("")
@@ -1128,7 +1130,7 @@ elif st.session_state.etat == "connecte":
                     st.info("**Format attendu :** `article mot, traduction en français` (un mot par ligne)  \n\n"
                             "**IMPORTANT :**  \n"
                             "- L'article est facultatif  \n"
-                            "- Si une expression contient des espaces qui ne servent pas à séparer l'article du mot, il faut mettre un point d'exclamation (!) au début de la ligne.")
+                            "- Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), il faut mettre un point d'exclamation (!) au début de la ligne.")
 
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
 
@@ -1173,7 +1175,7 @@ elif st.session_state.etat == "connecte":
                 st.session_state.action = "liste"
                 st.rerun()
 
-        # CAS D : FORMULAIRE DE CRÉATION DE LISTE
+        # CAS D : CREER LISTE
         elif st.session_state.action == "creer":
             st.subheader("✨ Créer une nouvelle liste")
             ligne_epaisse()
@@ -1338,6 +1340,8 @@ elif st.session_state.etat == "connecte":
                             st.session_state.pop("id_a_suppr", None)
                             st.session_state.pop("liste_valide", None)
                             st.rerun() 
+
+            st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
 
         # CAS E : VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
@@ -1567,6 +1571,8 @@ elif st.session_state.etat == "connecte":
 
                             elif succes == 3 :
                                 st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
+
+            st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
 
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
