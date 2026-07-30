@@ -2314,7 +2314,11 @@ elif st.session_state.etat == "connecte":
 #            del st.session_state[key]
 #        st.rerun()
 
+import time
 def placer_curseur(index=0):
+    # En changeant la 'key' à chaque passage, Streamlit recrée le composant
+    key_unique = f"autofocus_{index}_{time.time()}"
+
     components.html(
         f"""
         <script>
@@ -2324,14 +2328,12 @@ def placer_curseur(index=0):
             const observer = new MutationObserver((mutations, obs) => {{
                 const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
                 
-                // Dès que le champ qu'on cherche est détecté dans le DOM
                 if (inputs.length > {index}) {{
-                    inputs[{index}].focus(); // On met le focus
-                    obs.disconnect();        // 🛑 ON COUPE TOUT DE SUITE L'OBSERVER !
+                    inputs[{index}].focus();
+                    obs.disconnect(); // Se coupe dès qu'il a placé le curseur
                 }}
             }});
 
-            // On lance l'observation sur le corps du document
             observer.observe(doc.body, {{
                 childList: true,
                 subtree: true
@@ -2340,5 +2342,6 @@ def placer_curseur(index=0):
         </script>
         """,
         height=0,
+        key=key_unique,  # 👈 La clé magique est ici !
     )
 placer_curseur(0)
