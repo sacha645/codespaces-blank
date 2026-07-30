@@ -626,7 +626,8 @@ if "rerun" not in st.session_state :
    st.session_state.rerun = True
 else :
     st.session_state.rerun = True 
-if st.session_state.rerun :
+# 2. Injection du script SEULEMENT si rerun == True
+if st.session_state.rerun:
     components.html(
         """
         <script>
@@ -635,24 +636,26 @@ if st.session_state.rerun :
             if (firstInput) {
                 firstInput.focus();
                 if (observer) {
-                    observer.disconnect(); // Stopper l'observation après le premier focus
+                    observer.disconnect(); // Stop après premier focus
                 }
             }
         }
 
-        // Créer un observer qui se déconnecte après le premier focus
         const observer = new MutationObserver(() => {
             focusFirstInputOnce(observer);
         });
 
         observer.observe(window.parent.document.body, { childList: true, subtree: true });
 
-        // Tentative initiale au cas où le champ est déjà présent
+        // Tentative immédiate
         focusFirstInputOnce(observer);
         </script>
         """,
         height=0,
     )
+
+    # 3. On désactive le drapeau pour éviter un refocus au prochain rerun
+    st.session_state.rerun = False
 
 
 # --- INITIALISATION DU STATE ---
