@@ -883,7 +883,6 @@ elif st.session_state.etat == "nouveau":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
-            placer_curseur(0)
             mot_de_passe = st.text_input("Mot de passe", type="password")
             mot_de_passe_conf = st.text_input("Confirmer le mot de passe", type="password")
 
@@ -916,7 +915,6 @@ elif st.session_state.etat == "connect":
             st.write("")
 
             nom = st.text_input("Nom d'utilisateur")
-            placer_curseur(0)
             mot_de_passe = st.text_input("Mot de passe", type="password")
 
             st.write("")
@@ -1341,7 +1339,8 @@ elif st.session_state.etat == "connecte":
                             st.session_state.pop("liste_valide", None)
                             st.rerun() 
 
-            st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
+            if not is_verbe :
+                st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
 
         # CAS E : VOIR UNE LISTE (👁️)
         elif st.session_state.action == "voir":
@@ -1572,8 +1571,9 @@ elif st.session_state.etat == "connecte":
                             elif succes == 3 :
                                 st.warning(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.")
 
-            st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
-
+            if not type_liste == "verbe" :
+                st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
+            
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer":
             liste_id = st.session_state.liste_active_id
