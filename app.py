@@ -622,45 +622,55 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-if "rerun" not in st.session_state :
-   st.session_state.rerun = True
-else :
-    st.session_state.rerun = True 
-# Injection du script avec le drapeau Python → JS
+# components.html(
+#     """
+#     <script>
+#     function focusFirstInputOnce(observer) {
+#         const firstInput = window.parent.document.querySelector('input[type="text"]');
+#         if (firstInput) {
+#             firstInput.focus();
+#             if (observer) {
+#                 observer.disconnect(); // Stopper l'observation après le premier focus
+#             }
+#         }
+#     }
+
+#     // Créer un observer qui se déconnecte après le premier focus
+#     const observer = new MutationObserver(() => {
+#         focusFirstInputOnce(observer);
+#     });
+
+#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+
+#     // Tentative initiale au cas où le champ est déjà présent
+#     focusFirstInputOnce(observer);
+#     </script>
+#     """,
+#     height=0,
+# )
 components.html(
-    f"""
+    """
     <script>
-    const shouldFocus = {str(st.session_state.rerun).lower()}; // true ou false
-
-    function focusFirstInputOnce(observer) {{
+    function focusFirstInput() {
         const firstInput = window.parent.document.querySelector('input[type="text"]');
-        if (firstInput) {{
+        if (firstInput) {
             firstInput.focus();
-            if (observer) {{
-                observer.disconnect(); // Stop après premier focus
-            }}
-        }}
-    }}
+        }
+    }
 
-    if (shouldFocus) {{
-        // Créer un observer qui se déconnecte après le premier focus
-        const observer = new MutationObserver(() => {{
-            focusFirstInputOnce(observer);
-        }});
+    // Observer les changements dans le DOM parent
+    const observer = new MutationObserver(() => {
+        focusFirstInput();
+    });
 
-        observer.observe(window.parent.document.body, {{ childList: true, subtree: true }});
+    observer.observe(window.parent.document.body, { childList: true, subtree: true });
 
-        // Tentative initiale
-        focusFirstInputOnce(observer);
-    }}
+    // Focus initial
+    focusFirstInput();
     </script>
     """,
     height=0,
 )
-
-# Après injection, on désactive le drapeau pour éviter un refocus au prochain rerun
-st.session_state.rerun = False
-
 
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
