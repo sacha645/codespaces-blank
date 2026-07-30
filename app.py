@@ -2314,34 +2314,31 @@ elif st.session_state.etat == "connecte":
 #            del st.session_state[key]
 #        st.rerun()
 
-components.html(
-    """
-    <script>
-    function setFocusIfFree() {
-        const active = doc.activeElement;
+def placer_curseur(index=0):
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            const doc = window.parent.document;
 
-        // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
-        const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
+            const observer = new MutationObserver((mutations, obs) => {{
+                const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
+                
+                // Dès que le champ qu'on cherche est détecté dans le DOM
+                if (inputs.length > {index}) {{
+                    inputs[{index}].focus(); // On met le focus
+                    obs.disconnect();        // 🛑 ON COUPE TOUT DE SUITE L'OBSERVER !
+                }}
+            }});
 
-        // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
-        if (!isUserInteracting) {
-            const firstInput = window.parent.document.querySelector('input[type="text"]');
-            if (firstInput) {
-                firstInput.focus();
-            }
-        }
-    }
-
-    // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
-    const observer = new MutationObserver(() => {
-        setFocusIfFree();
-    });
-
-    observer.observe(window.parent.document.body, { childList: true, subtree: true });
-
-    // Tentative initiale
-    setFocusIfFree();
-    </script>
-    """,
-    height=0,
-)
+            // On lance l'observation sur le corps du document
+            observer.observe(doc.body, {{
+                childList: true,
+                subtree: true
+            }});
+        }})();
+        </script>
+        """,
+        height=0,
+    )
+placer_curseur(0)
