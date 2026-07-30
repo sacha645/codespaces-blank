@@ -622,88 +622,44 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Placement automatique du curseur ---
-# components.html(
-#     """
-#     <script>
-#     function focusFirstInputOnce(observer) {
-#         const firstInput = window.parent.document.querySelector('input[type="text"]');
-#         if (firstInput) {
-#             firstInput.focus();
-#             if (observer) {
-#                 observer.disconnect(); // Stopper l'observation après le premier focus
-#             }
-#         }
-#     }
+def placer_curseur(index=0):
+    # On inverse le booléen à chaque exécution
+    st.session_state.toggle_focus = not st.session_state.toggle_focus
 
-#     // Créer un observer qui se déconnecte après le premier focus
-#     const observer = new MutationObserver(() => {
-#         focusFirstInputOnce(observer);
-#     });
+    # Si True -> <div>, Si False -> <span>
+    # Forcer un changement de balise oblige React à détruire et recréer le bloc dans la page
+    balise = "div" if st.session_state.toggle_focus else "span"
 
-#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+    components.html(
+        f"""
+        <{balise}>
+        <script>
+        (function() {{
+            const doc = window.parent.document;
 
-#     // Tentative initiale au cas où le champ est déjà présent
-#     focusFirstInputOnce(observer);
-#     </script>
-#     """,
-#     height=0,
-# )
+            function appliquerFocus() {{
+                const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
+                if (inputs.length > {index}) {{
+                    inputs[{index}].focus();
+                }}
+            }}
 
-# components.html(
-#     """
-#     <script>
-#     function focusFirstInput() {
-#         const firstInput = window.parent.document.querySelector('input[type="text"]');
-#         if (firstInput) {
-#             firstInput.focus();
-#         }
-#     }
+            // 1. Essai immédiat
+            appliquerFocus();
 
-#     // Observer les changements dans le DOM parent
-#     const observer = new MutationObserver(() => {
-#         focusFirstInput();
-#     });
+            // 2. Observer de secours au cas où le champ met quelques millisecondes à s'afficher
+            const observer = new MutationObserver((mutations, obs) => {{
+                appliquerFocus();
+                obs.disconnect(); // Se coupe aussitôt
+            }});
 
-#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
-
-#     // Focus initial
-#     focusFirstInput();
-#     </script>
-#     """,
-#     height=0,
-# )
-
-# components.html(
-#     """
-#     <script>
-#     function setFocusIfFree() {
-#         const active = doc.activeElement;
-
-#         // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
-#         const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
-
-#         // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
-#         if (!isUserInteracting) {
-#             const firstInput = window.parent.document.querySelector('input[type="text"]');
-#             if (firstInput) {
-#                 firstInput.focus();
-#             }
-#         }
-#     }
-
-#     // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
-#     const observer = new MutationObserver(() => {
-#         setFocusIfFree();
-#     });
-
-#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
-
-#     // Tentative initiale
-#     setFocusIfFree();
-#     </script>
-#     """,
-#     height=0,
-# )
+            observer.observe(doc.body, {{ childList: true, subtree: true }});
+        }})();
+        </script>
+        </{balise}>
+        """,
+        height=0,
+    )
 
 
 # --- INITIALISATION DU STATE ---
@@ -712,6 +668,9 @@ if "etat" not in st.session_state:
 
 if "user" not in st.session_state:
     st.session_state.user = None
+
+if "toggle_focus" not in st.session_state:
+    st.session_state.toggle_focus = False
 
 
 # --- BARRE DE NAVIGATION ---
@@ -927,6 +886,9 @@ elif st.session_state.etat == "connecte":
 
             # 1. Champs de saisie
             nouveau_pseudo = st.text_input("Pseudo", value=st.session_state.temp_new_username) if "temp_new_username" in st.session_state else st.text_input("Pseudo", value=username)
+
+            st.write("")
+
             nouveau_mdp = st.text_input("Nouveau mot de passe", value=st.session_state.temp_new_password, type="password", placeholder="Entrer un nouveau mot de passe") if "temp_new_password" in st.session_state else st.text_input("Nouveau mot de passe", type="password", placeholder="Entrer un nouveau mot de passe")
 
             # 2. Vérification des modifications
@@ -962,24 +924,36 @@ elif st.session_state.etat == "connecte":
             pseudo_modifie = st.session_state.temp_new_username != username
             mdp_modifie = len(st.session_state.temp_new_password) > 0
 
+            st.write("")
+
             # Cas A : Seulement le pseudo a été modifié
             if pseudo_modifie and not mdp_modifie:
                 st.info("Vous êtes sur le point de modifier votre pseudo.")
+
+                st.write("")
+
                 mdp_actuel = st.text_input(
                     "Mot de passe actuel",
                     type="password",
                     placeholder="Veuillez confirmer votre mot de passe"
                 )
+
                 confirm_mdp = None  # Non nécessaire dans ce cas
 
             # Cas B : Le mot de passe (ou les deux) a été modifié
             else:
                 st.info("Vous êtes sur le point de modifier des informations sensibles.")
+
+                st.write("")
+
                 confirm_mdp = st.text_input(
                     "Confirmer le nouveau mot de passe",
                     type="password",
                     placeholder="Saisissez à nouveau votre nouveau mot de passe"
                 )
+
+                st.write("")
+
                 mdp_actuel = st.text_input(
                     "Mot de passe actuel",
                     type="password",
@@ -2301,60 +2275,17 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
+placer_curseur(0)
+
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-#    st.caption("Affiche en temps réel le contenu de st.session_state")
+   st.caption("Affiche en temps réel le contenu de st.session_state")
    
-#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
-#    st.json(dict(st.session_state))
+   # Affiche l'état complet sous forme JSON/dictionnaire lisible
+   st.json(dict(st.session_state))
    
-#    # Optionnel : Bouton pour vider la session et recommencer à zéro
-#    if st.button("🗑️ Vider le session_state"):
-#        for key in list(st.session_state.keys()):
-#            del st.session_state[key]
-#        st.rerun()
-
-
-if "toggle_focus" not in st.session_state:
-    st.session_state.toggle_focus = False
-
-
-def placer_curseur(index=0):
-    # On inverse le booléen à chaque exécution
-    st.session_state.toggle_focus = not st.session_state.toggle_focus
-
-    # Si True -> <div>, Si False -> <span>
-    # Forcer un changement de balise oblige React à détruire et recréer le bloc dans la page
-    balise = "div" if st.session_state.toggle_focus else "span"
-
-    components.html(
-        f"""
-        <{balise}>
-        <script>
-        (function() {{
-            const doc = window.parent.document;
-
-            function appliquerFocus() {{
-                const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
-                if (inputs.length > {index}) {{
-                    inputs[{index}].focus();
-                }}
-            }}
-
-            // 1. Essai immédiat
-            appliquerFocus();
-
-            // 2. Observer de secours au cas où le champ met quelques millisecondes à s'afficher
-            const observer = new MutationObserver((mutations, obs) => {{
-                appliquerFocus();
-                obs.disconnect(); // Se coupe aussitôt
-            }});
-
-            observer.observe(doc.body, {{ childList: true, subtree: true }});
-        }})();
-        </script>
-        </{balise}>
-        """,
-        height=0,
-    )
-placer_curseur(0)
+   # Optionnel : Bouton pour vider la session et recommencer à zéro
+   if st.button("🗑️ Vider le session_state"):
+       for key in list(st.session_state.keys()):
+           del st.session_state[key]
+       st.rerun()
