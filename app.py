@@ -2313,34 +2313,29 @@ elif st.session_state.etat == "connecte":
 #        for key in list(st.session_state.keys()):
 #            del st.session_state[key]
 #        st.rerun()
-
+import time
 def placer_curseur(index=0):
-    # Conteneur dynamique réinitialisé à chaque rechargement
-    conteneur = st.empty()
+    # Génération d'une valeur unique à chaque execution Python
+    id_unique = int(time.time() * 1000)
 
-    with conteneur:
-        components.html(
-            f"""
-            <script>
-            (function() {{
-                const doc = window.parent.document;
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            const doc = window.parent.document;
 
-                const observer = new MutationObserver((mutations, obs) => {{
-                    const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
-                    
-                    if (inputs.length > {index}) {{
-                        inputs[{index}].focus();
-                        obs.disconnect(); // Se déconnecte aussitôt pour te laisser naviguer librement
-                    }}
-                }});
+            const observer = new MutationObserver((mutations, obs) => {{
+                const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
+                if (inputs.length > {index}) {{
+                    inputs[{index}].focus();
+                    obs.disconnect(); // Se déconnecte immédiatement pour te laisser naviguer libre
+                }}
+            }});
 
-                observer.observe(doc.body, {{
-                    childList: true,
-                    subtree: true
-                }});
-            }})();
-            </script>
-            """,
-            height=0,
-        )
-placer_curseur()
+            observer.observe(doc.body, {{ childList: true, subtree: true }});
+        }})();
+        </script>
+        """,
+        height=0,
+    )
+placer_curseur(0)
