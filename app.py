@@ -279,7 +279,8 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
             if any(not (0 < len(v.strip()) <= 30) for v in variables):
                 return 3
 
-    # 3. Insertion en BDD uniquement si le format est correct
+
+    # 2. Insertion en BDD uniquement si le format est correct
     conn = sqlite3.connect("utilisateurs.db")
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
@@ -287,15 +288,21 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     for item in nouveaux_mots:
         if type_liste == "verbe":
             inf, pres, pret, pp, trad = item
-            if inf.strip() and trad.strip():
+            if inf.strip() and pres.strip() and pret.strip() and pp.strip() and trad.strip():
                 c.execute("""
                     INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
                     VALUES (?, ?, ?, ?, ?, ?)
                 """, (liste_id, inf.strip(), pres.strip(), pret.strip(), pp.strip(), trad.strip()))
+
         else:
             art, mot, trad = item
+
             if mot.strip() and trad.strip():
-                mot_complet = f"{art.strip()} {mot.strip()}" if art.strip() else mot.strip()
+                inf_mot_strip = inf_mot.strip()
+                art_strip = art.strip()
+
+                mot_complet = f"{art_strip} {inf_mot_strip}" if art_strip else "!" + inf_mot_strip if " " in inf_mot_strip else inf_mot_strip
+
                 c.execute("""
                     INSERT INTO mots (liste_id, mot_original, traduction) 
                     VALUES (?, ?, ?)
@@ -1315,13 +1322,15 @@ elif st.session_state.etat == "connecte":
 
                             for art, inf_mot, pres, pret, pp, trad in st.session_state.mots_temp.values():
                                 if is_verbe:
-                                    if inf_mot.strip() and trad.strip():
+                                    if inf_mot.strip() and pres.strip() and pret.strip() and pp.strip() and trad.strip():
                                         ajouter_élément_liste(derniere_liste_id, inf_mot, pres, pret, pp, trad)
 
                                 else:
+                                    inf_mot_strip = inf_mot.strip()
+                                    art_strip = art.strip()
                                     if inf_mot.strip() and trad.strip():
-                                        mot_comp = f"{art.strip()} {inf_mot.strip()}" if art.strip() else inf_mot.strip()
-                                        ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad)
+                                        mot_comp = f"{art_strip} {inf_mot_strip}" if art_strip else "!" + inf_mot_strip if " " in inf_mot_strip else inf_mot_strip
+                                        ajouter_élément_liste(derniere_liste_id, mot_comp, "", "", "", trad.strip())
 
                             st.session_state.action = "liste"
                             st.session_state.nb_lignes_mots = 2
