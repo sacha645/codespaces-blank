@@ -1814,7 +1814,7 @@ elif st.session_state.etat == "connecte":
                                 partie_art_html = f"<span style='color:red;'>{u_art if u_art else '(vide)'}</span>" if not art_correct else u_art
                                 partie_mot_html = f"<span style='color:red;'>{u_mot if u_mot else '(vide)'}</span>" if not mot_correct else u_mot
                                 
-                                rep_user_formatted = f"{partie_art_html} {partie_mot_html}".strip() if has_article else partie_mot_html
+                                rep_user_formatted = f"{partie_art_html} {partie_mot_html}".strip() 
 
                                 st.session_state.erreurs_commises.append({
                                     "id_mot": item["id_mot"],
