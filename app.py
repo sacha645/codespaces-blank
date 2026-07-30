@@ -2313,28 +2313,47 @@ elif st.session_state.etat == "connecte":
 #        for key in list(st.session_state.keys()):
 #            del st.session_state[key]
 #        st.rerun()
-import time
+
+
+if "toggle_focus" not in st.session_state:
+    st.session_state.toggle_focus = False
+
+
 def placer_curseur(index=0):
-    # Génération d'une valeur unique à chaque execution Python
-    id_unique = int(time.time() * 1000)
+    # On inverse le booléen à chaque exécution
+    st.session_state.toggle_focus = not st.session_state.toggle_focus
+
+    # Si True -> <div>, Si False -> <span>
+    # Forcer un changement de balise oblige React à détruire et recréer le bloc dans la page
+    balise = "div" if st.session_state.toggle_focus else "span"
 
     components.html(
         f"""
+        <{balise}>
         <script>
         (function() {{
             const doc = window.parent.document;
 
-            const observer = new MutationObserver((mutations, obs) => {{
+            function appliquerFocus() {{
                 const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
                 if (inputs.length > {index}) {{
                     inputs[{index}].focus();
-                    obs.disconnect(); // Se déconnecte immédiatement pour te laisser naviguer libre
                 }}
+            }}
+
+            // 1. Essai immédiat
+            appliquerFocus();
+
+            // 2. Observer de secours au cas où le champ met quelques millisecondes à s'afficher
+            const observer = new MutationObserver((mutations, obs) => {{
+                appliquerFocus();
+                obs.disconnect(); // Se coupe aussitôt
             }});
 
             observer.observe(doc.body, {{ childList: true, subtree: true }});
         }})();
         </script>
+        </{balise}>
         """,
         height=0,
     )
