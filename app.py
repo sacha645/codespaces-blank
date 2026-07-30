@@ -2314,34 +2314,33 @@ elif st.session_state.etat == "connecte":
 #            del st.session_state[key]
 #        st.rerun()
 
-import time
 def placer_curseur(index=0):
-    # En changeant la 'key' à chaque passage, Streamlit recrée le composant
-    key_unique = f"autofocus_{index}_{time.time()}"
+    # Conteneur dynamique réinitialisé à chaque rechargement
+    conteneur = st.empty()
 
-    components.html(
-        f"""
-        <script>
-        (function() {{
-            const doc = window.parent.document;
+    with conteneur:
+        components.html(
+            f"""
+            <script>
+            (function() {{
+                const doc = window.parent.document;
 
-            const observer = new MutationObserver((mutations, obs) => {{
-                const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
-                
-                if (inputs.length > {index}) {{
-                    inputs[{index}].focus();
-                    obs.disconnect(); // Se coupe dès qu'il a placé le curseur
-                }}
-            }});
+                const observer = new MutationObserver((mutations, obs) => {{
+                    const inputs = doc.querySelectorAll('input[type="text"], input[type="password"]');
+                    
+                    if (inputs.length > {index}) {{
+                        inputs[{index}].focus();
+                        obs.disconnect(); // Se déconnecte aussitôt pour te laisser naviguer librement
+                    }}
+                }});
 
-            observer.observe(doc.body, {{
-                childList: true,
-                subtree: true
-            }});
-        }})();
-        </script>
-        """,
-        height=0,
-        key=key_unique,  # 👈 La clé magique est ici !
-    )
-placer_curseur(0)
+                observer.observe(doc.body, {{
+                    childList: true,
+                    subtree: true
+                }});
+            }})();
+            </script>
+            """,
+            height=0,
+        )
+placer_curseur()
