@@ -2314,34 +2314,34 @@ elif st.session_state.etat == "connecte":
 #            del st.session_state[key]
 #        st.rerun()
 
-# components.html(
-#     """
-#     <script>
-#     function setFocusIfFree() {
-#         const active = doc.activeElement;
+components.html(
+    """
+    <script>
+    function setFocusIfFree() {
+        const active = doc.activeElement;
 
-#         // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
-#         const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
+        // 1. On vérifie si l'utilisateur est DÉJÀ dans un champ de texte ou un bouton
+        const isUserInteracting = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'BUTTON');
 
-#         // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
-#         if (!isUserInteracting) {
-#             const firstInput = window.parent.document.querySelector('input[type="text"]');
-#             if (firstInput) {
-#                 firstInput.focus();
-#             }
-#         }
-#     }
+        // 2. Si l'utilisateur n'est nulle part, on met le focus sur le premier champ
+        if (!isUserInteracting) {
+            const firstInput = window.parent.document.querySelector('input[type="text"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }
+    }
 
-#     // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
-#     const observer = new MutationObserver(() => {
-#         setFocusIfFree();
-#     });
+    // Un observer doux : il s'exécute quand la page bouge, mais respecte l'action de l'utilisateur
+    const observer = new MutationObserver(() => {
+        setFocusIfFree();
+    });
 
-#     observer.observe(window.parent.document.body, { childList: true, subtree: true });
+    observer.observe(window.parent.document.body, { childList: true, subtree: true });
 
-#     // Tentative initiale
-#     setFocusIfFree();
-#     </script>
-#     """,
-#     height=0,
-# )
+    // Tentative initiale
+    setFocusIfFree();
+    </script>
+    """,
+    height=0,
+)
