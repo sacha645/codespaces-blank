@@ -1624,15 +1624,18 @@ elif st.session_state.etat == "connecte":
                         st.toast("⚡ Sauvegarde chargée !")
                     else:
                         mots_bruts = recuperer_mots_liste(liste_id)
-                        articles_connus = ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"]
                         
                         mots_traites = []
                         for id_m, mot_or, _, _, _, trad in mots_bruts:
-                            parts = mot_or.strip().split(" ", 1)
-                            if len(parts) == 2 and parts[0].lower() in articles_connus:
-                                art, mot = parts[0], parts[1]
+                            mot_or_strip = mot_or.strip()
+
+                            if mot_or_strip.startswith("!") :
+                                art, mot = "", mot_or_strip.removeprefix("!")
+
                             else:
-                                art, mot = "", mot_or.strip()
+                                parts = mot_or_strip.split(" ", 1) 
+
+                                art, mot = parts[0], parts[1] if len(parts) == 2 else "", parts[0]
                             
                             mots_traites.append({
                                 "id_mot": id_m,
