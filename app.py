@@ -940,7 +940,15 @@ elif st.session_state.etat == "connect":
                     st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
 
-# --- 3. ÉTAT : CONNECTE (Espace utilisateur) ---
+# --- 3. ÉTAT : NONE ou CONNECTE (AIDE DU SITE) ---
+elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and st.session_state.action == "infos") :
+    _, col_texte, _ = st.columns([1, 3, 1])
+
+    with col_texte :
+        st.title("Bienvenu sur le Réviseur")
+
+
+# --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
@@ -2376,13 +2384,6 @@ elif st.session_state.etat == "connecte":
 
                         st.divider()
 
-
-# --- 4. ÉTAT : NONE ou CONNECTE (AIDE DU SITE) ---
-elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and st.session_state.action == "infos") :
-    _, col_texte, _ = st.columns([1, 3, 1])
-
-    with col_texte :
-        st.title("Bienvenu sur le Réviseur")
 
 # --- On place l'autofocus ---
 placer_curseur(0)
