@@ -1001,31 +1001,24 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
             
             st.markdown(
-    """➢ Le site vous permet de créer deux types de listes selon vos besoins :
-    **❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...
-    **❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !
+    """➢ Le site vous permet de créer deux types de listes selon vos besoins :  
+**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  
+**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  
 
+➢ 🛠️ Comment créer une liste ?  
+1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  
+2. Vous aurez à faire le choix entre vocabulaire et verbe :  
+❖Pour une liste de vocabulaire, vous devez remplir la case "**mot**" et la case "**traduction**". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  
+❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  
+3. Une fois que vous avez terminé, appuyez sur "Enregistrez votre liste".  
 
-➢ 🛠️ Comment créer une liste ?
-    1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").
-    2. Vous aurez à faire le choix entre vocabulaire et verbe :
-        ❖Pour une liste de vocabulaire, vous devez remplir la case "**mot**" et la case "**traduction**". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).
-        ❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.
-    3. Une fois que vous avez terminé, appuyez sur "Enregistrez votre liste".
-
-
-➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :
-    1. La consulter en appuyant sur le bouton "👁️"
-    2. La modifier en appuyant sur le bouton "✏️"
-    3. Vous entrainer dessus en appuyant sur le bouton "🎯"
-    4. La partager en appuyant sur le bouton "🔗" (voir onglet "")
-    5. La supprimer en appuyant sur le bouton "🗑️". ⚠️ ***Attention : cette action est <u>irréversible</u>***
-
-
-
-
-➢ **A savoir** :
-    ❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )""",
+➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  
+1. La consulter en appuyant sur le bouton "👁️"  
+2. La modifier en appuyant sur le bouton "✏️"  
+3. Vous entrainer dessus en appuyant sur le bouton "🎯"  
+4. La partager en appuyant sur le bouton "🔗" (voir onglet "")  
+5. La supprimer en appuyant sur le bouton "🗑️". ⚠️ ***Attention : cette action est <u>irréversible</u>*** ➢ **A savoir** :  
+❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )""",
     unsafe_allow_html=True,
 )
 
