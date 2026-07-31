@@ -941,7 +941,7 @@ elif st.session_state.etat == "connect":
 
 
 # --- 3. ÉTAT : NONE ou CONNECTE (AIDE DU SITE) ---
-elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and st.session_state.action == "infos") :
+elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and st.session_state.get("action") == "infos") :
     _, col_texte, _ = st.columns([1, 3, 1])
 
     with col_texte :
