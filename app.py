@@ -1000,28 +1000,27 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins :  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n
-
-➢ 🛠️ Comment créer une liste ?  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n
-
-➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***  \n
-
-
-➢ **A savoir** :
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )
-""", unsafe_allow_html=True)
+            st.markdown("➢ Le site vous permet de créer deux types de listes selon vos besoins :  \n" \
+            "    **❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  \n" \
+            "    **❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n" \
+            "" \
+            "➢ 🛠️ Comment créer une liste ?  \n" \
+            "    1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n" \
+            "    2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n" \
+            "         ❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n" \
+            "         ❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n" \
+            "    3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n" \
+            "" \
+            "➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n" \
+            "    1. La consulter en appuyant sur le bouton \"👁️\"  \n" \
+            "    2. La modifier en appuyant sur le bouton \"✏️\"  \n" \
+            "    3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n" \
+            "    4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n" \
+            "    5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***" \
+            "" \
+            "" \
+            "➢ **A savoir** :  \n" \
+            "    ❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )", unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
@@ -1821,7 +1820,7 @@ elif st.session_state.etat == "connecte":
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
-                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` &nbsp;|&nbsp; 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` | 🇫🇷 `{anc_d:g}/{anc_td:g}`")
 
                     st.write("")
 
@@ -2465,7 +2464,7 @@ elif st.session_state.etat == "connecte":
                             partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
                             partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
 
-                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
+                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} | {partie_drapeau}"
 
                     else:
                         texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
