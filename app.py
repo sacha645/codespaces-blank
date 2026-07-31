@@ -974,25 +974,25 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         st.write("")
 
         # --- SOMMAIRE AVEC ST.TABS ---
-        tab_compte, tab_listes, tab_social, tab_revisions, tab_scores, tab_astuces = st.tabs(["Gérer mon compte", "📁 Créer et gérer mes listes", "🔗 Social", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
+        tab_compte, tab_listes, tab_social, tab_revisions, tab_scores, tab_astuces = st.tabs(["🛠️ Gérer mon compte", "📁 Créer et gérer mes listes", "🔗 Social", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
 
         # 1. Gérer son compte
         with tab_compte : 
-            st.header("🛠️ Mon compte")
+            st.header("🛠️ Gérer Mon compte")
             
             st.write("")
 
-            st.write("""➢ **Identifiants & Connexion :** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
-
+            st.write("""➢ ***Identifiants & Connexion :*** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
 *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
 
-➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
+➢ ***Pseudo sensible à la case :*** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
 
-➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
+➢ ***Modification du compte :*** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
 
-➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
+➢ ***ID unique du compte :*** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).  
 
-➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. ⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""",  unsafe_allow_html=True)
+➢ ***Suppression du compte :*** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. 
+⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""",  unsafe_allow_html=True)
 
         # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
@@ -1000,27 +1000,26 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins :
-&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...
-&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple ! 
-            
-➢ 🛠️ Comment créer une liste ?
-&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").
-&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand). 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.
-&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".
-&nbsp;&nbsp;&nbsp;&nbsp;
+            st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins :  \n
+&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  \n
+&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n
 
-➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors : 
-&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"
-&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"
-&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"
-&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")
-&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***
+➢ 🛠️ Comment créer une liste ?  \n
+&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n
+&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n
+&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n
 
-➢ **A savoir** : 
-&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet ) 
+➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n
+&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n
+&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***  \n
+
+➢ **A savoir** :  \n
+&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )  \n
 """, unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
