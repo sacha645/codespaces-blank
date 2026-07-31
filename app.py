@@ -992,7 +992,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 ➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
 
-➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. ⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""")
+➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. ⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""",  unsafe_allow_html=True)
 
         # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
@@ -1000,7 +1000,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.write("""➢ Le site vous permet de créer deux types de listes selon vos besoins :
+            st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins :
 &nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...
 &nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple ! 
             
@@ -1021,7 +1021,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 ➢ **A savoir** : 
 &nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet ) 
-""")
+""", unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
