@@ -1001,25 +1001,26 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
             
             st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins :  \n
-&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  \n
-&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n
 
 ➢ 🛠️ Comment créer une liste ?  \n
-&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n
-&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n
-&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n
 
 ➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n
-&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n
-&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n
-&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***  \n
 
-➢ **A savoir** :  \n
-&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )  \n
+
+➢ **A savoir** :
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )
 """, unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
