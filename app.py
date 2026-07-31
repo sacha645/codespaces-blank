@@ -974,53 +974,69 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         st.write("")
 
         # --- SOMMAIRE AVEC ST.TABS ---
-        tab_compte, tab_listes, tab_revisions, tab_scores, tab_astuces = st.tabs(["Gérer mon compte", "📁 Créer et gérer mes listes", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
+        tab_compte, tab_listes, tab_social, tab_revisions, tab_scores, tab_astuces = st.tabs(["Gérer mon compte", "📁 Créer et gérer mes listes", "🔗 Social", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
 
-        # 1. CRÉER ET GÉRER SES LISTES
+        # 1. Gérer son compte
         with tab_compte : 
-            st.header("Mon compte")
+            st.header("🛠️ Mon compte")
             
             st.write("")
 
-            st.write("""➢ **Identifiants & Connexion :** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera **impossible** de récupérer votre compte !
+            st.write("""➢ **Identifiants & Connexion :** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
+
 *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
 
-➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo respecté les majuscules et les minuscules !
+➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
 
-➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page *\"Profil\"* accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
+➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
 
 ➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
 
-➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton *\"Supprimer mon compte\"* situé en haut dans la barre de navigation. ⚠️ **Attention : cette action est irréversible et supprimera l'intégralité de vos listes enregistrées.**""")
+➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. ⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""")
 
+        # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
-            st.write("""➢ Le site vous permet de créer deux types de listes selon vos besoins :*
-                **❖ Listes de Vocabulaire classique :** Pour apprendre des mots simples, des expressions ou des tournures de phrases.
-                **❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes (ex: *Infinitif, Présent, Prétérit, Participe Passé, Traduction* pour l'anglais ou l'allemand).
-            
-            ➢ 🛠️ Comment ajouter des mots ?
-                1. Allez dans le menu d'édition de votre liste situé : tout en haut à gauche si vous créez la liste ; sinon à droite du nom de la liste si vous souhaitez modifier une liste existante.
-                2. Pour une liste de vocabulaire remplissez le terme original (avec ou sans son article) et sa traduction. Pour une liste de verbe remplissez les 5 formes du verbes.
-                3. Appuyez sur  \"Enregistrez votre liste\".""")
 
-        # 2. ENTRAÎNEMENT & RÉVISIONS
+            st.write("")
+            
+            st.write("""➢ Le site vous permet de créer deux types de listes selon vos besoins :
+&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...
+&nbsp;&nbsp;&nbsp;&nbsp;**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple ! 
+            
+➢ 🛠️ Comment créer une liste ?
+&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").
+&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand). 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.
+&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors : 
+&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"
+&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"
+&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"
+&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")
+&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***
+
+➢ **A savoir** : 
+&nbsp;&nbsp;&nbsp;&nbsp;❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet ) 
+""")
+
+        # . ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
             st.header("🎯 Entraînement & Révisions")
             st.write("Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment !\n\n#### 🔄 Les modes de révision disponibles :\n* **🌐 Vers la langue étrangère :** La traduction française vous est donnée, à vous de retrouver le mot original (ou le verbe).\n* **🇫🇷 Vers le français :** Le mot étranger vous est présenté, vous devez saisir sa traduction en français.\n\n> **Note :** La validation s'effectue automatiquement ou via la touche Échap/Entrée selon votre mode de saisie.")
 
-        # 3. SUIVI DES SCORES
+        # . SUIVI DES SCORES
         with tab_scores:
             st.header("🏆 Suivi de mes scores")
             st.write("Pour vous aider à mesurer vos progrès, **Le Réviseur** conserve vos meilleurs résultats pour chaque liste.\n\n* 🌐 **Score Langue Étrangère :** Indique votre meilleur score lors du test vers la langue cible.\n* 🇫🇷 **Score Français :** Indique votre meilleur résultat lors de la traduction vers le français.\n* 📊 Vos scores s'affichent sous forme de ratios (ex: `15/20`) directement sur vos cartes de listes.")
 
-        # 4. ASTUCES & SYNTAXE
+        # . ASTUCES & SYNTAXE
         with tab_astuces:
             st.header("💡 Astuces & Syntaxe spéciale")
             st.write("Pour que le site sépare correctement les articles des mots, voici deux règles simples à connaître :\n\n#### 1. Gestion des articles\n* Si vous écrivez `der Hund`, le site comprendra automatiquement que **\"der\"** est l'article et **\"Hund\"** est le mot.\n\n#### 2. Cas des expressions avec espaces (`!`)\n* Si votre mot contient des espaces qui ne servent pas à séparer un article (ex: une expression comme *\"auf jeden Fall\"*), laissez la case article vide et **placez un point d'exclamation `!` au tout début du mot**.\n* **Exemple :** `!auf jeden Fall` $\\rightarrow$ Le site saura qu'il ne faut pas chercher d'article au début !")
-
-            
-
 
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
@@ -2387,77 +2403,77 @@ elif st.session_state.etat == "connecte":
                 st.info("Tu n'as aucune liste pour l'instant. Clique sur ➕ pour en créer une !")
 
             else:
-                    for liste_id, nom_liste, type_liste in listes:
-                        col_nom, col_voir, col_edit, col_train, col_share, col_del = st.columns([3, 1, 1, 1, 1, 1])
-                        
-                        with col_nom:
-                            if type_liste == "verbe":
-                                st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
-                            else:
-                                st.markdown(f"<h3 style='color: #1E90FF; margin:0;'>📖 {nom_liste} <span style='font-size:12px; background-color:#1E90FF; color:white; padding:2px 8px; border-radius:10px;'>VOCABULAIRE</span></h3>", unsafe_allow_html=True)
+                for liste_id, nom_liste, type_liste in listes:
+                    col_nom, col_voir, col_edit, col_train, col_share, col_del = st.columns([3, 1, 1, 1, 1, 1])
+                    
+                    with col_nom:
+                        if type_liste == "verbe":
+                            st.markdown(f"<h3 style='color: #8A2BE2; margin:0;'>⚡ {nom_liste} <span style='font-size:12px; background-color:#8A2BE2; color:white; padding:2px 8px; border-radius:10px;'>VERBES</span></h3>", unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"<h3 style='color: #1E90FF; margin:0;'>📖 {nom_liste} <span style='font-size:12px; background-color:#1E90FF; color:white; padding:2px 8px; border-radius:10px;'>VOCABULAIRE</span></h3>", unsafe_allow_html=True)
 
-                        with col_voir:
-                            st.write("")
-                            if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
-                                st.session_state.action = "voir"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-                        with col_edit:
-                            st.write("")
-                            if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
-                                st.session_state.action = "editer"
-                                st.session_state.liste_active_id = liste_id
-                                st.session_state.nb_lignes_mots = 2
-                                st.rerun()
-
-                        with col_share:
-                            st.write("")
-                            if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
-                                st.session_state.action = "partager"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-                        with col_train:
-                            st.write("")
-                            if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
-                                st.session_state.action = "entrainer"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-                        with col_del:
-                            st.write("")
-                            if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
-                                st.session_state.action = "supprimer"
-                                st.session_state.action_suppr = "liste"
-                                st.session_state.liste_active_id = liste_id
-                                st.rerun()
-
-
-                        # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ AVEC INFOBULLES ---
-                        score_record = recuperer_score_liste(user_id, liste_id)
-
+                    with col_voir:
                         st.write("")
-                        if score_record:
-                            s_v, t_v, s_d, t_d = score_record
-                            
-                            if type_liste == "verbe":
-                                partie_verbe = f"<span title='Score global aux verbes'>⚡ <code>{s_v:g}/{t_v:g}</code></span>"
-                                texte_score = f"🏆 <b>Meilleur score :</b> {partie_verbe}"
+                        if st.button("👁️", key=f"voir_{liste_id}", help="Voir la liste"):
+                            st.session_state.action = "voir"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
 
-                            else:
-                                partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
-                                partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
+                    with col_edit:
+                        st.write("")
+                        if st.button("✏️", key=f"edit_{liste_id}", help="Éditer la liste"):
+                            st.session_state.action = "editer"
+                            st.session_state.liste_active_id = liste_id
+                            st.session_state.nb_lignes_mots = 2
+                            st.rerun()
 
-                                texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
+                    with col_share:
+                        st.write("")
+                        if st.button("🔗", key=f"share_{liste_id}", help="Partager cette liste"):
+                            st.session_state.action = "partager"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+                    with col_train:
+                        st.write("")
+                        if st.button("🎯", key=f"train_{liste_id}", help="S'entraîner sur cette liste"):
+                            st.session_state.action = "entrainer"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+                    with col_del:
+                        st.write("")
+                        if st.button("🗑️", key=f"del_{liste_id}", help="Supprimer la liste"):
+                            st.session_state.action = "supprimer"
+                            st.session_state.action_suppr = "liste"
+                            st.session_state.liste_active_id = liste_id
+                            st.rerun()
+
+
+                    # --- AFFICHAGE DU MEILLEUR SCORE CENTRÉ AVEC INFOBULLES ---
+                    score_record = recuperer_score_liste(user_id, liste_id)
+
+                    st.write("")
+                    if score_record:
+                        s_v, t_v, s_d, t_d = score_record
+                        
+                        if type_liste == "verbe":
+                            partie_verbe = f"<span title='Score global aux verbes'>⚡ <code>{s_v:g}/{t_v:g}</code></span>"
+                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_verbe}"
 
                         else:
-                            texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
+                            partie_globe = f"<span title='Traduction vers la langue étrangère'>🌐 <code>{s_v:g}/{t_v:g}</code></span>"
+                            partie_drapeau = f"<span title='Traduction vers le français'>🇫🇷 <code>{s_d:g}/{t_d:g}</code></span>"
 
-                        # Affichage avec taille personnalisable (font-size)
-                        st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
+                            texte_score = f"🏆 <b>Meilleur score :</b> {partie_globe} &nbsp;|&nbsp; {partie_drapeau}"
 
-                        st.divider()
+                    else:
+                        texte_score = "🏆 <b>Meilleur score :</b> Pas encore d'essai"
+
+                    # Affichage avec taille personnalisable (font-size)
+                    st.markdown(f"<div style='text-align: left; color: gray; font-size: 1rem;'>{texte_score}</div>", unsafe_allow_html=True)
+
+                    st.divider()
 
 
 # --- On place l'autofocus ---
