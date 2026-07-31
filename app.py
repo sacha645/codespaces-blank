@@ -605,6 +605,25 @@ def ligne_epaisse():
         unsafe_allow_html=True
     )
 
+# Centrer les titres
+st.markdown(
+    """
+    <style>
+    /* Centrer les en-têtes de tous les st.tabs de l'application */
+    div[data-baseweb="tab-list"] {
+        justify-content: center;
+    }
+
+    /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
+    h1, h2, h3 {
+        text-align: center;
+    }
+    
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # --- GESTION DU MEILLEUR SCORE ---
 def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis):
@@ -945,7 +964,63 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     _, col_texte, _ = st.columns([1, 3, 1])
 
     with col_texte :
-        st.title("Bienvenu sur le Réviseur")
+        st.markdown("<h1 style='text-align: center;'>ℹ️ Centre d'aide - Le Réviseur</h1>", unsafe_allow_html=True)
+        
+        st.divider()
+
+        # --- PRÉSENTATION GÉNÉRALE ---
+        st.info("**Le Réviseur** est une plateforme intuitive conçue pour vous accompagner dans l'apprentissage et la mémorisation de votre vocabulaire et de vos verbes d'une langue étrangère. Créez vos listes sur-mesure, entraînez-vous et suivez vos progrès !")
+
+        st.write("")
+
+        # --- SOMMAIRE AVEC ST.TABS ---
+        tab_compte, tab_listes, tab_revisions, tab_scores, tab_astuces = st.tabs(["Gérer mon compte", "📁 Créer et gérer mes listes", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
+
+        # 1. CRÉER ET GÉRER SES LISTES
+        with tab_compte : 
+            st.header("Mon compte")
+            
+            st.write("")
+
+            st.write("""➢ **Identifiants & Connexion :** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera **impossible** de récupérer votre compte !
+            *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
+
+            ➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo respecté les majuscules et les minuscules !
+
+            ➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page *\"Profil\"* accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
+
+            ➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
+
+            ➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton *\"Supprimer mon compte\"* situé en haut dans la barre de navigation. ⚠️ **Attention : cette action est irréversible et supprimera l'intégralité de vos listes enregistrées.**""")
+
+        with tab_listes:
+            st.header("📁 Créer et gérer Mes listes")
+            st.write("""➢ Le site vous permet de créer deux types de listes selon vos besoins :*
+                **❖ Listes de Vocabulaire classique :** Pour apprendre des mots simples, des expressions ou des tournures de phrases.
+                **❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes (ex: *Infinitif, Présent, Prétérit, Participe Passé, Traduction* pour l'anglais ou l'allemand).
+            
+            ➢ 🛠️ Comment ajouter des mots ?
+                1. Allez dans le menu d'édition de votre liste situé : tout en haut à gauche si vous créez la liste ; sinon à droite du nom de la liste si vous souhaitez modifier une liste existante.
+                2. Pour une liste de vocabulaire remplissez le terme original (avec ou sans son article) et sa traduction. Pour une liste de verbe remplissez les 5 formes du verbes.
+                3. Appuyez sur  \"Enregistrez votre liste\".""")
+
+        # 2. ENTRAÎNEMENT & RÉVISIONS
+        with tab_revisions:
+            st.header("🎯 Entraînement & Révisions")
+            st.write("Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment !\n\n#### 🔄 Les modes de révision disponibles :\n* **🌐 Vers la langue étrangère :** La traduction française vous est donnée, à vous de retrouver le mot original (ou le verbe).\n* **🇫🇷 Vers le français :** Le mot étranger vous est présenté, vous devez saisir sa traduction en français.\n\n> **Note :** La validation s'effectue automatiquement ou via la touche Échap/Entrée selon votre mode de saisie.")
+
+        # 3. SUIVI DES SCORES
+        with tab_scores:
+            st.header("🏆 Suivi de mes scores")
+            st.write("Pour vous aider à mesurer vos progrès, **Le Réviseur** conserve vos meilleurs résultats pour chaque liste.\n\n* 🌐 **Score Langue Étrangère :** Indique votre meilleur score lors du test vers la langue cible.\n* 🇫🇷 **Score Français :** Indique votre meilleur résultat lors de la traduction vers le français.\n* 📊 Vos scores s'affichent sous forme de ratios (ex: `15/20`) directement sur vos cartes de listes.")
+
+        # 4. ASTUCES & SYNTAXE
+        with tab_astuces:
+            st.header("💡 Astuces & Syntaxe spéciale")
+            st.write("Pour que le site sépare correctement les articles des mots, voici deux règles simples à connaître :\n\n#### 1. Gestion des articles\n* Si vous écrivez `der Hund`, le site comprendra automatiquement que **\"der\"** est l'article et **\"Hund\"** est le mot.\n\n#### 2. Cas des expressions avec espaces (`!`)\n* Si votre mot contient des espaces qui ne servent pas à séparer un article (ex: une expression comme *\"auf jeden Fall\"*), laissez la case article vide et **placez un point d'exclamation `!` au tout début du mot**.\n* **Exemple :** `!auf jeden Fall` $\\rightarrow$ Le site saura qu'il ne faut pas chercher d'article au début !")
+
+            
+
 
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
