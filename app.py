@@ -1005,7 +1005,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             "    **❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !  \n" \
             "" \
             "➢ 🛠️ Comment créer une liste ?  \n" \
-            "    1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton "➕").  \n" \
+            "    1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").  \n" \
             "    2. Vous aurez à faire le choix entre vocabulaire et verbe.  \n" \
             "         ❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n" \
             "         ❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n" \
