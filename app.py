@@ -881,13 +881,8 @@ ligne_epaisse()
 
 
 # --- AFFICHAGE SELON L'ÉTAT ---
-
-# 1. ÉTAT : NONE (Accueil public)
-if st.session_state.etat == "none":
-    _, col_texte, _ = st.columns([1, 3, 1])
-
-# 2. ÉTAT : NOUVEAU (Inscription)
-elif st.session_state.etat == "nouveau":
+# 1. ÉTAT : NOUVEAU (Inscription)
+if st.session_state.etat == "nouveau":
     st.write("")
     _, col_centre, _ = st.columns([1, 2, 1])
     with col_centre:
@@ -918,7 +913,7 @@ elif st.session_state.etat == "nouveau":
                     else:
                         st.error("Ce nom d'utilisateur est déjà pris.")
 
-# 3. ÉTAT : CONNECT (Connexion)
+# 2. ÉTAT : CONNECT (Connexion)
 elif st.session_state.etat == "connect":
     st.write("")
     _, col_centre, _ = st.columns([1, 2, 1])
@@ -945,7 +940,7 @@ elif st.session_state.etat == "connect":
                     st.error("Nom d'utilisateur ou mot de passe incorrect.")
 
 
-# --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
+# --- 3. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
     username, user_id = st.session_state.user
 
@@ -2281,7 +2276,7 @@ elif st.session_state.etat == "connecte":
         # CAS J : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             st.write("")
-            col_titre, col_import, col_ajout = st.columns([3, 1, 1])
+            col_titre, col_import, col_ajout, col_infos = st.columns([3, 1, 1, 1])
             with col_titre:
                 st.subheader("📋 Mes listes")
 
@@ -2294,6 +2289,11 @@ elif st.session_state.etat == "connecte":
                 if st.button("➕", use_container_width=True, help="Créer une nouvelle liste"):
                     st.session_state.action = "creer"
                     st.session_state.nb_lignes_mots = 2
+                    st.rerun()
+
+            with col_infos :
+                if st.button("ℹ️", use_container_width=True, help="Aide"):
+                    st.session_state.action = "infos"
                     st.rerun()
 
             ligne_epaisse()
@@ -2377,6 +2377,12 @@ elif st.session_state.etat == "connecte":
                         st.divider()
 
 
+# --- 4. ÉTAT : NONE ou CONNECTE (AIDE DU SITE) ---
+elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and st.session_state.action == "infos") :
+    _, col_texte, _ = st.columns([1, 3, 1])
+
+    with col_texte :
+        st.title("Bienvenu sur le Réviseur")
 
 # --- On place l'autofocus ---
 placer_curseur(0)
