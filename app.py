@@ -983,15 +983,15 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
 
             st.write("""➢ **Identifiants & Connexion :** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera **impossible** de récupérer votre compte !
-            *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
+*Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
 
-            ➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo respecté les majuscules et les minuscules !
+➢ **Pseudo sensible à la case :** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo respecté les majuscules et les minuscules !
 
-            ➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page *\"Profil\"* accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
+➢ **Modification du compte :** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page *\"Profil\"* accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
 
-            ➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
+➢ **ID unique du compte :** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (ex: le partage ou l'importation de listes).  
 
-            ➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton *\"Supprimer mon compte\"* situé en haut dans la barre de navigation. ⚠️ **Attention : cette action est irréversible et supprimera l'intégralité de vos listes enregistrées.**""")
+➢ **Suppression du compte :** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton *\"Supprimer mon compte\"* situé en haut dans la barre de navigation. ⚠️ **Attention : cette action est irréversible et supprimera l'intégralité de vos listes enregistrées.**""")
 
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
