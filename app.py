@@ -1062,7 +1062,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.markdown("<p style='text-align: center;'>Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\"</p>", unsafe_allow_html=True)
 
-            st.divider()
+            st.write("")
 
             st.write("""
 <ul style="list-style-type: '❖ ';">
