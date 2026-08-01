@@ -1001,7 +1001,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
             
             st.markdown("""
-<ul>
+<ul style="list-style-type: none;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
     <li>
         <ul style="list-style-type: '❖ ';">
