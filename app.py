@@ -1000,7 +1000,9 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins : 
+            st.markdown("""
+<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+    <li>➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
     <li>
         <ul style="list-style-type: '❖ ';">
             <li><b>Listes de Vocabulaire classique :</b> Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
@@ -1009,31 +1011,44 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     </li>
 </ul>
 
-➢ 🛠️ Comment créer une liste ?
-<ol>
-    <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
-    <li>Vous aurez à faire le choix entre vocabulaire et verbe :
-        <ul>
-            <li>❖ Pour une liste de vocabulaire, vous devez remplir la case \"<b>mot</b>\" et la case \"<b>traduction</b>\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
-            <li>❖ Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.</li>
+<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+    <li>➢ 🛠️ Comment créer une liste ?</li>
+    <li>
+        <ol>
+            <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
+            <li>Vous aurez à faire le choix entre vocabulaire et verbe :
+                <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+                    <li>Pour une liste de vocabulaire, vous devez remplir la case \"<b>mot</b>\" et la case \"<b>traduction</b>\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
+                    <li>Pour une liste de verbe, vous devez remplir les 5 cases : <i>Infinitif, Présent, Prétérit, Participe Passé, Traduction</i>.</li>
+                </ul>
+            </li>
+            <li>Une fois que vous avez terminé, appuyez sur \"Enregistrez votre liste\".</li>
+        </ol>
+    </li>
+</ul>
+
+<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+    <li>➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :</li>
+    <li>
+        <ol>
+            <li>La consulter en appuyant sur le bouton \"👁️\"</li>
+            <li>La modifier en appuyant sur le bouton \"✏️\"</li>
+            <li>Vous entrainer dessus en appuyant sur le bouton \"🎯\" (voir onglet)</li>
+            <li>La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")</li>
+            <li>La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ <strong>Attention : cette action est <u>irréversible</u></li>
+        </ol>
+    </li>
+</ul>
+
+<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+    <li>➢ <b>A savoir<:b> :</li>
+    <li>
+        <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+            <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
         </ul>
     </li>
-    <li>Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".</li>
-</ol>
-    
-➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :
-<ol>
-    <li>La consulter en appuyant sur le bouton \"👁️\"</li>
-    <li>La modifier en appuyant sur le bouton \"✏️\"</li>
-    <li>Vous entrainer dessus en appuyant sur le bouton \"🎯\"</li>
-    <li>La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")</li>
-    <li>La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ <strong>Attention : cette action est <u>irréversible</u></li>
-</ol>
-    
-➢ <b>A savoir<:b> :  
-<ul> 
-    <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
-</ul>""", unsafe_allow_html=True)
+</ul>
+""", unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
