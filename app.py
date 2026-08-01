@@ -1001,8 +1001,8 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
             
             st.markdown("""
-<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li>➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
+<ul>
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
     <li>
         <ul style="list-style-type: '❖ ';">
             <li><b>Listes de Vocabulaire classique :</b> Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
