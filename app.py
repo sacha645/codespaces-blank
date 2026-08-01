@@ -980,7 +980,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         with tab_compte : 
             st.header("🛠️ Gérer Mon compte")
             
-            st.write("")
+            ligne_epaisse()
 
             st.write("""➢ <u>***Identifiants & Connexion :***</u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
 *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
@@ -998,7 +998,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
 
-            st.write("")
+            ligne_epaisse()
             
             st.markdown("""\
 <ul style="list-style-type: none;">
@@ -1060,14 +1060,18 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
 
+            st.markdown("<h3>Mon Subheader Centré</h3>", unsafe_allow_html=True)
+
+            ligne_epaisse()
+
             st.write("""
 Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\" 
 
 <ul style="list-style-type: '❖ ';">
     <li>Pour une liste de vocabulaire il existe 2 sens de révision :
         <ul>
-            <li>**🌐 Vers la langue étrangère :** La traduction française vous est donnée, à vous de retrouver le mot original (ainsi que son article si présent).</li>
-            <li>**🇫🇷 Vers le français :** Le mot étranger vous est présenté, à vous de retrouver sa traduction en français.</li>
+            <li><b>🌐 Vers la langue étrangère :</b> La traduction française vous est donnée, à vous de retrouver le mot original (ainsi que son article si présent).</li>
+            <li><b>🇫🇷 Vers le français :</b> Le mot étranger vous est présenté, à vous de retrouver sa traduction en français.</li>
         </ul>
     </li>
     <li>Pour une liste de verbes :
@@ -1077,6 +1081,7 @@ Une fois votre liste créée, vous pouvez tester vos connaissances à tout momen
     </li>
 </ul>
 
+<br>
 <ul style="list-style-type: '➢ ';">
     <li>Votre progression est automatiquement sauvegardé. Si jamais vous quittez le site par inadvertance, pas de panique, vous pourrez reprendre là où vous en étiez !</li><br>
     <li>Si jamais vous devez interrompre un entrainement mais que vous ne voulez pas perdre votre progression, il y a le bouton \"Mettre en pause\" situé en bas de la page qui vous renverra à l'écran d'accueil tout en sauvegardant votre progression.</li><br>
