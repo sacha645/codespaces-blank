@@ -1014,11 +1014,11 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             "\n" \
             "\n" \
             "➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n" \
-            "1. La consulter en appuyant sur le bouton \"👁️\"  \n" \
-            "2. La modifier en appuyant sur le bouton \"✏️\"  \n" \
-            "3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n" \
-            "4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n" \
-            "5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***" \
+            "   1. La consulter en appuyant sur le bouton \"👁️\"  \n" \
+            "   2. La modifier en appuyant sur le bouton \"✏️\"  \n" \
+            "   3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n" \
+            "   4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n" \
+            "   5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***" \
             "\n" \
             "\n" \
             "\n" \
