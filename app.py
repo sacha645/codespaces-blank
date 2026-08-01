@@ -1001,37 +1001,37 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
             
             st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins : 
-            <ul>
-                <li>**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
-                <li>**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !</li>
-            </ul>
-            
-            ➢ 🛠️ Comment créer une liste ?
-            <ol>
-                <li>1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
-                <li>2. Vous aurez à faire le choix entre vocabulaire et verbe :</li>
-                    <ul>
-                        <li>❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
-                        <li>❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.</li>
-                    </ul>
-                3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  
-            </ol>
-              
-            ➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :
-            <ol>
-               <li>1. La consulter en appuyant sur le bouton \"👁️\"</li>
-               <li>2. La modifier en appuyant sur le bouton \"✏️\"</li>
-               <li>3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"</li>
-               <li>4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")</li>
-               <li>5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***</li>
-            </ol>
-              
-              
-              
-            ➢ **A savoir** :  
-            <ul> 
-                <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
-            </ul>""", unsafe_allow_html=True)
+<ul>
+    <li>**❖ Listes de Vocabulaire classique :** Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
+    <li>**❖ Listes de Verbes :** Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !</li>
+</ul>
+
+➢ 🛠️ Comment créer une liste ?
+<ol>
+    <li>1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
+    <li>2. Vous aurez à faire le choix entre vocabulaire et verbe :</li>
+        <ul>
+            <li>❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
+            <li>❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.</li>
+        </ul>
+    3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  
+</ol>
+    
+➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :
+<ol>
+    <li>1. La consulter en appuyant sur le bouton \"👁️\"</li>
+    <li>2. La modifier en appuyant sur le bouton \"✏️\"</li>
+    <li>3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"</li>
+    <li>4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")</li>
+    <li>5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***</li>
+</ol>
+    
+    
+    
+➢ **A savoir** :  
+<ul> 
+    <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
+</ul>""", unsafe_allow_html=True)
 
         # . ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
