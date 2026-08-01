@@ -1000,7 +1000,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""
+            st.markdown("""\
 <ul style="list-style-type: none;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
     <li>
@@ -1054,10 +1054,31 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 </ul>
 """, unsafe_allow_html=True)
 
-        # . ENTRAÎNEMENT & RÉVISIONS
+        # 3. ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
             st.header("🎯 Entraînement & Révisions")
-            st.write("Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment !\n\n#### 🔄 Les modes de révision disponibles :\n* **🌐 Vers la langue étrangère :** La traduction française vous est donnée, à vous de retrouver le mot original (ou le verbe).\n* **🇫🇷 Vers le français :** Le mot étranger vous est présenté, vous devez saisir sa traduction en français.\n\n> **Note :** La validation s'effectue automatiquement ou via la touche Échap/Entrée selon votre mode de saisie.")
+
+            st.write("")
+
+            st.write("""
+Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\" !
+
+<ul style="list-style-type: '❖ ';">
+    <li>Pour une liste de vocabulaire il existe 2 sens de révision :
+        <ul>
+            <li>**🌐 Vers la langue étrangère :** La traduction française vous est donnée, à vous de retrouver le mot original (ainsi que son article si présent).</li>
+            <li>**🇫🇷 Vers le français :** Le mot étranger vous est présenté, à vous de retrouver sa traduction en français.</li>
+        </ul>
+    </li>
+    <li>Pour une liste de verbes :
+        <ul>
+            <li>L'une des 5 formes du verbe vous est donné, à vous de retrouvé les 4 autres formes. Chacunes des 5 formes du verbes vous sera donné pendant un entrainement en alternance avec les formes des autres verbes.</li>
+        </ul>
+    </li>
+</ul>
+
+À la fin de votre entrainement votre score vous sera donné, ainsi que la liste de vos erreurs. Après votre entrainement vous pouvez allez dans visualiser la liste (via le boutton \"👁️\"). Là-bas apparaitrons en rouge tous les mots pour lesquelles vous avez fait une faute. Vous pourrez alors décider de réviser uniquement vos lacunes via le bouton "Réviser mes erreurs". 
+""", unsafe_allow_html=True)
 
         # . SUIVI DES SCORES
         with tab_scores:
