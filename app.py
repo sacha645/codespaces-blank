@@ -1070,7 +1070,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         </ul>
     </li>
 </ul>
-""")
+""", unsafe_allow_html=True)
 
         # 4. ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
