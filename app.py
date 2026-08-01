@@ -1006,18 +1006,18 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     <li>
         <ul style="list-style-type: '❖ ';">
             <li><b>Listes de Vocabulaire classique :</b> Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
-            <li><b>Listes de Verbes :</b> Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !</li>
+            <li><b>Listes de Verbes :</b> Spécialement conçues pour travailler toutes les formes des verbes : <i>Infinitif, Présent, Prétérit, Participe Passé, Traduction</i>. Idéal pour apprendre des verbes irrégulier par exemple !</li>
         </ul>
     </li>
 </ul>
 
-<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li>➢ 🛠️ Comment créer une liste ?</li>
+<ul style="list-style-type: none;">
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ 🛠️ Comment créer une liste ?</li>
     <li>
         <ol>
             <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
             <li>Vous aurez à faire le choix entre vocabulaire et verbe :
-                <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
+                <ul style="list-style-type: '❖ ';">
                     <li>Pour une liste de vocabulaire, vous devez remplir la case \"<b>mot</b>\" et la case \"<b>traduction</b>\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
                     <li>Pour une liste de verbe, vous devez remplir les 5 cases : <i>Infinitif, Présent, Prétérit, Participe Passé, Traduction</i>.</li>
                 </ul>
@@ -1027,8 +1027,8 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     </li>
 </ul>
 
-<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li>➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :</li>
+<ul style="list-style-type: none;">
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :</li>
     <li>
         <ol>
             <li>La consulter en appuyant sur le bouton \"👁️\"</li>
@@ -1041,10 +1041,10 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 </ul>
 
 <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li>➢ <b>A savoir</b> :</li>
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ <b>A savoir</b> :</li>
     <li>
-        <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-            <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
+        <ul style="list-style-type: '❖ ';">
+            <li>Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
         </ul>
     </li>
 </ul>
