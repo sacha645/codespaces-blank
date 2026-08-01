@@ -1061,7 +1061,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
 
             st.write("""
-Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\" !
+➢ Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\" 
 
 <ul style="list-style-type: '❖ ';">
     <li>Pour une liste de vocabulaire il existe 2 sens de révision :
@@ -1077,7 +1077,14 @@ Une fois votre liste créée, vous pouvez tester vos connaissances à tout momen
     </li>
 </ul>
 
-À la fin de votre entrainement votre score vous sera donné, ainsi que la liste de vos erreurs. Après votre entrainement vous pouvez allez dans visualiser la liste (via le boutton \"👁️\"). Là-bas apparaitrons en rouge tous les mots pour lesquelles vous avez fait une faute. Vous pourrez alors décider de réviser uniquement vos lacunes via le bouton "Réviser mes erreurs". 
+<ul style="list-style-type: '➢ ';">
+    <li>Votre progression est automatiquement sauvegardé. Si jamais vous quittez le site par inadvertance, pas de panique, vous pourrez reprendre là où vous en étiez !<br>Si jamais vous devez interrompre un entrainement mais que vous ne voulez pas perdre votre progression, il y a le bouton \"Mettre en pause\" situé en bas de la page qui vous renverra à l'écran d'accueil tout en sauvegardant votre progression.<br>Si jamais vous voulez interrompre un entrainement et écraser votre progression actuelle, il y a le bouton \"Abandonner l'entrainement\" situé en bas de la page qui vous renverra à l'écran d'accueil tout en supprimant votre progression.</li>
+    
+    <li>À la fin de votre entrainement votre score vous sera donné, ainsi que la liste de vos erreurs. Vous pourrez alors recommencer l'entrainement ou retourner à l'écran d'accueil.</li>
+
+    <li>Après votre entrainement vous pouvez allez visualiser la liste (via le boutton \"👁️\" sur l'écran d'accueil). Les mots pour lesquelles vous avez fait une faute apparaitrons en rouge. Vous pourrez alors décider de réviser uniquement vos lacunes via le bouton "Réviser mes erreurs".</li>
+</ul>
+
 """, unsafe_allow_html=True)
 
         # . SUIVI DES SCORES
@@ -2030,7 +2037,7 @@ elif st.session_state.etat == "connecte":
 
                     # --- BOUTONS PAUSE ET ABANDON ---
                     st.write("")
-                    col_b1, col_b2 = st.columns(2)
+                    col_b2, col_b1  = st.columns(2)
 
                     with col_b1:
                         if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
@@ -2262,7 +2269,7 @@ elif st.session_state.etat == "connecte":
                         st.rerun()
 
                     st.write("")
-                    col_b1, col_b2 = st.columns(2)
+                    col_b2, col_b1 = st.columns(2)
 
                     with col_b1:
                         if st.button("⏸️ Mettre en pause", use_container_width=True, type="secondary"):
