@@ -997,6 +997,8 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
+
+            st.write("")
             
             st.markdown("""\
 <ul style="list-style-type: none;">
@@ -1060,7 +1062,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.markdown("<p style='text-align: center;'>Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\"</p>", unsafe_allow_html=True)
 
-            ligne_epaisse()
+            st.divider()
 
             st.write("""
 <ul style="list-style-type: '❖ ';">
