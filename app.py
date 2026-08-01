@@ -1000,10 +1000,11 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""➢ Le site vous permet de créer deux types de listes selon vos besoins : 
-<ul style="list-style-type: '❖ ';">
-    <li><b>Listes de Vocabulaire classique :</b> Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
-    <li><b>Listes de Verbes :</b> Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !</li>
+            st.markdown("""<ul style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins : 
+    <ul style="list-style-type: '❖ ';">
+        <li><b>Listes de Vocabulaire classique :</b> Pour apprendre des mots, des expressions ou des tournures de phrases...</li>
+        <li><b>Listes de Verbes :</b> Spécialement conçues pour travailler toutes les formes des verbes : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*. Idéal pour apprendre des verbes irrégulier par exemple !</li>
+    </ul>
 </ul>
 
 ➢ 🛠️ Comment créer une liste ?
