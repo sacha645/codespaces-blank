@@ -987,7 +987,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     <li><u><i><b>Identifiants & Connexion :</b></i></u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera <u><i><b>impossible</b></i></u> de récupérer votre compte !<br><i>Conseil :</i> En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).</li><br>
     <li><u><i><b>Pseudo sensible à la case :</b></i></u> le pseudo \"Jean\" est différent du pseudo \"jean\". Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !</li><br>
     <li><u><i><b>Modification du compte :</b></i></u> Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page <b>\"Profil\"</b> accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.</li><br>
-    <li><u><i><b>ID unique du compte :</b></i></u> Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).</li><br>
+    <li><u><i><b>ID unique du compte :</b></i></u> Chaque compte possède un ID unique, affiché en haut à gauche du site lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).</li><br>
     <li><u><i><b>Suppression du compte :</b></i></u> Vous pouvez supprimer définitivement votre compte à tout moment via le bouton <b>\"Supprimer mon compte\"</b> situé en haut dans la barre de navigation.<br>⚠️ </i></b>Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.</b></i></li>
 </ul>""",  unsafe_allow_html=True)
 
@@ -1013,7 +1013,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ 🛠️ Comment créer une liste ?</li>
     <li>
         <ol>
-            <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
+            <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de la page d'accueil (cliquez sur le bouton \"➕\").</li>
             <li>Faites votre choix entre vocabulaire et verbes :
                 <ul style="list-style-type: '❖ ';">
                     <li>Pour une liste de vocabulaire, vous devez remplir la case \"<b>mot</b>\" et la case \"<b>traduction</b>\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
@@ -1027,7 +1027,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 
 <ul style="list-style-type: none;">
-    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :</li>
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Une fois votre liste créée elle apparait sur la page d'accueil. Vous pouvez alors :</li>
     <li>
         <ol>
             <li>La consulter en appuyant sur le bouton \"👁️\"</li>
@@ -1061,13 +1061,13 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 <ul style="list-style-type: '➢ ';">
     <li>À votre compte est associé un identifiant unique visible en haut à gauche du site après vous être connecté. Cet id vous servira pour l'option de partage des listes (bouton : \"🔗\").
         <ul style="list-style-type: '❖ ';">
-            <li><u><b>Envoyer une liste à un ami :</b></u> vous pouvez partager l'une de vos liste avec une autre personne. Pour ce faire vous aurez besoin de l'id associé à <b>son</b> compte. Une fois la liste envoyé elle apparaitra directement sur le compte de votre ami(e). Si ce dernier modifie ou supprime la liste, cela n'affectera pas votre liste originale.</li>
+            <li><u><b>Envoyer une liste à un ami :</b></u> vous pouvez partager l'une de vos liste avec une autre personne. Pour ce faire vous aurez besoin de l'id associé à <b>son</b> compte. Une fois la liste envoyé elle apparaitra directement sur le compte de votre ami(e).<br>Si ce dernier modifie ou supprime la liste, cela n'affectera pas votre liste originale.</li>
         </ul>
     </li>
     <br>
-    <li>Si vous ne connaissez pas l'id de votre ami(e) ce n'est pas un problème. À chaque liste est associé un autre id unique (à ne pas confondre avec celui de votre compte, celui-ci se trouve dans le menu de partage de la liste (bouton : \"🔗\"), onglet \"📋 Obtenir l'ID de la liste\". ).
+    <li>Si vous ne connaissez pas l'id de votre ami(e) ce n'est pas un problème. À chaque liste est associé un autre id unique (à ne pas confondre avec celui de votre compte, celui-ci se trouve dans le menu de partage de la liste (bouton : \"🔗\"), onglet \"📋 Obtenir l'ID de la liste\".
         <ul style="list-style-type: '❖ ';">
-            <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\").Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur l'écran d'accueil du site. Vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe depuis son compte.</li>
+            <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\", en haut à droite de la page d'accueil). Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur votre page d'accueil.<br><i>Astuce :</i> vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe depuis son compte.</li>
         </ul>
     </li>
 </ul>
@@ -1101,10 +1101,10 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 <br>
 <ul style="list-style-type: '➢ ';">
     <li>Votre progression est automatiquement sauvegardé. Si jamais vous quittez le site par inadvertance, pas de panique, vous pourrez reprendre là où vous en étiez !</li><br>
-    <li>Si jamais vous devez interrompre un entrainement mais que vous ne voulez pas perdre votre progression, il y a le bouton \"Mettre en pause\" situé en bas de la page qui vous renverra à l'écran d'accueil tout en sauvegardant votre progression.</li><br>
-    <li>Si jamais vous voulez interrompre un entrainement et écraser votre progression actuelle, il y a le bouton \"Abandonner l'entrainement\" situé en bas de la page qui vous renverra à l'écran d'accueil tout en supprimant votre progression.</li><br>
-    <li>À la fin de votre entrainement votre score vous sera donné, ainsi que la liste de vos erreurs. Vous pourrez alors recommencer l'entrainement ou retourner à l'écran d'accueil.</li><br>
-    <li>Après votre entrainement vous pouvez allez visualiser la liste (via le boutton \"👁️\" sur l'écran d'accueil). Les mots pour lesquelles vous avez fait une faute apparaitrons en rouge. Vous pourrez alors décider de réviser uniquement vos lacunes via le bouton "Réviser mes erreurs".</li>
+    <li>Si jamais vous devez interrompre un entrainement mais que vous ne voulez pas perdre votre progression, il y a le bouton \"Mettre en pause\" situé en bas de la page qui vous renverra sur la page d'accueil tout en sauvegardant votre progression.</li><br>
+    <li>Si jamais vous voulez interrompre un entrainement et écraser votre progression actuelle, il y a le bouton \"Abandonner l'entrainement\" situé en bas de la page qui vous renverra sur la page d'accueil tout en supprimant votre progression.</li><br>
+    <li>À la fin de votre entrainement votre score vous sera donné, ainsi que la liste de vos erreurs. Vous pourrez alors recommencer l'entrainement ou retourner à la page d'accueil.</li><br>
+    <li>Après votre entrainement vous pouvez allez visualiser la liste (via le boutton \"👁️\" sur la page d'accueil). Les mots pour lesquelles vous avez fait une faute apparaitrons en rouge. Vous pourrez alors décider de réviser uniquement vos lacunes via le bouton "Réviser mes erreurs".</li>
 </ul>
 
 """, unsafe_allow_html=True)
