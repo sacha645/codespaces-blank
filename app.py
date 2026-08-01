@@ -1041,7 +1041,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 </ul>
 
 <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li>➢ <b>A savoir<:b> :</li>
+    <li>➢ <b>A savoir</b> :</li>
     <li>
         <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
             <li>❖ Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
