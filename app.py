@@ -982,17 +982,14 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
 
-            st.write("""➢ <u>***Identifiants & Connexion :***</u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
-*Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
-
-➢ <u>***Pseudo sensible à la case :***</u> le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
-
-➢ <u>***Modification du compte :***</u> Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
-
-➢ <u>***ID unique du compte :***</u> Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).  
-
-➢ <u>***Suppression du compte :***</u> Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. 
-⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""",  unsafe_allow_html=True)
+            st.write("""
+<ul style="list-style-type: '❖ ';">
+    <li><u><i><b>Identifiants & Connexion :***</b></i></u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera <u><i><b>impossible</b></i></u> de récupérer votre compte !<br><i>Conseil :</i> En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).</li><br>
+    <li><u><i><b>Pseudo sensible à la case :</b></i></u> le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !</li><br>
+    <li><u><i><b>Modification du compte :</b></i></u> Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page <b>\"Profil\"</b> accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.</li><br>
+    <li><u><i><b>ID unique du compte :</b></i></u> Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).</li><br>
+    <li><u><i><b>Suppression du compte :</b></i></u> Vous pouvez supprimer définitivement votre compte à tout moment via le bouton <b>\"Supprimer mon compte\"</b> situé en haut dans la barre de navigation.<br>⚠️ </u></i></b>Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.</b></i></u></li><br>
+</ul>""",  unsafe_allow_html=True)
 
         # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
@@ -1000,7 +997,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
             
-            st.markdown("""\
+            st.markdown("""
 <ul style="list-style-type: none;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Le site vous permet de créer deux types de listes selon vos besoins :</li>
     <li>
@@ -1054,7 +1051,17 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 </ul>
 """, unsafe_allow_html=True)
 
-        # 3. ENTRAÎNEMENT & RÉVISIONS
+        # 3. Social
+        with tab_social :
+            st.header("🔗 Social")
+
+            st.write("")
+
+            st.write("""
+
+""")
+
+        # 4. ENTRAÎNEMENT & RÉVISIONS
         with tab_revisions:
             st.header("🎯 Entraînement & Révisions")
 
