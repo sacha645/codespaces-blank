@@ -614,10 +614,10 @@ st.markdown(
         justify-content: center;
     }
 
-    /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
-    h1, h2, h3 {
-        text-align: center;
-    }
+    # /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
+    # h1, h2, h3 {
+    #     text-align: center;
+    # }
     
     </style>
     """,
@@ -1041,7 +1041,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 
 <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
-    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ <b>A savoir</b> :</li>
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ <b>À savoir</b> :</li>
     <li>
         <ul style="list-style-type: '❖ ';">
             <li>Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
@@ -1058,7 +1058,18 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             st.write("")
 
             st.write("""
-
+<ul style="list-style-type: '➢ ';">
+    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">À votre compte est associé un identifiant unique visible en haut à gauche du site après vous être connecté. Cet id vous servira pour l'option de partage des listes (bouton : \"🔗\").
+        <ul style="list-style-type: '❖ ';">
+            <li><u><b>Envoyer une liste à un ami :</b></u> vous pouvez partager l'une de vos liste avec une autre personne. Pour ce faire vous aurez besoin de l'id associé à <b>son</b> compte. Une fois la liste envoyé elle apparaitra directement sur le compte de votre ami(e). Si ce dernier modifie ou supprime la liste, cela n'affectera pas votre liste originale.</li>
+        </ul>
+    </li>
+    <li>Si vous ne connaissez pas l'id de votre ami(e) ce n'est pas un problème. À chaque liste est associé un autre id unique (à ne pas confondre avec celui de votre compte, celui-ci se trouve dans le menu de partage de la liste (bouton : \"🔗\"), onglet \"📋 Obtenir l'ID de la liste\". ).
+        <ul style="list-style-type: '❖ ';">
+            <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\").Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur l'écran d'accueil du site. Vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe depuis son compte.</li>
+        </ul>
+    </li>
+</ul>
 """)
 
         # 4. ENTRAÎNEMENT & RÉVISIONS
@@ -2317,7 +2328,7 @@ elif st.session_state.etat == "connecte":
 
             st.write("")
 
-            tab_id, tab_direct = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
+            tab_direct, tab_id = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
             
             with tab_id:
                 st.write("")
