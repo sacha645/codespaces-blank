@@ -1059,7 +1059,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("""
 <ul style="list-style-type: '➢ ';">
-    <li style="list-style-type: none; padding-left: 0; margin-left: 0;">À votre compte est associé un identifiant unique visible en haut à gauche du site après vous être connecté. Cet id vous servira pour l'option de partage des listes (bouton : \"🔗\").
+    <li>À votre compte est associé un identifiant unique visible en haut à gauche du site après vous être connecté. Cet id vous servira pour l'option de partage des listes (bouton : \"🔗\").
         <ul style="list-style-type: '❖ ';">
             <li><u><b>Envoyer une liste à un ami :</b></u> vous pouvez partager l'une de vos liste avec une autre personne. Pour ce faire vous aurez besoin de l'id associé à <b>son</b> compte. Une fois la liste envoyé elle apparaitra directement sur le compte de votre ami(e). Si ce dernier modifie ou supprime la liste, cela n'affectera pas votre liste originale.</li>
         </ul>
