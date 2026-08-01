@@ -1006,19 +1006,19 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             "\n" \
             "\n" \
             "➢ 🛠️ Comment créer une liste ?  \n" \
-            "1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").  \n" \
-            "2. Vous aurez à faire le choix entre vocabulaire et verbe :  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;1. Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;2. Vous aurez à faire le choix entre vocabulaire et verbe :  \n" \
             "       - ❖Pour une liste de vocabulaire, vous devez remplir la case \"**mot**\" et la case \"**traduction**\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).  \n" \
             "       - ❖Pour une liste de verbe, vous devez remplir les 5 cases : *Infinitif, Présent, Prétérit, Participe Passé, Traduction*.  \n" \
-            "3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;3. Une fois que vous avez terminé, appuyez sur  \"Enregistrez votre liste\".  \n" \
             "\n" \
             "\n" \
             "➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :  \n" \
-            "   1. La consulter en appuyant sur le bouton \"👁️\"  \n" \
-            "   2. La modifier en appuyant sur le bouton \"✏️\"  \n" \
-            "   3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n" \
-            "   4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n" \
-            "   5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;1. La consulter en appuyant sur le bouton \"👁️\"  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;2. La modifier en appuyant sur le bouton \"✏️\"  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;3. Vous entrainer dessus en appuyant sur le bouton \"🎯\"  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;4. La partager en appuyant sur le bouton \"🔗\" (voir onglet \"\")  \n" \
+            "&nbsp;&nbsp;&nbsp;&nbsp;5. La supprimer en appuyant sur le bouton \"🗑️\". ⚠️ ***Attention : cette action est <u>irréversible</u>***" \
             "\n" \
             "\n" \
             "\n" \
