@@ -614,10 +614,10 @@ st.markdown(
         justify-content: center;
     }
 
-    # /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
-    # h1, h2, h3 {
-    #     text-align: center;
-    # }
+    /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
+    h1, h2, h3 {
+        text-align: center;
+    }
     
     </style>
     """,
@@ -1064,6 +1064,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             <li><u><b>Envoyer une liste à un ami :</b></u> vous pouvez partager l'une de vos liste avec une autre personne. Pour ce faire vous aurez besoin de l'id associé à <b>son</b> compte. Une fois la liste envoyé elle apparaitra directement sur le compte de votre ami(e). Si ce dernier modifie ou supprime la liste, cela n'affectera pas votre liste originale.</li>
         </ul>
     </li>
+    <br>
     <li>Si vous ne connaissez pas l'id de votre ami(e) ce n'est pas un problème. À chaque liste est associé un autre id unique (à ne pas confondre avec celui de votre compte, celui-ci se trouve dans le menu de partage de la liste (bouton : \"🔗\"), onglet \"📋 Obtenir l'ID de la liste\". ).
         <ul style="list-style-type: '❖ ';">
             <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\").Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur l'écran d'accueil du site. Vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe depuis son compte.</li>
@@ -2455,9 +2456,11 @@ elif st.session_state.etat == "connecte":
         # CAS J : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             st.write("")
+
             col_titre, col_import, col_ajout, col_infos = st.columns([3, 1, 1, 1])
+
             with col_titre:
-                st.subheader("📋 Mes listes")
+                st.markdown("<h3 style='text-align: left;'>📋 Mes listes</h3>", unsafe_allow_html=True)
 
             with col_import:
                 if st.button("📥", use_container_width=True, help="Importer une liste"):
