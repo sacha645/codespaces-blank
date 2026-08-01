@@ -982,16 +982,16 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
             
             st.write("")
 
-            st.write("""➢ ***Identifiants & Connexion :*** La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
+            st.write("""➢ <u>***Identifiants & Connexion :***</u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
 *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
 
-➢ ***Pseudo sensible à la case :*** le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
+➢ <u>***Pseudo sensible à la case :***</u> le pseudo \"Jean\" est différent du pseudo \"jean"\. Lorsque vous renseignez votre pseudo, respectez les majuscules et les minuscules !
 
-➢ ***Modification du compte :*** Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
+➢ <u>***Modification du compte :***</u> Une fois connecté, vous pouvez modifier les informations de votre compte depuis la page **\"Profil\"** accessible via le bouton situé en haut dans la barre de navigation. Votre mot de passe vous sera demandé par sécurité.  
 
-➢ ***ID unique du compte :*** Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).  
+➢ <u>***ID unique du compte :***</u> Chaque compte possède un ID unique, affiché en haut à gauche de l'écran lorsque vous êtes connecté. Cet identifiant vous sera utile pour certaines fonctionnalités avancées (voir onglet).  
 
-➢ ***Suppression du compte :*** Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. 
+➢ <u>***Suppression du compte :***</u> Vous pouvez supprimer définitivement votre compte à tout moment via le bouton **\"Supprimer mon compte\"** situé en haut dans la barre de navigation. 
 ⚠️ ***Attention : cette action est <u>irréversible</u> et supprimera <u>l'intégralité</u> de vos listes enregistrées.***""",  unsafe_allow_html=True)
 
         # 2. CRÉER ET GÉRER SES LISTES
@@ -1011,21 +1011,23 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     </li>
 </ul>
 
+
 <ul style="list-style-type: none;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ 🛠️ Comment créer une liste ?</li>
     <li>
         <ol>
             <li>Allez dans le menu d'édition de votre liste situé tout en haut à gauche de l'écran d'accueil (cliquez sur le bouton \"➕\").</li>
-            <li>Vous aurez à faire le choix entre vocabulaire et verbe :
+            <li>Faites votre choix entre vocabulaire et verbes :
                 <ul style="list-style-type: '❖ ';">
                     <li>Pour une liste de vocabulaire, vous devez remplir la case \"<b>mot</b>\" et la case \"<b>traduction</b>\". La case article est falcultative, elle sert notament dans les langues où les articles sont important (par exemple en allemand).</li>
                     <li>Pour une liste de verbe, vous devez remplir les 5 cases : <i>Infinitif, Présent, Prétérit, Participe Passé, Traduction</i>.</li>
                 </ul>
             </li>
-            <li>Une fois que vous avez terminé, appuyez sur \"Enregistrez votre liste\".</li>
+            <li>Appuyez sur \"Enregistrez votre liste\" une fois que vous avez terminé.</li>
         </ol>
     </li>
 </ul>
+
 
 <ul style="list-style-type: none;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ Une fois votre liste créée elle apparait sur l'écran d'accueil. Vous pouvez alors :</li>
@@ -1040,11 +1042,13 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     </li>
 </ul>
 
+
 <ul style="list-style-type: none; padding-left: 0; margin-left: 0;">
     <li style="list-style-type: none; padding-left: 0; margin-left: 0;">➢ <b>A savoir</b> :</li>
     <li>
         <ul style="list-style-type: '❖ ';">
             <li>Vous pouvez importer une liste à partir d'une liste déjà existante ou via un fichier .txt (voir onglet )</li>
+            <li>Vous pouvez exporter une liste déjà existante en un fichier.txt (voir onglet )</li>
         </ul>
     </li>
 </ul>
