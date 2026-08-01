@@ -979,8 +979,8 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         # 1. Gérer son compte
         with tab_compte : 
             st.header("🛠️ Gérer Mon compte")
-            
-            ligne_epaisse()
+
+            st.write("")
 
             st.write("""➢ <u>***Identifiants & Connexion :***</u> La création de votre compte ainsi que la connexion s'effectuent via votre pseudo et votre mot de passe. Par conséquent, si vous perdez votre mot de passe, il sera ***<u>impossible</u>*** de récupérer votre compte !
 *Conseil :* En cas de perte de votre mot de passe, conservez l'ID de vos listes afin de pouvoir les importer sur un nouveau compte (voir l'onglet ...).  
@@ -997,8 +997,6 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         # 2. CRÉER ET GÉRER SES LISTES
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
-
-            st.divider()
             
             st.markdown("""\
 <ul style="list-style-type: none;">
@@ -1060,7 +1058,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
 
-            st.markdown("Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\"", unsafe_allow_html=True)
+            st.markdown("<p style='text-align: center;'>Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\"</p>", unsafe_allow_html=True)
 
             ligne_epaisse()
 
