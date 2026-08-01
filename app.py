@@ -998,7 +998,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         with tab_listes:
             st.header("📁 Créer et gérer Mes listes")
 
-            ligne_epaisse()
+            st.divider()
             
             st.markdown("""\
 <ul style="list-style-type: none;">
@@ -1060,13 +1060,11 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
             st.write("")
 
-            st.markdown("<h3>Mon Subheader Centré</h3>", unsafe_allow_html=True)
+            st.markdown("Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\"", unsafe_allow_html=True)
 
             ligne_epaisse()
 
             st.write("""
-Une fois votre liste créée, vous pouvez tester vos connaissances à tout moment via le bouton \"🎯\" 
-
 <ul style="list-style-type: '❖ ';">
     <li>Pour une liste de vocabulaire il existe 2 sens de révision :
         <ul>
