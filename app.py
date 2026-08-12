@@ -1812,7 +1812,7 @@ elif st.session_state.etat == "connecte":
 
                                 art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
 
-                            if err_dfr :
+                            if err_vfr :
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "depuis_francais"})
                             else : 
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "vers_francais"})
