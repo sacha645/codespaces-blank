@@ -2041,8 +2041,8 @@ elif st.session_state.etat == "connecte":
                         u_mot = user_mot.strip() if sens == "vers_francais" else user_trad.strip()
 
                         if sens == "vers_francais":
-                            art_correct = (u_art.lower() == item["article"].lower())
-                            mot_correct = (u_mot.lower() == item["mot"].lower())
+                            art_correct = (u_art.lower() == item["article"].strip().lower())
+                            mot_correct = (u_mot.lower() == item["mot"].strip().lower())
                             
                             if art_correct:
                                 points_gagnes += 0.5 if bool(item["article"]) else 0
