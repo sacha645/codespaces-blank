@@ -1784,7 +1784,8 @@ elif st.session_state.etat == "connecte":
                     mots_bruts = recuperer_mots_liste(liste_id)
                     erreurs = charger_erreurs(user_id, liste_id)
                     
-                    mots_traites = []
+                    # On crée la liste de questions 
+                    questions = []
                     for id_m, mot_or, _, _, _, trad in mots_bruts:
                         # Supprime les éventuels "!"
                         mot_or = mot_or.strip()
@@ -1809,18 +1810,7 @@ elif st.session_state.etat == "connecte":
                             # Attribution selon le sens de l'erreur
                             mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
 
-                            mots_traites.append({
-                                        "id_mot": id_m,
-                                        "article": art,
-                                        "mot": mot_final,
-                                        "traduction": trad_finale
-                                        })
-                            
-                    # On crée la liste de questions avec les 2 sens (exactement comme dans ton code d'origine)
-                    questions = []
-                    for item in mots_traites:
-                        questions.append({"item": item, "sens": "vers_francais"})
-                        questions.append({"item": item, "sens": "depuis_francais"})
+                            questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "vers_francais" if err_vfr else "depuis_francais"})
                     
                     # Mélange 1 : Aléatoire
                     random.shuffle(questions)
@@ -2052,9 +2042,9 @@ elif st.session_state.etat == "connecte":
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
                             if art_correct:
-                                points_gagnes += 0.5
+                                points_gagnes += 0.5 if bool(item["article"])
                             if mot_correct:
-                                points_gagnes += 0.5
+                                points_gagnes += 1 if not bool(item["article"]) and art_correct else 0.5
 
                             if points_gagnes < 1.0:
                                 q_txt = item['traduction']
@@ -2073,13 +2063,16 @@ elif st.session_state.etat == "connecte":
                                     "reponse_attendue": rep_att
                                 })
 
+                            st.session_state.score_vers_fr += points_gagnes
+                            st.session_state.total_vers_fr += total_q
+
                         else:
                             mot_correct = (u_mot.lower() == item["traduction"].lower())
-                            mot_affiche = f"{item['article']} {item['mot']}".strip()
 
                             if mot_correct:
                                 points_gagnes = 1.0
                             else:
+                                mot_affiche = f"{item['article']} {item['mot']}".strip()
                                 q_txt = mot_affiche
                                 rep_att = item["traduction"]
 
@@ -2094,10 +2087,6 @@ elif st.session_state.etat == "connecte":
                                     "reponse_attendue": rep_att
                                 })
 
-                        if sens == "vers_francais":
-                            st.session_state.score_vers_fr += points_gagnes
-                            st.session_state.total_vers_fr += total_q
-                        else:
                             st.session_state.score_depuis_fr += points_gagnes
                             st.session_state.total_depuis_fr += total_q
 
