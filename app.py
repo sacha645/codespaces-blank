@@ -1602,17 +1602,20 @@ elif st.session_state.etat == "connecte":
             ligne_epaisse()
             st.write("")
 
-            col_retour, col_train = st.columns([1, 1])
-            with col_retour : 
-                if st.button("🔙 Retour", use_container_width = True):
+            has_errors = charger_erreurs(user_id, liste_id)
+
+            cols = st.columns(2) if has_errors else [st.container()]
+            with cols[0]:
+                if st.button("🔙 Retour", use_container_width=True):
                     st.session_state.action = "liste"
                     st.session_state.liste_active_id = None
                     st.rerun()
 
-            with col_train :
-                if st.button("🎯 Revoir mes erreurs", use_container_width = True) :
-                    st.session_state.action = "err_entrainer"
-                    st.rerun()
+            if has_errors :
+                with cols[1]:
+                    if st.button("🎯 Revoir mes erreurs", use_container_width=True):
+                        st.session_state.action = "err_entrainer"
+                        st.rerun()
 
         # CAS F : ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
@@ -1810,7 +1813,7 @@ elif st.session_state.etat == "connecte":
                             # Attribution selon le sens de l'erreur
                             mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
 
-                            questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "vers_francais" if err_vfr else "depuis_francais"})
+                            questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "depuis_francais" if err_vfr else "vers_francais"})
                     
                     # Mélange 1 : Aléatoire
                     random.shuffle(questions)
