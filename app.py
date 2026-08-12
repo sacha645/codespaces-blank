@@ -1610,7 +1610,7 @@ elif st.session_state.etat == "connecte":
                     st.rerun()
 
             with col_train :
-                if st.button("🎯 Revoir mes erreurs", use_container_width = True)
+                if st.button("🎯 Revoir mes erreurs", use_container_width = True) :
                     st.session_state.action = "err_entrainer"
                     st.rerun()
 
