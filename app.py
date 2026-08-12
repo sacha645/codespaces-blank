@@ -1833,7 +1833,6 @@ elif st.session_state.etat == "connecte":
                     st.session_state.erreurs_commises = []
                     st.session_state.quiz_liste_id = liste_id
                     st.session_state.action = "entrainer"
-
                 elif "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
 
@@ -1918,24 +1917,14 @@ elif st.session_state.etat == "connecte":
 
                 # 2. VUE FINALE : BILAN DU QUIZ ET SAUVEGARDE EN BDD
                 if index >= len(questions):
+                    supprimer_sauvegarde_partie(liste_id)
+
                     s_v = st.session_state.score_vers_fr
                     t_v = st.session_state.total_vers_fr
                     s_d = st.session_state.score_depuis_fr
                     t_d = st.session_state.total_depuis_fr
 
-                    score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
-                    est_nouveau_record = False
-
-                    if score_actuel_bdd is None:
-                        est_nouveau_record = True
-                    else:
-                        anc_v, _, anc_d, _ = score_actuel_bdd
-                        if s_v > anc_v or s_d > anc_d:
-                            est_nouveau_record = True
-
-                    enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
-                    supprimer_sauvegarde_partie(liste_id)
-
+                    # Enregistrement des erreurs
                     mots_err = {}
                     for err in st.session_state.erreurs_commises:
                         if "id_mot" in err:
@@ -1949,35 +1938,64 @@ elif st.session_state.etat == "connecte":
                             elif sens == "depuis_fr":
                                 mots_err[id_m]["depuis_fr"] = True
 
-                    sauvegarder_erreurs(user_id, liste_id, mots_err)
+                    if mots_err :
+                        sauvegarder_erreurs(user_id, liste_id, mots_err)
 
                     st.write("### 📊 Tes résultats :")
 
-                    if est_nouveau_record:
-                        st.success("🥳 **Nouveau meilleur score !**")
-                    elif score_actuel_bdd:
-                        anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
-                        st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` | 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+                    # Animation du nouveau meilleur score et résultats
+                    if st.session_state.action == "entrainer" :
+                        score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
+                        est_nouveau_record = False
 
-                    st.write("")
+                        if score_actuel_bdd is None:
+                            est_nouveau_record = True
+                        else:
+                            anc_v, _, anc_d, _ = score_actuel_bdd
+                            if s_v > anc_v or s_d > anc_d:
+                                est_nouveau_record = True
 
-                    col_res1, col_res2 = st.columns(2)
-                    with col_res1:
-                        score_v = st.session_state.score_vers_fr
-                        tot_v = st.session_state.total_vers_fr
-                        st.metric(label="🌐 Vers la langue étrangère", value=f"{score_v:g} / {tot_v:g}")
+                        if est_nouveau_record:
+                            st.success("🥳 **Nouveau meilleur score !**")
+                            enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
+                        elif score_actuel_bdd:
+                            anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
+                            st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` | 🇫🇷 `{anc_d:g}/{anc_td:g}`")
 
-                    with col_res2:
-                        score_d = st.session_state.score_depuis_fr
-                        tot_d = st.session_state.total_depuis_fr
-                        st.metric(label="🇫🇷 Vers le français", value=f"{score_d:g} / {tot_d:g}")
+                        st.write("")
 
-                    erreurs = st.session_state.erreurs_commises
+                        col_res1, col_res2 = st.columns(2)
+                        with col_res1:
+                            st.metric(label="🌐 Vers la langue étrangère", value=f"{s_v:g} / {t_v:g}")
+
+                        with col_res2:
+                            st.metric(label="🇫🇷 Vers le français", value=f"{s_d:g} / {t_d:g}")
+
+                    # Résultats révision erreurs
+                    else:
+                        st.write("")
+
+                        cols = st.columns(2) if (t_v and t_d) else st.columns(1)
+
+                        if t_v :
+                            with cols[0]:
+                                st.metric(label="🌐 Vers la langue étrangère", value=f"{s_v:g} / {t_v:g}")
+
+                        if t_d :
+                            col_dest = cols[1] if (t_v and t_d) else cols[0]
+                            with col_dest :
+                                st.metric(label="🇫🇷 Vers le français", value=f"{s_d:g} / {t_d:g}")
+
                     st.divider()
 
+                    erreurs = st.session_state.erreurs_commises
                     if erreurs:
-                        st.write("### ❌ Liste des erreurs commises")
+                        if st.session_state.action == "entrainer" :
+                            st.write("### ❌ Liste des erreurs commises")
+                        else : 
+                            st.write("### ❌ Liste des erreurs qu'il te reste à réviser")
                         st.caption("Seuls les éléments erronés sont affichés en rouge :")
+
                         st.write("")
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
@@ -1992,7 +2010,10 @@ elif st.session_state.etat == "connecte":
                             c3.markdown(f"🟢 {err['reponse_attendue']}")
                     else:
                         st.balloons()
-                        st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
+                        if st.session_state.action == "entrainer" :
+                            st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
+                        else : 
+                            st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
 
                     ligne_epaisse()
                     st.write("")
@@ -2226,6 +2247,8 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
+                    st.write("")
+
                     st.write("### 📊 Tes résultats :")
 
                     if est_nouveau_record:
@@ -2236,7 +2259,15 @@ elif st.session_state.etat == "connecte":
 
                     st.write("")
 
-                    st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
+                    st.markdown(
+    f"""
+    <div style="text-align: center; margin: 10px 0;">
+        <span style="font-size: 0.9em; color: #808495;">⚡ Score</span>
+        <div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
