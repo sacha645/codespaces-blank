@@ -974,7 +974,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
         st.write("")
 
         # --- SOMMAIRE AVEC ST.TABS ---
-        tab_compte, tab_listes, tab_social, tab_revisions, tab_scores, tab_astuces = st.tabs(["🛠️ Gérer mon compte", "📁 Créer et gérer mes listes", "🔗 Social", "🎯 Entraînement & Révisions", "🏆 Suivi de mes scores", "💡 Astuces & Syntaxe"])
+        tab_compte, tab_listes, tab_social, tab_revisions, tab_astuces = st.tabs(["🛠️ Gérer mon compte", "📁 Créer et gérer mes listes", "🔗 Social", "🎯 Entraînement & Révisions", "💡 Astuces & Syntaxe"])
 
         # 1. Gérer son compte
         with tab_compte : 
@@ -1067,7 +1067,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
     <br>
     <li>Si vous ne connaissez pas l'id de votre ami(e) ce n'est pas un problème. À chaque liste est associé un autre id unique (à ne pas confondre avec celui de votre compte, celui-ci se trouve dans le menu de partage de la liste (bouton : \"🔗\"), onglet \"📋 Obtenir l'ID de la liste\".
         <ul style="list-style-type: '❖ ';">
-            <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\", en haut à droite de la page d'accueil). Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur votre page d'accueil.<br><i>Astuce :</i> vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe depuis son compte.</li>
+            <li><u><b>Importer une liste depuis un id :</b></u> rendez-vous dans le menu d'import (bouton : \"📥\", en haut à droite de la page d'accueil). Il ne vous reste plus qu'à entrer l'id de la liste et celle-ci apparaitra directement sur votre page d'accueil.<br><i>Astuce :</i> vous pouvez donc envoyer l'id de la liste que vous voulez partager à votre ami(e) pour qu'il l'importe directement depuis son compte.</li>
         </ul>
     </li>
 </ul>
@@ -1109,12 +1109,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 """, unsafe_allow_html=True)
 
-        # . SUIVI DES SCORES
-        with tab_scores:
-            st.header("🏆 Suivi de mes scores")
-            st.write("Pour vous aider à mesurer vos progrès, **Le Réviseur** conserve vos meilleurs résultats pour chaque liste.\n\n* 🌐 **Score Langue Étrangère :** Indique votre meilleur score lors du test vers la langue cible.\n* 🇫🇷 **Score Français :** Indique votre meilleur résultat lors de la traduction vers le français.\n* 📊 Vos scores s'affichent sous forme de ratios (ex: `15/20`) directement sur vos cartes de listes.")
-
-        # . ASTUCES & SYNTAXE
+        # 5. ASTUCES & SYNTAXE
         with tab_astuces:
             st.header("💡 Astuces & Syntaxe spéciale")
             st.write("Pour que le site sépare correctement les articles des mots, voici deux règles simples à connaître :\n\n#### 1. Gestion des articles\n* Si vous écrivez `der Hund`, le site comprendra automatiquement que **\"der\"** est l'article et **\"Hund\"** est le mot.\n\n#### 2. Cas des expressions avec espaces (`!`)\n* Si votre mot contient des espaces qui ne servent pas à séparer un article (ex: une expression comme *\"auf jeden Fall\"*), laissez la case article vide et **placez un point d'exclamation `!` au tout début du mot**.\n* **Exemple :** `!auf jeden Fall` $\\rightarrow$ Le site saura qu'il ne faut pas chercher d'article au début !")
@@ -1607,10 +1602,17 @@ elif st.session_state.etat == "connecte":
             ligne_epaisse()
             st.write("")
 
-            if st.button("🔙 Retour", use_container_width=True):
-                st.session_state.action = "liste"
-                st.session_state.liste_active_id = None
-                st.rerun()
+            col_retour, col_train = st.columns([1, 1])
+            with col_retour : 
+                if st.button("🔙 Retour", use_container_width = True):
+                    st.session_state.action = "liste"
+                    st.session_state.liste_active_id = None
+                    st.rerun()
+
+            with col_train :
+                if st.button("🎯 Revoir mes erreurs", use_container_width = True)
+                    st.session_state.action = "err_entrainer"
+                    st.rerun()
 
         # CAS F : ÉDITER UNE LISTE (✏️)
         elif st.session_state.action == "editer":
@@ -1764,7 +1766,7 @@ elif st.session_state.etat == "connecte":
                 st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
             
         # CAS G : ENTRAÎNEMENT (🎯)
-        elif st.session_state.action == "entrainer":
+        elif st.session_state.action == "entrainer" or st.session_state.action == "err_entrainer":
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
             info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
@@ -1778,7 +1780,66 @@ elif st.session_state.etat == "connecte":
             if type_liste == "vocabulaire":
 
                 # 1. INITIALISATION / REPRISE DU QUIZ VOCABULAIRE
-                if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
+                if st.session_state.action == "err_entrainer" :
+                    mots_bruts = recuperer_mots_liste(liste_id)
+                    erreurs = charger_erreurs(user_id, liste_id)
+                    
+                    mots_traites = []
+                    for id_m, mot_or, _, _, _, trad in mots_bruts:
+                        # Supprime les éventuels "!"
+                        mot_or = mot_or.strip()
+
+                        # Récupération des erreurs spécifiques par sens
+                        # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
+                        err_info = erreurs.get(id_m, {}) if isinstance(erreurs, dict) else {}
+
+                        # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
+                        err_vfr = err_info.get("vers_fr", False)
+                        # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
+                        err_dfr = err_info.get("depuis_fr", False)
+
+                        if err_vfr or err_dfr :                    
+                            if mot_or.startswith("!") :
+                                art, mot = "", mot_or.removeprefix("!")
+                            else:
+                                parts = mot_or.split(" ", 1) 
+
+                                art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
+
+                            # Attribution selon le sens de l'erreur
+                            mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
+
+                            mots_traites.append({
+                                        "id_mot": id_m,
+                                        "article": art,
+                                        "mot": mot_final,
+                                        "traduction": trad_finale
+                                        })
+                            
+                    # On crée la liste de questions avec les 2 sens (exactement comme dans ton code d'origine)
+                    questions = []
+                    for item in mots_traites:
+                        questions.append({"item": item, "sens": "vers_francais"})
+                        questions.append({"item": item, "sens": "depuis_francais"})
+                    
+                    # Mélange 1 : Aléatoire
+                    random.shuffle(questions)
+
+                    # Mélange 2 : Démêlage
+                    questions = demeler_questions(questions)
+
+                    # Enregistrement dans la session
+                    st.session_state.quiz_mots = questions
+                    st.session_state.quiz_index = 0
+                    st.session_state.score_vers_fr = 0.0
+                    st.session_state.total_vers_fr = 0.0
+                    st.session_state.score_depuis_fr = 0.0
+                    st.session_state.total_depuis_fr = 0.0
+                    st.session_state.erreurs_commises = []
+                    st.session_state.quiz_liste_id = liste_id
+                    st.session_state.action = "entrainer"
+
+                elif "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
 
                     # Demande si une sauvegarde existe
@@ -1820,7 +1881,6 @@ elif st.session_state.etat == "connecte":
 
                             if mot_or_strip.startswith("!") :
                                 art, mot = "", mot_or_strip.removeprefix("!")
-
                             else:
                                 parts = mot_or_strip.split(" ", 1) 
 
@@ -1842,7 +1902,7 @@ elif st.session_state.etat == "connecte":
                         # Mélange 1 : Aléatoire
                         random.shuffle(questions)
 
-                        # Mélange 2 : Démêlage (qui reçoit maintenant la bonne structure avec 'item')
+                        # Mélange 2 : Démêlage
                         questions = demeler_questions(questions)
 
                         # Enregistrement dans la session
