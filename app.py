@@ -2258,22 +2258,7 @@ elif st.session_state.etat == "connecte":
                     st.write("")
                     st.write("")
 
-                    with st.container(key="metric_centre"):
-                        st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
-
-                    st.markdown(
-                        """
-                        <style>
-                        div[element-id="metric_centre"] div[data-testid="stMetric"] {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            text-align: center;
-                        }
-                        </style>
-                        """,
-                        unsafe_allow_html=True,
-)
+                    st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
