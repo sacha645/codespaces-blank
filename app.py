@@ -1812,13 +1812,10 @@ elif st.session_state.etat == "connecte":
 
                                 art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
 
-                            # Attribution selon le sens de l'erreur
-                            mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
-
                             if err_dfr :
-                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "depuis_francais"})
+                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "depuis_francais"})
                             else : 
-                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "vers_francais"})
+                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "vers_francais"})
             
                     # Mélange 1 : Aléatoire
                     random.shuffle(questions)
