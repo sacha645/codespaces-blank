@@ -1816,9 +1816,9 @@ elif st.session_state.etat == "connecte":
                                 art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
 
                             # Attribution selon le sens de l'erreur
-                            mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
+                            mot_final, trad_finale = ((mot, trad.strip()) if err_dfr else (trad.strip(), mot))
 
-                            if err_vfr :
+                            if err_dfr :
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "depuis_francais"})
                             else : 
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "vers_francais"})
