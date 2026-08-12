@@ -2042,7 +2042,7 @@ elif st.session_state.etat == "connecte":
                             mot_correct = (u_mot.lower() == item["mot"].lower())
                             
                             if art_correct:
-                                points_gagnes += 0.5 if bool(item["article"])
+                                points_gagnes += 0.5 if bool(item["article"]) else 0
                             if mot_correct:
                                 points_gagnes += 1 if not bool(item["article"]) and art_correct else 0.5
 
