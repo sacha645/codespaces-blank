@@ -2247,27 +2247,19 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("")
-
                     st.write("### 📊 Tes résultats :")
+
+                    st.write("")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.write(f"🏆 **Meilleur score :** ⚡ `{anc_v:g}/{anc_tv:g}`")
+                        st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
 
                     st.write("")
 
-                    st.markdown(
-    f"""
-    <div style="text-align: center; margin: 10px 0;">
-        <span style="font-size: 0.9em; color: #808495;">⚡ Score</span>
-        <div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+                    st.columns([1, 2, 1])[1].metric("⚡ Score", f"{s_v:g} / {t_v:g}")
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
