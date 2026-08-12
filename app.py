@@ -1641,16 +1641,13 @@ elif st.session_state.etat == "connecte":
                 else :
                     def séparer_article(mot_or, trad_val):     
                         if mot_or.startswith("!") :
-                            mot = mot_or.removeprefix("!")
-
-                            return ("", mot, trad_val)
+                            return ("", mot_or, trad_val)
                         
                         else:
                             parts = mot_or.split(" ", 1) 
                             art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])                   
 
                             return (art, mot, trad_val)
-
                     st.session_state.mots_temp = {x : séparer_article(mot_or, trad_val) for x, (_, mot_or, _, _, _, trad_val) in enumerate(mots_existants)}
 
                 st.session_state.nb_lignes_mots = len(st.session_state.mots_temp) + 1
