@@ -2249,8 +2249,6 @@ elif st.session_state.etat == "connecte":
 
                     st.write("### 📊 Tes résultats :")
 
-                    st.write("")
-
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
@@ -2258,8 +2256,24 @@ elif st.session_state.etat == "connecte":
                         st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
 
                     st.write("")
+                    st.write("")
 
-                    st.columns([1, 2, 1])[1].metric("⚡ Score", f"{s_v:g} / {t_v:g}")
+                    with st.container(key="metric_centre"):
+                        st.metric(label="⚡ Score", value=f"{s_v:g} / {t_v:g}")
+
+                    st.markdown(
+                        """
+                        <style>
+                        div[element-id="metric_centre"] div[data-testid="stMetric"] {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            text-align: center;
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True,
+)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
