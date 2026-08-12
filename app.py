@@ -1639,18 +1639,22 @@ elif st.session_state.etat == "connecte":
                     st.session_state.mots_temp = {x: (inf, pres, pret, participe, trad) for x, (_, inf, pres, pret, participe, trad) in enumerate(mots_existants)}
 
                 else :
-                    def séparer_article(mot_or, trad_val):                        
-                        parts = mot_or.split(" ", 1)
-    
-                        # Si on a 2 parties et que la première est un article
-                        if len(parts) == 2 and parts[0].lower() in ["le", "la", "les", "un", "une", "des", "l'", "the", "a", "an", "el", "los", "las", "der", "die", "das"] :
-                            return (parts[0], parts[1], trad_val)
+                    def séparer_article(mot_or, trad_val):     
+                        if mot_or.startswith("!") :
+                            mot = mot_or.removeprefix("!")
+
+                            return ("", mot, trad_val)
                         
-                        # Sinon, tout le mot reste dans le champ mot
-                        return ("", mot_or, trad_val)
+                        else:
+                            parts = mot_or.split(" ", 1) 
+                            art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])                   
+
+                            return (art, mot, trad_val)
+
                     st.session_state.mots_temp = {x : séparer_article(mot_or, trad_val) for x, (_, mot_or, _, _, _, trad_val) in enumerate(mots_existants)}
 
                 st.session_state.nb_lignes_mots = len(st.session_state.mots_temp) + 1
+
             st.session_state.id_a_suppr = None
 
 
@@ -1805,6 +1809,7 @@ elif st.session_state.etat == "connecte":
                         if err_vfr or err_dfr :                    
                             if mot_or.startswith("!") :
                                 art, mot = "", mot_or.removeprefix("!")
+
                             else:
                                 parts = mot_or.split(" ", 1) 
 
@@ -1813,8 +1818,11 @@ elif st.session_state.etat == "connecte":
                             # Attribution selon le sens de l'erreur
                             mot_final, trad_finale = ((mot, trad.strip()) if err_vfr else (trad.strip(), mot))
 
-                            questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "depuis_francais" if err_vfr else "vers_francais"})
-                    
+                            if err_vfr :
+                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "depuis_francais"})
+                            else : 
+                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot_final, "traduction": trad_finale}, "sens": "vers_francais"})
+            
                     # Mélange 1 : Aléatoire
                     random.shuffle(questions)
 
@@ -1994,6 +2002,7 @@ elif st.session_state.etat == "connecte":
 
                     ligne_epaisse()
                     st.write("")
+                    
                     col_b1, col_b2 = st.columns(2)
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
