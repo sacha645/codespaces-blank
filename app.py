@@ -1941,7 +1941,7 @@ elif st.session_state.etat == "connecte":
                     if mots_err :
                         sauvegarder_erreurs(user_id, liste_id, mots_err)
 
-                    st.write("### 📊 Tes résultats :")
+                    st.write("###  📊 Tes résultats :")
 
                     # Animation du nouveau meilleur score et résultats
                     if st.session_state.action == "entrainer" :
@@ -1963,13 +1963,14 @@ elif st.session_state.etat == "connecte":
                             st.markdown(f"<div style='text-align: center;'>🏆 <b>Meilleur score :</b> 🌐 <code>{anc_v:g}/{anc_tv:g}</code> | 🇫🇷 <code>{anc_d:g}/{anc_td:g}</code></div>", unsafe_allow_html=True)
 
                         st.write("")
+                        st.write("")
 
                         col_res1, col_res2 = st.columns(2)
                         with col_res1:
-                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🌐 Vers la langue étrangère</span><div style='font-size: 2rem; font-weight: 700;'>{s_v:g} / {t_v:g}</div></div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🌐 Vers la langue étrangère</span><div style='font-size: 2rem; font-weight: 500;'>{s_v:g} / {t_v:g}</div></div>", unsafe_allow_html=True)
 
                         with col_res2:
-                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🇫🇷 Vers le français</span><div style='font-size: 2rem; font-weight: 700;'>{s_d:g} / {t_d:g}</div></div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🇫🇷 Vers le français</span><div style='font-size: 2rem; font-weight: 500;'>{s_d:g} / {t_d:g}</div></div>", unsafe_allow_html=True)
 
                     # Résultats révision erreurs
                     else:
@@ -1994,7 +1995,7 @@ elif st.session_state.etat == "connecte":
                             st.write("### ❌ Liste des erreurs commises")
                         else : 
                             st.write("### ❌ Liste des erreurs qu'il te reste à réviser")
-                        st.caption("Seuls les éléments erronés sont affichés en rouge :")
+                        st.markdown("<p style='text-align: center; color: #808495; font-size: 0.875rem;'>Seuls les éléments erronés sont affichés en rouge :</p>", unsafe_allow_html=True)
 
                         st.write("")
 
@@ -2247,7 +2248,7 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("### 📊 Tes résultats : ")
+                    st.write("###  📊 Tes résultats : ")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
@@ -2255,7 +2256,6 @@ elif st.session_state.etat == "connecte":
                         anc_v, anc_tv, _, _ = score_actuel_bdd
                         st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
 
-                    st.write("")
                     st.write("")
 
                     st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 0.9em; color: white;">⚡ Score</span><div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
