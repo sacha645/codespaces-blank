@@ -2254,12 +2254,12 @@ elif st.session_state.etat == "connecte":
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
+                        st.markdown(f"""<div style="text-align: center; margin: 10px 0;">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
 
                     st.write("")
 
                     st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
-
+                    
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
 
