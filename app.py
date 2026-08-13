@@ -844,7 +844,7 @@ with col_title:
             st.session_state.etat = "none"
 
         # 2. Si connecté et en plein entraînement
-        elif st.session_state.get("action") == "entrainer":
+        elif st.session_state.get("action") == "entrainer" or st.session_state.get("action") == "err_entrainer" :
             user_id = st.session_state.user[1] if st.session_state.get("user") else None
             liste_id = st.session_state.get("liste_active_id")
             type_liste = obtenir_type_liste(liste_id)
@@ -2054,6 +2054,7 @@ elif st.session_state.etat == "connecte":
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
+                            st.session_state.action = "entrainer"
                             st.rerun()
 
                 # 3. VUE DE QUESTION EN COURS
@@ -2193,8 +2194,11 @@ elif st.session_state.etat == "connecte":
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                            if st.session_state.action == "entrainer" :
+                                st.session_state.action_suppr = "abandon"
+                            else : 
+                                st.session_state.action_suppr = "abandon2"
                             st.session_state.action = "supprimer"
-                            st.session_state.action_suppr = "abandon"
                             st.rerun()
 
             # --- S'IL S'AGIT D'UNE LISTE DE VERBES ---
@@ -2324,6 +2328,7 @@ elif st.session_state.etat == "connecte":
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
+                            st.session_state.action = "entrainer"
                             st.rerun()
                     
 
@@ -2422,8 +2427,11 @@ elif st.session_state.etat == "connecte":
 
                     with col_b2:
                         if st.button("🛑 Abandonner l'entraînement", use_container_width=True, type="secondary"):
+                            if st.session_state.action == "entrainer" :
+                                st.session_state.action_suppr = "abandon"
+                            else : 
+                                st.session_state.action_suppr = "abandon2"
                             st.session_state.action = "supprimer"
-                            st.session_state.action_suppr = "abandon"
 
         # CAS H : VUE PARTAGER UNE LISTE (🔗)
         elif st.session_state.action == "partager":
@@ -2492,7 +2500,7 @@ elif st.session_state.etat == "connecte":
                 st.write("")
 
             # CAS I.C : ABANDONNER UN ENTRAINEMENT
-            elif st.session_state.action_suppr == "abandon":
+            elif st.session_state.action_suppr == "abandon" or st.session_state.action_suppr == "abandon2" :
                 st.write("")
                 st.warning("⚠️ **Es-tu sûr de vouloir abandonner ?** Ta progression actuelle sera perdue.")
                 st.write("")
@@ -2548,6 +2556,9 @@ elif st.session_state.etat == "connecte":
                 if st.button("❌ Annuler", use_container_width=True):
                     if st.session_state.action_suppr == "abandon" :
                         st.session_state.action = "entrainer"
+
+                    elif st.session_state.action_suppr == "abandon2" :
+                        st.session_state.action = "err_entrainer"
 
                     else: 
                         st.session_state.liste_active_id = None
