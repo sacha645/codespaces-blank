@@ -1607,7 +1607,7 @@ elif st.session_state.etat == "connecte":
             ligne_epaisse()
             st.write("")
 
-            has_errors = sum(err_info.get("vers_fr", False) + err_info.get("depuis_fr", False) for err_info in charger_erreurs(user_id, liste_id))
+            has_errors = sum(err_info.get("vers_fr", False) + err_info.get("depuis_fr", False) for err_info in (charger_erreurs(user_id, liste_id) or {}).values())
 
             cols = st.columns(2) if has_errors else [st.container()]
             with cols[0]:
@@ -1801,7 +1801,7 @@ elif st.session_state.etat == "connecte":
 
                         # Récupération des erreurs spécifiques par sens
                         # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
-                        err_info = erreurs.get(id_m, {}) if isinstance(erreurs, dict) else {}
+                        err_info = (erreurs or {}).get(id_m, {})
 
                         # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
                         err_vfr = err_info.get("vers_fr", False)
