@@ -2040,6 +2040,7 @@ elif st.session_state.etat == "connecte":
                         with col_b3:
                             if st.button(f"🎯 Revoir mes erreurs ({x})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
+                                st.session_state.pop("quiz_mots", None)
                                 st.rerun()
                     else :
                         col_b1, col_b2 = st.columns(2)
