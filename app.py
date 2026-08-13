@@ -1609,7 +1609,7 @@ elif st.session_state.etat == "connecte":
                             trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" 
                             has_errors += 1
                         else :
-                            trad_dip = trad
+                            trad_disp = trad
 
                         cm1, cm2 = st.columns(2)
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
