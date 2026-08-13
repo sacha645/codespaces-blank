@@ -1607,7 +1607,7 @@ elif st.session_state.etat == "connecte":
             ligne_epaisse()
             st.write("")
 
-            has_errors = len(charger_erreurs(user_id, liste_id))
+            has_errors = sum(err_info.get("vers_fr", False) + err_info.get("depuis_fr", False) for err_info in charger_erreurs(user_id, liste_id))
 
             cols = st.columns(2) if has_errors else [st.container()]
             with cols[0]:
