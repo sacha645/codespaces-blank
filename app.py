@@ -2248,27 +2248,17 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    # Un seul bloc HTML pour TOUT centrer parfaitement
-                    html_code = f"""
-                    <div style="text-align: center; width: 100%;">
-                        <h3 style="margin-bottom: 10px;">📊 Tes résultats</h3>
-                    """
+                    st.write("### 📊 Tes résultats")
 
                     if est_nouveau_record:
-                        html_code += '<p style="color: #4CAF50; font-weight: bold;">🥳 Nouveau meilleur score !</p>'
+                        st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        html_code += f'<p style="color: #808495; margin-bottom: 15px;">🏆 <b>Meilleur score :</b> ⚡ {anc_v:g}/{anc_tv:g}</p>'
+                        st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
 
-                    html_code += f"""
-                        <div style="margin-top: 15px;">
-                            <span style="font-size: 1rem; color: #FFFFFF; font-weight: 500;">⚡ Score :</span>
-                            <div style="font-size: 2.2rem; font-weight: 700; color: #FFFFFF;">{s_v:g} / {t_v:g}</div>
-                        </div>
-                    </div>
-                    """
+                    st.write("")
 
-                    st.markdown(html_code, unsafe_allow_html=True)
+                    st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
