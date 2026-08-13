@@ -2018,27 +2018,38 @@ elif st.session_state.etat == "connecte":
                         col_rep.markdown("<u>**Ta réponse:**</u>", unsafe_allow_html=True)
                         col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
-                        for err in erreurs:
+                        for err, x in enumerate(erreurs, 1):
                             c1, c2, c3 = st.columns([2, 2, 2])
                             c1.markdown(f"Traduction de <u>**{err['question']}**</u>", unsafe_allow_html=True)
                             c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
                             c3.markdown(f"🟢 {err['reponse_attendue']}")
+                            nb_err = x
                     else:
                         st.balloons()
                         if st.session_state.action == "entrainer" :
                             st.info("⭐ Félicitations ! Tu as fait un sans-faute parfait.")
                         else : 
                             st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
+                        
 
                     ligne_epaisse()
                     st.write("")
+
+                    if erreurs :
+                        col_b1, col_b2, col_b3 = st.columns(3)
+                        with col_b3:
+                            if st.button(f"🎯 Revoir mes erreurs ({x})", use_container_width=True):
+                                st.session_state.action = "err_entrainer"
+                                st.rerun()
+                    else :
+                        col_b1, col_b2 = st.columns(2)
                     
-                    col_b1, col_b2 = st.columns(2)
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
                             st.session_state.action = "liste"
                             st.rerun()
+
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
