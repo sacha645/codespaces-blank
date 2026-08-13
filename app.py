@@ -1565,18 +1565,19 @@ elif st.session_state.etat == "connecte":
                         id_m, inf, pres, pret, pp, trad = mot
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
-                        def fmt_v(texte, idx_f, k):
-                            if isinstance(errs, dict) and errs.get(idx_f, 0) >= 2:
-                                k += 1
-                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
-                            return texte
+                        def fmt_v(texte, idx_f):
+                            is_err = isinstance(errs, dict) and errs.get(idx_f, 0) >= 2
+                            if is_err:
+                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>", 1
+                            return texte, 0
 
-                        col1, col2, col3, col4, col5 = st.columns(5)
-                        col1.markdown(fmt_v(inf, 1, has_errors), unsafe_allow_html=True)
-                        col2.markdown(fmt_v(pres, 2, has_errors), unsafe_allow_html=True)
-                        col3.markdown(fmt_v(pret, 3, has_errors), unsafe_allow_html=True)
-                        col4.markdown(fmt_v(pp, 4, has_errors), unsafe_allow_html=True)
-                        col5.markdown(fmt_v(trad, 5, has_errors), unsafe_allow_html=True)
+                        cols = st.columns(5)
+                        elements = [(inf, 1), (pres, 2), (pret, 3), (pp, 4), (trad, 5)]
+
+                        for col, (texte, idx) in zip(cols, elements):
+                            txt_html, k = fmt_v(texte, idx)
+                            col.markdown(txt_html, unsafe_allow_html=True)
+                            has_errors += k
                 else:
                     c_m1, c_m2 = st.columns(2)
                     c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
@@ -1627,7 +1628,7 @@ elif st.session_state.etat == "connecte":
 
             if has_errors :
                 with cols[1]:
-                    if st.button(f"🎯 Revoir mes erreurs {has_errors}", use_container_width=True):
+                    if st.button(f"🎯 Revoir mes erreurs ({has_errors})", use_container_width=True):
                         st.session_state.action = "err_entrainer"
                         st.rerun()
 
