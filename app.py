@@ -1819,7 +1819,7 @@ elif st.session_state.etat == "connecte":
 
                             if err_vfr :
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "depuis_francais"})
-                            else : 
+                            if err_dfr : 
                                 questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "vers_francais"})
             
                     # Mélange 1 : Aléatoire
@@ -1946,7 +1946,7 @@ elif st.session_state.etat == "connecte":
                     if mots_err :
                         sauvegarder_erreurs(user_id, liste_id, mots_err)
 
-                    st.write("### 📊 Tes résultats")
+                    st.write("### &nbsp;&nbsp;&nbsp;📊 Tes résultats")
 
                     # Animation du nouveau meilleur score et résultats
                     if st.session_state.action == "entrainer" :
