@@ -2258,7 +2258,15 @@ elif st.session_state.etat == "connecte":
                     st.write("")
                     st.write("")
 
-                    st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
+                    st.markdown(
+    f"""
+    <div style="text-align: center; margin: 10px 0;">
+        <span style="font-size: 0.9em; color: #808495;">⚡ Score</span>
+        <div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
