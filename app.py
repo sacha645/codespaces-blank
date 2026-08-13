@@ -1602,7 +1602,7 @@ elif st.session_state.etat == "connecte":
             ligne_epaisse()
             st.write("")
 
-            has_errors = charger_erreurs(user_id, liste_id)
+            has_errors = len(charger_erreurs(user_id, liste_id))
 
             cols = st.columns(2) if has_errors else [st.container()]
             with cols[0]:
@@ -1613,7 +1613,7 @@ elif st.session_state.etat == "connecte":
 
             if has_errors :
                 with cols[1]:
-                    if st.button("🎯 Revoir mes erreurs", use_container_width=True):
+                    if st.button(f"🎯 Revoir mes erreurs {has_errors}", use_container_width=True):
                         st.session_state.action = "err_entrainer"
                         st.rerun()
 
@@ -2254,7 +2254,7 @@ elif st.session_state.etat == "connecte":
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"""<div style="text-align: center">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
+                        st.markdown(f"""<div style="text-align: center">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code>   </div>""", unsafe_allow_html=True)
 
                     st.write("")
 
