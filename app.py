@@ -1960,16 +1960,16 @@ elif st.session_state.etat == "connecte":
                             enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
                         elif score_actuel_bdd:
                             anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
-                            st.write(f"🏆 **Meilleur score :** 🌐 `{anc_v:g}/{anc_tv:g}` | 🇫🇷 `{anc_d:g}/{anc_td:g}`")
+                            st.markdown(f"<div style='text-align: center;'>🏆 <b>Meilleur score :</b> 🌐 <code>{anc_v:g}/{anc_tv:g}</code> | 🇫🇷 <code>{anc_d:g}/{anc_td:g}</code></div>", unsafe_allow_html=True)
 
                         st.write("")
 
                         col_res1, col_res2 = st.columns(2)
                         with col_res1:
-                            st.metric(label="🌐 Vers la langue étrangère", value=f"{s_v:g} / {t_v:g}")
+                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🌐 Vers la langue étrangère</span><div style='font-size: 2rem; font-weight: 700;'>{s_v:g} / {t_v:g}</div></div>", unsafe_allow_html=True)
 
                         with col_res2:
-                            st.metric(label="🇫🇷 Vers le français", value=f"{s_d:g} / {t_d:g}")
+                            st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🇫🇷 Vers le français</span><div style='font-size: 2rem; font-weight: 700;'>{s_d:g} / {t_d:g}</div></div>", unsafe_allow_html=True)
 
                     # Résultats révision erreurs
                     else:
@@ -2247,7 +2247,7 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("### 📊 Tes résultats :")
+                    st.write("### 📊 Tes résultats : ")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
@@ -2258,15 +2258,7 @@ elif st.session_state.etat == "connecte":
                     st.write("")
                     st.write("")
 
-                    st.markdown(
-    f"""
-    <div style="text-align: center; margin: 10px 0;">
-        <span style="font-size: 0.9em; color: #808495;">⚡ Score</span>
-        <div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+                    st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 0.9em; color: white;">⚡ Score</span><div style="font-size: 2rem; font-weight: 700;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
