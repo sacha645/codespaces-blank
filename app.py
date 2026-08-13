@@ -2018,7 +2018,7 @@ elif st.session_state.etat == "connecte":
                         col_rep.markdown("<u>**Ta réponse:**</u>", unsafe_allow_html=True)
                         col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
-                        for err, x in enumerate(erreurs, 1):
+                        for x, err in enumerate(erreurs, 1):
                             c1, c2, c3 = st.columns([2, 2, 2])
                             c1.markdown(f"Traduction de <u>**{err['question']}**</u>", unsafe_allow_html=True)
                             c2.markdown(err["reponse_user_html"], unsafe_allow_html=True)
