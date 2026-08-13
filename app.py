@@ -615,7 +615,7 @@ st.markdown(
     }
 
     /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
-    h1, h2, h3 {
+    h1, h2{
         text-align: center;
     }
     
@@ -2252,7 +2252,7 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("### 📊 Tes résultats")
+                    st.write(f"""<h3 class="centre">📊 Tes résultats</centre>""", unsafe_allow_html=True)
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
