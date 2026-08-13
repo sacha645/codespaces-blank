@@ -1550,6 +1550,7 @@ elif st.session_state.etat == "connecte":
                 st.info("Cette liste ne contient aucun élément.")
             else:
                 compteur_err = charger_erreurs(user_id, liste_id)
+                has_errors = 0
 
                 if type_liste == "verbe":
                     c1, c2, c3, c4, c5 = st.columns(5)
@@ -1564,17 +1565,18 @@ elif st.session_state.etat == "connecte":
                         id_m, inf, pres, pret, pp, trad = mot
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
-                        def fmt_v(texte, idx_f):
+                        def fmt_v(texte, idx_f, k):
                             if isinstance(errs, dict) and errs.get(idx_f, 0) >= 2:
+                                k += 1
                                 return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
                             return texte
 
                         col1, col2, col3, col4, col5 = st.columns(5)
-                        col1.markdown(fmt_v(inf, 1), unsafe_allow_html=True)
-                        col2.markdown(fmt_v(pres, 2), unsafe_allow_html=True)
-                        col3.markdown(fmt_v(pret, 3), unsafe_allow_html=True)
-                        col4.markdown(fmt_v(pp, 4), unsafe_allow_html=True)
-                        col5.markdown(fmt_v(trad, 5), unsafe_allow_html=True)
+                        col1.markdown(fmt_v(inf, 1, has_errors), unsafe_allow_html=True)
+                        col2.markdown(fmt_v(pres, 2, has_errors), unsafe_allow_html=True)
+                        col3.markdown(fmt_v(pret, 3, has_errors), unsafe_allow_html=True)
+                        col4.markdown(fmt_v(pp, 4, has_errors), unsafe_allow_html=True)
+                        col5.markdown(fmt_v(trad, 5, has_errors), unsafe_allow_html=True)
                 else:
                     c_m1, c_m2 = st.columns(2)
                     c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
@@ -1597,8 +1599,17 @@ elif st.session_state.etat == "connecte":
                         err_orig = err_info.get("depuis_fr", False)
 
                         # Coloration uniquement du côté erroné
-                        mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>" if err_orig else mot_or
-                        trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" if err_trad else trad
+                        if err_orig :
+                            mot_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{mot_or}</span>" 
+                            has_errors += 1
+                        else : 
+                            mot_disp = mot_or
+
+                        if err_trad :
+                            trad_disp = f"<span style='color: #FF4B4B; font-weight: bold;'>{trad}</span>" 
+                            has_errors += 1
+                        else :
+                            trad_dip = trad
 
                         cm1, cm2 = st.columns(2)
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
@@ -1606,8 +1617,6 @@ elif st.session_state.etat == "connecte":
 
             ligne_epaisse()
             st.write("")
-
-            has_errors = sum(err_info.get("vers_fr", False) + err_info.get("depuis_fr", False) for err_info in (charger_erreurs(user_id, liste_id) or {}).values())
 
             cols = st.columns(2) if has_errors else [st.container()]
             with cols[0]:
