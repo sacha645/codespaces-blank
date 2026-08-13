@@ -2248,17 +2248,27 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("### 📊 Tes résultats")
+                    # Un seul bloc HTML pour TOUT centrer parfaitement
+                    html_code = f"""
+                    <div style="text-align: center; width: 100%;">
+                        <h3 style="margin-bottom: 10px;">📊 Tes résultats</h3>
+                    """
 
                     if est_nouveau_record:
-                        st.success("🥳 **Nouveau meilleur score !**")
+                        html_code += '<p style="color: #4CAF50; font-weight: bold;">🥳 Nouveau meilleur score !</p>'
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"""<div style="text-align: center; color: #808495; font-size: 0.95rem; margin-bottom: 15px;">🏆 <b>Meilleur score :</b> ⚡ <b>{anc_v:g}/{anc_tv:g}</b></div>""", unsafe_allow_html=True)
+                        html_code += f'<p style="color: #808495; margin-bottom: 15px;">🏆 <b>Meilleur score :</b> ⚡ {anc_v:g}/{anc_tv:g}</p>'
 
-                    st.write("")
+                    html_code += f"""
+                        <div style="margin-top: 15px;">
+                            <span style="font-size: 1rem; color: #FFFFFF; font-weight: 500;">⚡ Score :</span>
+                            <div style="font-size: 2.2rem; font-weight: 700; color: #FFFFFF;">{s_v:g} / {t_v:g}</div>
+                        </div>
+                    </div>
+                    """
 
-                    st.markdown(f"""<div style="text-align: center; margin-top: 10px;"><div style="font-size: 1rem; color: #FFFFFF; font-weight: 500; margin-bottom: 4px;">⚡ Score :</div><div style="font-size: 2.2rem; font-weight: 700; color: #FFFFFF;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
+                    st.markdown(html_code, unsafe_allow_html=True)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
