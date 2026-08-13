@@ -2253,7 +2253,7 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.subheader("🎯 Entraînement : r")
+                    st.write("### 🎯 Entraînement : r")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
