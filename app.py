@@ -615,12 +615,13 @@ st.markdown(
     }
 
     /* 2. Centrer tous les titres (st.title, st.header, st.subheader) */
-    h1, h2{
+    h1, h2, h3 {
         text-align: center;
     }
     
     .centre {
     text-align: center;
+    align-items: center;
     justify-content: center;
     }
     </style>
@@ -2252,7 +2253,7 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write(f"""<h3 class="centre">📊 Tes résultats</centre>""", unsafe_allow_html=True)
+                    st.write("### 📊 Tes résultats")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
@@ -2262,7 +2263,7 @@ elif st.session_state.etat == "connecte":
 
                     st.write("")
 
-                    st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
+                    st.markdown(f"""<div class="centre"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
