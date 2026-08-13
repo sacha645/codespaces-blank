@@ -1953,11 +1953,9 @@ elif st.session_state.etat == "connecte":
                             elif sens == "depuis_fr":
                                 mots_err[id_m]["depuis_fr"] = True
 
-                    if mots_err :
-                        sauvegarder_erreurs(user_id, liste_id, mots_err)
+                    sauvegarder_erreurs(user_id, liste_id, mots_err)
 
                     st.write("### &nbsp;&nbsp;&nbsp;📊 Tes résultats")
-                    st.write(mots_err)
 
                     # Animation du nouveau meilleur score et résultats
                     if st.session_state.action == "entrainer" :
