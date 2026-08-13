@@ -1941,7 +1941,7 @@ elif st.session_state.etat == "connecte":
                     if mots_err :
                         sauvegarder_erreurs(user_id, liste_id, mots_err)
 
-                    st.write("### 📊 Tes résultats : ")
+                    st.write("### 📊 Tes résultats")
 
                     # Animation du nouveau meilleur score et résultats
                     if st.session_state.action == "entrainer" :
@@ -2248,18 +2248,18 @@ elif st.session_state.etat == "connecte":
                     # Suppression de la partie sauvegardée
                     supprimer_sauvegarde_partie(liste_id)
 
-                    st.write("### 📊 Tes résultats : ")
+                    st.write("### 📊 Tes résultats")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"<center>🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></center>", unsafe_allow_html=True)
+                        st.markdown(f"""<div style="text-align: center; color: #808495; font-size: 0.9em; margin-bottom: 20px;">🏆 <b>Meilleur score : ⚡</b> {anc_v:g} / {anc_tv:g}</div>""", unsafe_allow_html=True)
 
                     st.write("")
 
-                    st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 0.9em; color: white;">⚡ Score : </span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
-
+                    st.markdown(f"""<div style="text-align: center; margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
+                    st.markdown(f"""<div style="text-align: center; margin: 15px 0;"><span style="font-size: 0.9em; color: #808495; text-transform: uppercase; letter-spacing: 1px;">⚡ Score :</span><div style="font-size: 2.8rem; font-weight: 800; color: #4CAF50;">⚡ {s_v:g} <span style="font-size: 1.5rem; color: #808495;">/ {t_v:g}</span></div></div>""", unsafe_allow_html=True)
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
 
@@ -2268,7 +2268,7 @@ elif st.session_state.etat == "connecte":
 
                     if err_details:
                         st.write("### ❌ Récapitulatif des erreurs commises")
-                        st.caption("Voici les formes sur lesquelles tu t'es trompé(e) :")
+                        st.markdown("<p style='text-align: center; color: #808495; font-size: 0.875rem;'>Voici les formes sur lesquelles tu t'es trompé(e) :</p>", unsafe_allow_html=True)
                         st.write("")
 
                         col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
