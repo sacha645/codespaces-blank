@@ -1847,7 +1847,6 @@ elif st.session_state.etat == "connecte":
                     st.session_state.total_depuis_fr = 0.0
                     st.session_state.erreurs_commises = []
                     st.session_state.quiz_liste_id = liste_id
-                    st.session_state.action = "entrainer"
                 elif "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
                     partie_sauvee = charger_partie_sauvegardee(liste_id)
 
