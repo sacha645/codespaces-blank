@@ -1957,7 +1957,7 @@ elif st.session_state.etat == "connecte":
                         sauvegarder_erreurs(user_id, liste_id, mots_err)
 
                     st.write("### &nbsp;&nbsp;&nbsp;📊 Tes résultats")
-                    print(mots_err)
+                    st.write(mots_err)
 
                     # Animation du nouveau meilleur score et résultats
                     if st.session_state.action == "entrainer" :
