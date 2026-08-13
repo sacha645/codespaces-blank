@@ -619,6 +619,13 @@ st.markdown(
         text-align: center;
     }
     
+    .centre {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -2249,13 +2256,12 @@ elif st.session_state.etat == "connecte":
                     supprimer_sauvegarde_partie(liste_id)
 
                     st.write("### 📊 Tes résultats")
-                    st.write("### |")
 
                     if est_nouveau_record:
                         st.success("🥳 **Nouveau meilleur score !**")
                     elif score_actuel_bdd:
                         anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"""<div style="text-align: center">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
+                        st.markdown(f"""<div class="centre">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
 
                     st.write("")
 
