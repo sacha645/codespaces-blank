@@ -1799,114 +1799,40 @@ elif st.session_state.etat == "connecte":
             if type_liste == "vocabulaire":
 
                 # 1. INITIALISATION / REPRISE DU QUIZ VOCABULAIRE
-                if st.session_state.action == "err_entrainer" :
-                    mots_bruts = recuperer_mots_liste(liste_id)
-                    erreurs = charger_erreurs(user_id, liste_id)
-                    
-                    # On crée la liste de questions 
-                    questions = []
-                    for id_m, mot_or, _, _, _, trad in mots_bruts:
-                        # Supprime les éventuels "!"
-                        mot_or = mot_or.strip()
-
-                        # Récupération des erreurs spécifiques par sens
-                        # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
-                        err_info = (erreurs or {}).get(id_m, {})
-
-                        # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
-                        err_vfr = err_info.get("vers_fr", False)
-                        # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
-                        err_dfr = err_info.get("depuis_fr", False)
-
-                        if err_vfr or err_dfr :                    
-                            if mot_or.startswith("!") :
-                                art, mot = "", mot_or.removeprefix("!")
-
-                            else:
-                                parts = mot_or.split(" ", 1) 
-
-                                art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
-
-                            if err_vfr :
-                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "depuis_francais"})
-                            if err_dfr : 
-                                questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "vers_francais"})
-            
-                    # Mélange 1 : Aléatoire
-                    random.shuffle(questions)
-
-                    # Mélange 2 : Démêlage
-                    questions = demeler_questions(questions)
-
-                    # Enregistrement dans la session
-                    st.session_state.quiz_mots = questions
-                    st.session_state.quiz_index = 0
-                    st.session_state.score_vers_fr = 0.0
-                    st.session_state.total_vers_fr = 0.0
-                    st.session_state.score_depuis_fr = 0.0
-                    st.session_state.total_depuis_fr = 0.0
-                    st.session_state.erreurs_commises = []
-                    st.session_state.quiz_liste_id = liste_id
-                elif "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
-                    partie_sauvee = charger_partie_sauvegardee(liste_id)
-
-                    # Demande si une sauvegarde existe
-                    if partie_sauvee and "choix_reprise" not in st.session_state:
-                        st.info("💾 Une sauvegarde d'entraînement existe pour cette liste.")
-                        st.write("")
-                        col_c1, col_c2 = st.columns(2)
-                        
-                        with col_c1:
-                            if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
-                                st.session_state.choix_reprise = "charger"
-                                st.rerun()
-
-                        with col_c2:
-                            if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                supprimer_sauvegarde_partie(liste_id)
-                                st.session_state.choix_reprise = "nouveau"
-                                st.rerun()
-
-                        st.stop()
-
-                    # Chargement ou Création
-                    if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
-                        st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
-                        st.session_state.quiz_index = partie_sauvee["quiz_index"]
-                        st.session_state.score_vers_fr = partie_sauvee["score_vers_fr"]
-                        st.session_state.total_vers_fr = partie_sauvee["total_vers_fr"]
-                        st.session_state.score_depuis_fr = partie_sauvee["score_depuis_fr"]
-                        st.session_state.total_depuis_fr = partie_sauvee["total_depuis_fr"]
-                        st.session_state.erreurs_commises = partie_sauvee["erreurs_commises"]
-                        st.session_state.quiz_liste_id = liste_id
-                        st.toast("⚡ Sauvegarde chargée !")
-                    else:
+                if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
+                    if st.session_state.action == "err_entrainer" :
                         mots_bruts = recuperer_mots_liste(liste_id)
+                        erreurs = charger_erreurs(user_id, liste_id)
                         
-                        mots_traites = []
-                        for id_m, mot_or, _, _, _, trad in mots_bruts:
-                            mot_or_strip = mot_or.strip()
-
-                            if mot_or_strip.startswith("!") :
-                                art, mot = "", mot_or_strip.removeprefix("!")
-                            else:
-                                parts = mot_or_strip.split(" ", 1) 
-
-                                art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
-                            
-                            mots_traites.append({
-                                "id_mot": id_m,
-                                "article": art,
-                                "mot": mot,
-                                "traduction": trad.strip()
-                            })
-
-                        # On crée la liste de questions avec les 2 sens (exactement comme dans ton code d'origine)
+                        # On crée la liste de questions 
                         questions = []
-                        for item in mots_traites:
-                            questions.append({"item": item, "sens": "vers_francais"})
-                            questions.append({"item": item, "sens": "depuis_francais"})
-                        
+                        for id_m, mot_or, _, _, _, trad in mots_bruts:
+                            # Supprime les éventuels "!"
+                            mot_or = mot_or.strip()
+
+                            # Récupération des erreurs spécifiques par sens
+                            # err_info = {"vers_fr": True/False, "depuis_fr": True/False}
+                            err_info = (erreurs or {}).get(id_m, {})
+
+                            # Si l'erreur était vers le français (question en langue étrangère -> faute sur la traduction)
+                            err_vfr = err_info.get("vers_fr", False)
+                            # Si l'erreur était depuis le français (question en français -> faute sur le mot étranger)
+                            err_dfr = err_info.get("depuis_fr", False)
+
+                            if err_vfr or err_dfr :                    
+                                if mot_or.startswith("!") :
+                                    art, mot = "", mot_or.removeprefix("!")
+
+                                else:
+                                    parts = mot_or.split(" ", 1) 
+
+                                    art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
+
+                                if err_vfr :
+                                    questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "depuis_francais"})
+                                if err_dfr : 
+                                    questions.append({"item": {"id_mot": id_m, "article": art, "mot": mot, "traduction": trad}, "sens": "vers_francais"})
+                
                         # Mélange 1 : Aléatoire
                         random.shuffle(questions)
 
@@ -1922,9 +1848,84 @@ elif st.session_state.etat == "connecte":
                         st.session_state.total_depuis_fr = 0.0
                         st.session_state.erreurs_commises = []
                         st.session_state.quiz_liste_id = liste_id
+                    else : 
+                        partie_sauvee = charger_partie_sauvegardee(liste_id)
 
-                    # Nettoyage du choix temporaire
-                    st.session_state.pop("choix_reprise", None)
+                        # Demande si une sauvegarde existe
+                        if partie_sauvee and "choix_reprise" not in st.session_state:
+                            st.info("💾 Une sauvegarde d'entraînement existe pour cette liste.")
+                            st.write("")
+                            col_c1, col_c2 = st.columns(2)
+                            
+                            with col_c1:
+                                if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
+                                    st.session_state.choix_reprise = "charger"
+                                    st.rerun()
+
+                            with col_c2:
+                                if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
+                                    supprimer_sauvegarde_partie(liste_id)
+                                    st.session_state.choix_reprise = "nouveau"
+                                    st.rerun()
+
+                            st.stop()
+
+                        # Chargement ou Création
+                        if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
+                            st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
+                            st.session_state.quiz_index = partie_sauvee["quiz_index"]
+                            st.session_state.score_vers_fr = partie_sauvee["score_vers_fr"]
+                            st.session_state.total_vers_fr = partie_sauvee["total_vers_fr"]
+                            st.session_state.score_depuis_fr = partie_sauvee["score_depuis_fr"]
+                            st.session_state.total_depuis_fr = partie_sauvee["total_depuis_fr"]
+                            st.session_state.erreurs_commises = partie_sauvee["erreurs_commises"]
+                            st.session_state.quiz_liste_id = liste_id
+                            st.toast("⚡ Sauvegarde chargée !")
+                        else:
+                            mots_bruts = recuperer_mots_liste(liste_id)
+                            
+                            mots_traites = []
+                            for id_m, mot_or, _, _, _, trad in mots_bruts:
+                                mot_or_strip = mot_or.strip()
+
+                                if mot_or_strip.startswith("!") :
+                                    art, mot = "", mot_or_strip.removeprefix("!")
+                                else:
+                                    parts = mot_or_strip.split(" ", 1) 
+
+                                    art, mot = (parts[0], parts[1]) if len(parts) == 2 else ("", parts[0])
+                                
+                                mots_traites.append({
+                                    "id_mot": id_m,
+                                    "article": art,
+                                    "mot": mot,
+                                    "traduction": trad.strip()
+                                })
+
+                            # On crée la liste de questions avec les 2 sens (exactement comme dans ton code d'origine)
+                            questions = []
+                            for item in mots_traites:
+                                questions.append({"item": item, "sens": "vers_francais"})
+                                questions.append({"item": item, "sens": "depuis_francais"})
+                            
+                            # Mélange 1 : Aléatoire
+                            random.shuffle(questions)
+
+                            # Mélange 2 : Démêlage
+                            questions = demeler_questions(questions)
+
+                            # Enregistrement dans la session
+                            st.session_state.quiz_mots = questions
+                            st.session_state.quiz_index = 0
+                            st.session_state.score_vers_fr = 0.0
+                            st.session_state.total_vers_fr = 0.0
+                            st.session_state.score_depuis_fr = 0.0
+                            st.session_state.total_depuis_fr = 0.0
+                            st.session_state.erreurs_commises = []
+                            st.session_state.quiz_liste_id = liste_id
+
+                        # Nettoyage du choix temporaire
+                        st.session_state.pop("choix_reprise", None)
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
