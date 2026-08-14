@@ -1995,12 +1995,12 @@ elif st.session_state.etat == "connecte":
 
                         if t_v :
                             with cols[0]:
-                                st.metric(label="🌐 Vers la langue étrangère", value=f"{s_v:g} / {t_v:g}")
+                                st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🌐 Vers la langue étrangère</span><div style='font-size: 2rem; font-weight: 500;'>{s_v:g} / {t_v:g}</div></div>", unsafe_allow_html=True)
 
                         if t_d :
                             col_dest = cols[1] if (t_v and t_d) else cols[0]
                             with col_dest :
-                                st.metric(label="🇫🇷 Vers le français", value=f"{s_d:g} / {t_d:g}")
+                                st.markdown(f"<div style='text-align: center; margin: 10px 0;'><span style='font-size: 0.9em; color: white;'>🇫🇷 Vers le français</span><div style='font-size: 2rem; font-weight: 500;'>{s_d:g} / {t_d:g}</div></div>", unsafe_allow_html=True)
 
                     st.divider()
 
@@ -2362,7 +2362,7 @@ elif st.session_state.etat == "connecte":
                         col_b1, col_b2, col_b3 = st.columns(3)
 
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({sum(x for x in st.session_state.erreurs_compteur.values().values())})", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({sum(bool(x[0]) + bool(x[1]) + bool(x[2]) + bool(x[3]) + bool(x[4]) for x in st.session_state.erreurs_compteur.values())})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
