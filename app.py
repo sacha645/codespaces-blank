@@ -504,9 +504,7 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
     
     # Pour chaque verbe, on génère un ordre aléatoire unique de ses 5 formes (sans remise)
     # Ainsi chaque forme servira EXACTEMENT 1 fois d'indice sur les 5 tours.
-    tirages_par_verbe = {
-        verbe[0]: random.sample(range(5), 5) for verbe in mots_verbes
-    }
+    tirages_par_verbe = {verbe[0]: random.sample(range(5), 5) for verbe in mots_verbes}
     
     for tour in range(5):
         for verbe in mots_verbes:
@@ -1970,8 +1968,8 @@ elif st.session_state.etat == "connecte":
                                 est_nouveau_record = True
 
                         if est_nouveau_record:
-                            st.success("🥳 **Nouveau meilleur score !**")
                             enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, s_d, t_d)
+                            st.success("🥳 **Nouveau meilleur score !**")
                         elif score_actuel_bdd:
                             anc_v, anc_tv, anc_d, anc_td = score_actuel_bdd
                             st.markdown(f"<div style='text-align: center;'>🏆 <b>Meilleur score :</b> 🌐 <code>{anc_v:g}/{anc_tv:g}</code> | 🇫🇷 <code>{anc_d:g}/{anc_td:g}</code></div>", unsafe_allow_html=True)
@@ -2038,7 +2036,7 @@ elif st.session_state.etat == "connecte":
                     if erreurs :
                         col_b1, col_b2, col_b3 = st.columns(3)
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({x})", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({nb_err})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
@@ -2205,86 +2203,113 @@ elif st.session_state.etat == "connecte":
             else:
                 # 1. INITIALISATION DU QUIZ VERBES
                 if "quiz_mots" not in st.session_state or st.session_state.get("quiz_liste_id") != liste_id:
-                    # On vérifie si une sauvegarde existe en BDD
-                    partie_sauvee = charger_partie_sauvegardee(liste_id)
-
-                    if partie_sauvee and "choix_reprise" not in st.session_state:
-                        # Demande de confirmation à l'utilisateur
-                        st.info("💾 Une sauvegarde d'entraînement existe pour cette liste de verbes.")
-                        st.write("")
-                        col_c1, col_c2 = st.columns(2)
-                        
-                        with col_c1:
-                            if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
-                                st.session_state.choix_reprise = "charger"
-                                st.rerun()
-
-                        with col_c2:
-                            if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                supprimer_sauvegarde_partie(liste_id)
-                                st.session_state.choix_reprise = "nouveau"
-                                st.rerun()
-
-                        st.stop()  # Stoppe l'affichage tant que l'utilisateur n'a pas choisi
-
-                    # Applique le choix fait par l'utilisateur
-                    if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
-                        st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
-                        st.session_state.quiz_index = partie_sauvee["quiz_index"]
-                        st.session_state.score_verbes = partie_sauvee["score_verbes"]
-                        st.session_state.total_verbes = partie_sauvee["total_verbes"]
-                        st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
-                        st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
-                        st.session_state.quiz_liste_id = liste_id
-                        st.toast("⚡ Sauvegarde chargée !")
-
-                    else:
+                    if st.session_state.action == "err_entrainer" :
                         mots_bruts = recuperer_mots_liste(liste_id)
-                        st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
+                        erreurs = charger_erreurs(user_id, liste_id)
+
+                        # On crée la liste de questions 
+                        questions = []
+                        formes_infos = ["Infinitif", "Présent", "Prétérit", "Participe Passé", "Traduction"]
+                        for x in mots_bruts :
+                            id_m, inf, pres, pret, pp, trad = x
+                            err_info = (erreurs or {}).get(id_m, {})
+
+                            # Vérification de où est l'erreur
+                            errs = [i for i in range(1, 6) if err_info.get(i, 0) >= 2]
+
+                            if errs :
+                                for y in errs :
+                                    questions.append({"id_mot" : id_m, 
+                                                    "attentes" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z != y],
+                                                    "valeur_fournie" : [x[y] for z in range(1, 6) if z == y],
+                                                    "verbe_tuple" : x})
+                        
+                        st.session_state.quiz_mots = questions
                         st.session_state.quiz_index = 0
                         st.session_state.score_verbes = 0.0
-                        st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
+                        st.session_state.total_verbes = 0
                         st.session_state.erreurs_compteur = {}
                         st.session_state.erreurs_verbes_detail = []
                         st.session_state.quiz_liste_id = liste_id
 
-                    # Nettoyage de la variable de choix temporaire
-                    st.session_state.pop("choix_reprise", None)
+                    else :
+                        # On vérifie si une sauvegarde existe en BDD
+                        partie_sauvee = charger_partie_sauvegardee(liste_id)
+
+                        if partie_sauvee and "choix_reprise" not in st.session_state:
+                            # Demande de confirmation à l'utilisateur
+                            st.info("💾 Une sauvegarde d'entraînement existe pour cette liste de verbes.")
+                            st.write("")
+                            col_c1, col_c2 = st.columns(2)
+                            
+                            with col_c1:
+                                if st.button("▶️ Charger la sauvegarde", type="primary", use_container_width=True):
+                                    st.session_state.choix_reprise = "charger"
+                                    st.rerun()
+
+                            with col_c2:
+                                if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
+                                    supprimer_sauvegarde_partie(liste_id)
+                                    st.session_state.choix_reprise = "nouveau"
+                                    st.rerun()
+
+                            st.stop()  # Stoppe l'affichage tant que l'utilisateur n'a pas choisi
+
+                        # Applique le choix fait par l'utilisateur
+                        if partie_sauvee and st.session_state.get("choix_reprise") == "charger":
+                            st.session_state.quiz_mots = partie_sauvee["quiz_mots"]
+                            st.session_state.quiz_index = partie_sauvee["quiz_index"]
+                            st.session_state.score_verbes = partie_sauvee["score_verbes"]
+                            st.session_state.total_verbes = partie_sauvee["total_verbes"]
+                            st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
+                            st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
+                            st.session_state.quiz_liste_id = liste_id
+                            st.toast("⚡ Sauvegarde chargée !")
+
+                        else:
+                            mots_bruts = recuperer_mots_liste(liste_id)
+                            st.session_state.quiz_mots = preparer_quiz_verbes_aleatoire(mots_bruts)
+                            st.session_state.quiz_index = 0
+                            st.session_state.score_verbes = 0.0
+                            st.session_state.total_verbes = float(len(st.session_state.quiz_mots))
+                            st.session_state.erreurs_compteur = {}
+                            st.session_state.erreurs_verbes_detail = []
+                            st.session_state.quiz_liste_id = liste_id
+
+                        # Nettoyage de la variable de choix temporaire
+                        st.session_state.pop("choix_reprise", None)
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
 
                 # 2. VUE FINALE : BILAN ET SAUVEGARDE
                 if index >= len(questions):
+                    sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
+                    supprimer_sauvegarde_partie(liste_id)
+
                     s_v = st.session_state.score_verbes
                     t_v = st.session_state.total_verbes
 
-                    # Sauvegarde des erreurs en session
-                    sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
-
-                    score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
-                    est_nouveau_record = False
-
-                    if score_actuel_bdd is None:
-                        est_nouveau_record = True
-                    else:
-                        anc_score, _, _, _ = score_actuel_bdd
-                        if s_v > anc_score :
-                            est_nouveau_record = True
-
-                    # Enregistrement du meilleur score
-                    enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
-
-                    # Suppression de la partie sauvegardée
-                    supprimer_sauvegarde_partie(liste_id)
-
                     st.write("### &nbsp;&nbsp;&nbsp;📊 Tes résultats")
 
-                    if est_nouveau_record:
-                        st.success("🥳 **Nouveau meilleur score !**")
-                    elif score_actuel_bdd:
-                        anc_v, anc_tv, _, _ = score_actuel_bdd
-                        st.markdown(f"""<div class="centre">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
+                    if st.session_state.action == "entrainer" :
+                        score_actuel_bdd = recuperer_score_liste(user_id, liste_id)
+                        est_nouveau_record = False
+
+                        if score_actuel_bdd is None:
+                            est_nouveau_record = True
+                        else:
+                            anc_score, _, _, _ = score_actuel_bdd
+                            if s_v > anc_score :
+                                est_nouveau_record = True
+
+
+                        if est_nouveau_record:
+                            enregistrer_meilleur_score(user_id, liste_id, s_v, t_v, 0, 0)
+                            st.success("🥳 **Nouveau meilleur score !**")
+                        elif score_actuel_bdd:
+                            anc_v, anc_tv, _, _ = score_actuel_bdd
+                            st.markdown(f"""<div class="centre">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
 
                     st.write("")
 
@@ -2297,7 +2322,10 @@ elif st.session_state.etat == "connecte":
                     st.session_state.pop("erreurs_verbes_detail", None)
 
                     if err_details:
-                        st.write("### ❌ Récapitulatif des erreurs commises")
+                        if st.session_state.action == "entrainer" :
+                            st.write("### ❌ Récapitulatif des erreurs commises")
+                        else :
+                            st.write("### ❌ Récapitulatif des erreurs qu'il te reste à réviser")
                         st.markdown("<p style='text-align: center; color: #808495; font-size: 0.875rem;'>Voici les formes sur lesquelles tu t'es trompé(e) :</p>", unsafe_allow_html=True)
                         st.write("")
 
@@ -2307,19 +2335,34 @@ elif st.session_state.etat == "connecte":
                         col_rep.markdown("<u>**Ta réponse :**</u>", unsafe_allow_html=True)
                         col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
-                        for err in err_details:
+                        for x, err in enumerate(err_details, 1) :
                             c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
                             c1.markdown(f"**{err['verbe']}**")
                             c2.markdown(err["forme"])
                             c3.markdown(f"<span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span>", unsafe_allow_html=True)
                             c4.markdown(f"🟢 `{err['rep_attendue']}`")
+                            nb_err = x
                     else:
                         st.balloons()
-                        st.info("⭐ Félicitations ! Un sans-faute parfait sur les verbes !")
+                        if st.session_state.action == "entrainer" :
+                            st.info("⭐ Félicitations ! Un sans-faute parfait sur les verbes !")
+                        else :
+                            st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
 
                     ligne_epaisse()
                     st.write("")
-                    col_b1, col_b2 = st.columns(2)
+
+                    if err_details:
+                        col_b1, col_b2, col_b3 = st.columns(3)
+
+                        with col_b3:
+                            if st.button(f"🎯 Revoir mes erreurs ({nb_err})", use_container_width=True):
+                                st.session_state.action = "err_entrainer"
+                                st.session_state.pop("quiz_mots", None)
+                                st.rerun()
+                    else :
+                        col_b1, col_b2 = st.columns(2)
+
                     with col_b1:
                         if st.button("🔙 Retour aux listes", type="primary", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
@@ -2347,12 +2390,24 @@ elif st.session_state.etat == "connecte":
                             (4, "Participe Passé"),
                             (5, "Traduction")
                         ]
-                        
+
                         for idx_t, nom_f in ordre_formes:
                             if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
-                                reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
+                                if st.session_state.action == "entrainer" :
+                                    reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
+
+                                else :
+                                    st.text_input(f"{nom_f} :", value=q["attentes"].pop(0)["reponse_attendue"], disabled=True, key=f"dis_{index}_{idx_t}")
+
                             else:
-                                st.text_input(f"{nom_f} :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
+                                if st.session_state.action == "entrainer" :
+                                    st.text_input(f"{nom_f} :", value=q["valeur_fournie"].pop(0), disabled=True, key=f"dis_{index}_{idx_t}")
+
+                                else :
+                                    reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
+                                    st.session_state.total_verbes += 1
+
+
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
@@ -2364,22 +2419,40 @@ elif st.session_state.etat == "connecte":
                         if id_mot not in st.session_state.erreurs_compteur:
                             st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
-                        for att in q["attentes"]:
-                            idx_t = att["idx_tuple"]
-                            rep_u = reponses_user.get(idx_t, "").strip()
-                            rep_att = att["reponse_attendue"].strip()
+                        if st.session_state.action == "entrainer" :
+                            for att in q["attentes"]:
+                                idx_t = att["idx_tuple"]
+                                rep_u = reponses_user.get(idx_t, "").strip()
+                                rep_att = att["reponse_attendue"].strip()
 
-                            if rep_u.lower() == rep_att.lower():
-                                pts_gagnes += 0.25
-                            else:
-                                st.session_state.erreurs_compteur[id_mot][idx_t] += 1
-                                # Détail de l'erreur pour le bilan final
-                                st.session_state.erreurs_verbes_detail.append({
-                                    "verbe": q["verbe_tuple"][1],
-                                    "forme": att["nom"],
-                                    "rep_user": rep_u,
-                                    "rep_attendue": rep_att
-                                })
+                                if rep_u.lower() == rep_att.lower():
+                                    pts_gagnes += 0.25
+                                else:
+                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+                                    # Détail de l'erreur pour le bilan final
+                                    st.session_state.erreurs_verbes_detail.append({
+                                        "verbe": q["verbe_tuple"][1],
+                                        "forme": att["nom"],
+                                        "rep_user": rep_u,
+                                        "rep_attendue": rep_att
+                                    })
+                        else :
+                            for att in q["attentes"]:
+                                idx_t = att["idx_tuple"]
+                                rep_u = reponses_user.get(idx_t, "").strip()
+                                rep_att = att["reponse_attendue"].strip()
+
+                                if rep_u.lower() == rep_att.lower():
+                                    pts_gagnes += 1
+                                else:
+                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+                                    # Détail de l'erreur pour le bilan final
+                                    st.session_state.erreurs_verbes_detail.append({
+                                        "verbe": q["verbe_tuple"][1],
+                                        "forme": att["nom"],
+                                        "rep_user": rep_u,
+                                        "rep_attendue": rep_att
+                                    })
 
                         st.session_state.score_verbes += pts_gagnes
 
