@@ -2362,7 +2362,7 @@ elif st.session_state.etat == "connecte":
                         col_b1, col_b2, col_b3 = st.columns(3)
 
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({sum(sum(x[i] >= 2 for i in range(1, 6)) for x in st.session_state.erreurs_compteur.values())}))", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({sum(sum(x[i] >= 2 for i in range(1, 6)) for x in st.session_state.erreurs_compteur.values())})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
@@ -2612,7 +2612,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.pop("action_suppr", None)
                         st.rerun()
 
-                elif st.session_state.action_suppr == "abandon":
+                elif st.session_state.action_suppr == "abandon" or st.session_state.action_suppr == "abandon2" :
                     if st.button("💥 Oui, abandonner", type="primary", use_container_width=True):
                         # A. Suppression de la sauvegarde BDD si elle existe
                         liste_id = st.session_state.get("liste_active_id")
