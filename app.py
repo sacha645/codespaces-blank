@@ -856,9 +856,10 @@ with col_title:
                         "total_vers_fr": st.session_state.get("total_vers_fr", 0.0),
                         "score_depuis_fr": st.session_state.get("score_depuis_fr", 0.0),
                         "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
-                        "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                        "erreurs_commises": st.session_state.get("erreurs_commises", []),
+                        "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                     }
-                    
+
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
                     
                     for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_vers_fr", 
@@ -872,7 +873,8 @@ with col_title:
                         "score_verbes": st.session_state.get("score_verbes", 0.0),
                         "total_verbes": st.session_state.get("total_verbes", 0.0),
                         "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                        "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                        "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                     }
 
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver)
@@ -1878,6 +1880,7 @@ elif st.session_state.etat == "connecte":
                             st.session_state.total_depuis_fr = partie_sauvee["total_depuis_fr"]
                             st.session_state.erreurs_commises = partie_sauvee["erreurs_commises"]
                             st.session_state.quiz_liste_id = liste_id
+                            st.session_state.action = "err_entrainer" if partie_sauvee["type"] == "erreur" else "entrainer"
                             st.toast("⚡ Sauvegarde chargée !")
                         else:
                             mots_bruts = recuperer_mots_liste(liste_id)
@@ -2153,7 +2156,8 @@ elif st.session_state.etat == "connecte":
                             "total_vers_fr": st.session_state.total_vers_fr,
                             "score_depuis_fr": st.session_state.score_depuis_fr,
                             "total_depuis_fr": st.session_state.total_depuis_fr,
-                            "erreurs_commises": st.session_state.erreurs_commises
+                            "erreurs_commises": st.session_state.erreurs_commises,
+                            "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
 
@@ -2172,7 +2176,8 @@ elif st.session_state.etat == "connecte":
                                 "total_vers_fr": st.session_state.get("total_vers_fr", 0.0),
                                 "score_depuis_fr": st.session_state.get("score_depuis_fr", 0.0),
                                 "total_depuis_fr": st.session_state.get("total_depuis_fr", 0.0),
-                                "erreurs_commises": st.session_state.get("erreurs_commises", [])
+                                "erreurs_commises": st.session_state.get("erreurs_commises", []),
+                                "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                             }
                             
                             sauvegarder_partie(user_id, liste_id, etat_a_sauver)
@@ -2264,6 +2269,7 @@ elif st.session_state.etat == "connecte":
                             st.session_state.erreurs_compteur = partie_sauvee["erreurs_compteur"]
                             st.session_state.erreurs_verbes_detail = partie_sauvee["erreurs_verbes_detail"]
                             st.session_state.quiz_liste_id = liste_id
+                            st.session_state.action = "err_entrainer" if partie_sauvee["type"] == "erreur" else "entrainer"
                             st.toast("⚡ Sauvegarde chargée !")
 
                         else:
@@ -2368,6 +2374,7 @@ elif st.session_state.etat == "connecte":
                             st.session_state.pop("quiz_mots", None)
                             st.session_state.action = "liste"
                             st.rerun()
+
                     with col_b2:
                         if st.button("🔄 Recommencer", use_container_width=True):
                             st.session_state.pop("quiz_mots", None)
@@ -2401,13 +2408,10 @@ elif st.session_state.etat == "connecte":
 
                             else:
                                 if st.session_state.action == "entrainer" :
-                                    st.text_input(f"{nom_f} :", value=q["valeur_fournie"].pop(0), disabled=True, key=f"dis_{index}_{idx_t}")
+                                    st.text_input(f"{nom_f} :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
 
                                 else :
                                     reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
-                                    st.session_state.total_verbes += 1
-
-
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
@@ -2456,6 +2460,8 @@ elif st.session_state.etat == "connecte":
 
                         st.session_state.score_verbes += pts_gagnes
 
+                        st.session_state.total_verbes += 1
+                        
                         st.session_state.quiz_index += 1
 
                         # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
@@ -2465,7 +2471,8 @@ elif st.session_state.etat == "connecte":
                             "score_verbes": st.session_state.get("score_verbes", 0.0),
                             "total_verbes": st.session_state.get("total_verbes", 0.0),
                             "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                            "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                            "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                            "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
 
@@ -2483,7 +2490,8 @@ elif st.session_state.etat == "connecte":
                                 "score_verbes": st.session_state.get("score_verbes", 0.0),
                                 "total_verbes": st.session_state.get("total_verbes", 0.0),
                                 "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                                "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", [])
+                                "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                                "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                             }
                             
                             # 2. Sauvegarde en BDD
