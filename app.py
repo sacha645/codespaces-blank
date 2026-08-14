@@ -2341,13 +2341,13 @@ elif st.session_state.etat == "connecte":
                         col_rep.markdown("<u>**Ta réponse :**</u>", unsafe_allow_html=True)
                         col_att.markdown("<u>**Réponse attendue :**</u>", unsafe_allow_html=True)
 
-                        for x, err in enumerate(err_details, 1) :
+                        for err in err_details :
                             c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
                             c1.markdown(f"**{err['verbe']}**")
                             c2.markdown(err["forme"])
                             c3.markdown(f"<span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span>", unsafe_allow_html=True)
                             c4.markdown(f"🟢 `{err['rep_attendue']}`")
-                            nb_err = x
+
                     else:
                         st.balloons()
                         if st.session_state.action == "entrainer" :
@@ -2362,7 +2362,7 @@ elif st.session_state.etat == "connecte":
                         col_b1, col_b2, col_b3 = st.columns(3)
 
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({nb_err})", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({sum(x for x in st.session_state.erreurs_compteur.values().values())})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
@@ -2460,7 +2460,8 @@ elif st.session_state.etat == "connecte":
 
                         st.session_state.score_verbes += pts_gagnes
 
-                        st.session_state.total_verbes += 1
+                        if st.session_state.action == "err_entrainer" :
+                            st.session_state.total_verbes += 1
                         
                         st.session_state.quiz_index += 1
 
