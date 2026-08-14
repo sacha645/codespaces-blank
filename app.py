@@ -2362,7 +2362,7 @@ elif st.session_state.etat == "connecte":
                         col_b1, col_b2, col_b3 = st.columns(3)
 
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({sum(bool(x[0]) + bool(x[1]) + bool(x[2]) + bool(x[3]) + bool(x[4]) for x in st.session_state.erreurs_compteur.values())})", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({sum(sum(x[i] >= 2 for i in range(1, 6)) for x in st.session_state.erreurs_compteur.values())}))", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
