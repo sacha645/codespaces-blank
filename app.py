@@ -2441,7 +2441,7 @@ elif st.session_state.etat == "connecte":
                                         "rep_attendue": rep_att
                                     })
                         else :
-                            for att in q["valeur_fournie"]:
+                            for att in q["attentes"]:
                                 idx_t = att["idx_tuple"]
                                 rep_u = reponses_user.get(idx_t, "").strip()
                                 rep_att = att["reponse_attendue"].strip()
