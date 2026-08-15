@@ -2431,9 +2431,10 @@ elif st.session_state.etat == "connecte":
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
+                        st.session_state.test2 = "chat1"
 
                     if valider:
-                        st.session_state.test2 = "chat"
+                        st.session_state.test2 = "chat2"
                         pts_gagnes = 0.0
                         id_mot = q["id_mot"]
 
