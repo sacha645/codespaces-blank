@@ -2433,70 +2433,70 @@ elif st.session_state.etat == "connecte":
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
                         st.session_state.test2 = "chat1"
 
-                    if valider:
-                        st.session_state.test2 = "chat2"
-                        pts_gagnes = 0.0
-                        id_mot = q["id_mot"]
+                        if valider:
+                            st.session_state.test2 = "chat2"
+                            pts_gagnes = 0.0
+                            id_mot = q["id_mot"]
 
-                        if id_mot not in st.session_state.erreurs_compteur:
-                            st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+                            if id_mot not in st.session_state.erreurs_compteur:
+                                st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
-                        if st.session_state.action == "entrainer" :
-                            for att in q["attentes"]:
-                                idx_t = att["idx_tuple"]
-                                rep_u = reponses_user.get(idx_t, "").strip()
-                                rep_att = att["reponse_attendue"].strip()
+                            if st.session_state.action == "entrainer" :
+                                for att in q["attentes"]:
+                                    idx_t = att["idx_tuple"]
+                                    rep_u = reponses_user.get(idx_t, "").strip()
+                                    rep_att = att["reponse_attendue"].strip()
 
-                                if rep_u.lower() == rep_att.lower():
-                                    pts_gagnes += 0.25
-                                else:
-                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 1
-                                    # Détail de l'erreur pour le bilan final
-                                    st.session_state.erreurs_verbes_detail.append({
-                                        "verbe": q["verbe_tuple"][1],
-                                        "forme": att["nom"],
-                                        "rep_user": rep_u,
-                                        "rep_attendue": rep_att
-                                    })
-                        else :
-                            for att in q["valeur_fournie"]:
-                                idx_t = att["idx_tuple"]
-                                rep_u = reponses_user.get(idx_t, "").strip()
-                                rep_att = att["reponse_attendue"].strip()
+                                    if rep_u.lower() == rep_att.lower():
+                                        pts_gagnes += 0.25
+                                    else:
+                                        st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+                                        # Détail de l'erreur pour le bilan final
+                                        st.session_state.erreurs_verbes_detail.append({
+                                            "verbe": q["verbe_tuple"][1],
+                                            "forme": att["nom"],
+                                            "rep_user": rep_u,
+                                            "rep_attendue": rep_att
+                                        })
+                            else :
+                                for att in q["valeur_fournie"]:
+                                    idx_t = att["idx_tuple"]
+                                    rep_u = reponses_user.get(idx_t, "").strip()
+                                    rep_att = att["reponse_attendue"].strip()
 
-                                if rep_u.lower() == rep_att.lower():
-                                    pts_gagnes += 1
-                                else:
-                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 2
+                                    if rep_u.lower() == rep_att.lower():
+                                        pts_gagnes += 1
+                                    else:
+                                        st.session_state.erreurs_compteur[id_mot][idx_t] += 2
 
-                                    # Détail de l'erreur pour le bilan final
-                                    st.session_state.erreurs_verbes_detail.append({
-                                        "verbe": q["verbe_tuple"][1],
-                                        "forme": att["nom"],
-                                        "rep_user": rep_u,
-                                        "rep_attendue": rep_att
-                                    })
+                                        # Détail de l'erreur pour le bilan final
+                                        st.session_state.erreurs_verbes_detail.append({
+                                            "verbe": q["verbe_tuple"][1],
+                                            "forme": att["nom"],
+                                            "rep_user": rep_u,
+                                            "rep_attendue": rep_att
+                                        })
 
-                        st.session_state.score_verbes += pts_gagnes
+                            st.session_state.score_verbes += pts_gagnes
 
-                        if st.session_state.action == "err_entrainer" :
-                            st.session_state.total_verbes += 1
-                        
-                        st.session_state.quiz_index += 1
+                            if st.session_state.action == "err_entrainer" :
+                                st.session_state.total_verbes += 1
+                            
+                            st.session_state.quiz_index += 1
 
-                        # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
-                        etat_a_sauver = {
-                            "quiz_index": st.session_state.get("quiz_index", 0),
-                            "quiz_mots": st.session_state.get("quiz_mots", []),
-                            "score_verbes": st.session_state.get("score_verbes", 0.0),
-                            "total_verbes": st.session_state.get("total_verbes", 0.0),
-                            "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                            "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
-                            "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
-                        }
-                        sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                            # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
+                            etat_a_sauver = {
+                                "quiz_index": st.session_state.get("quiz_index", 0),
+                                "quiz_mots": st.session_state.get("quiz_mots", []),
+                                "score_verbes": st.session_state.get("score_verbes", 0.0),
+                                "total_verbes": st.session_state.get("total_verbes", 0.0),
+                                "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                                "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                                "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
+                            }
+                            sauvegarder_partie(user_id, liste_id, etat_a_sauver)
 
-                        st.rerun()
+                            st.rerun()
 
                     st.write("")
                     col_b2, col_b1 = st.columns(2)
