@@ -1864,7 +1864,6 @@ elif st.session_state.etat == "connecte":
                         st.session_state.total_depuis_fr = 0.0
                         st.session_state.erreurs_commises = []
                         st.session_state.quiz_liste_id = liste_id
-                        st.write("a")
                     else : 
                         partie_sauvee = charger_partie_sauvegardee(liste_id)
 
@@ -2253,6 +2252,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.erreurs_compteur = {}
                         st.session_state.erreurs_verbes_detail = []
                         st.session_state.quiz_liste_id = liste_id
+                        st.write("a")
 
                     else :
                         # On vérifie si une sauvegarde existe en BDD
