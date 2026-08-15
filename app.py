@@ -2306,6 +2306,16 @@ elif st.session_state.etat == "connecte":
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
 
+
+                # --- Déboggeur ---
+                # On utilise un expander pour garder l'interface propre
+                with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+                    st.caption("Affiche en temps réel le contenu de st.session_state")
+                    
+                    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+                    st.json(dict(st.session_state))
+
+
                 # 2. VUE FINALE : BILAN ET SAUVEGARDE
                 if index >= len(questions):
                     sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
