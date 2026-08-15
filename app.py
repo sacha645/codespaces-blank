@@ -2774,3 +2774,11 @@ elif st.session_state.etat == "connecte":
 
 # --- On place l'autofocus ---
 placer_curseur(0)
+
+# --- Déboggeur ---
+# On utilise un expander pour garder l'interface propre
+with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+   st.caption("Affiche en temps réel le contenu de st.session_state")
+   
+   # Affiche l'état complet sous forme JSON/dictionnaire lisible
+   st.json(dict(st.session_state))
