@@ -2223,11 +2223,10 @@ elif st.session_state.etat == "connecte":
                             errs = [i for i in range(1, 6) if err_info.get(i, 0) >= 2]
 
                             if errs :
-                                for y in errs :
-                                    questions.append({"id_mot" : id_m, 
-                                                    "attentes" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z != y],
-                                                    "valeur_fournie" : [x[y] for z in range(1, 6) if z == y],
-                                                    "verbe_tuple" : x})
+                                questions.append({"id_mot" : id_m, 
+                                                "attentes" : [x[z] for z in range(1, 6) if z not in errs],
+                                                "valeur_fournie" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z]} for z in range(1, 6) if z in errs],
+                                                "verbe_tuple" : x})
                         
                         st.session_state.quiz_mots = questions
                         st.session_state.quiz_index = 0
@@ -2404,7 +2403,7 @@ elif st.session_state.etat == "connecte":
                                     reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
 
                                 else :
-                                    st.text_input(f"{nom_f} :", value=q["attentes"].pop(0)["reponse_attendue"], disabled=True, key=f"dis_{index}_{idx_t}")
+                                    st.text_input(f"{nom_f} :", value=q["attentes"].pop(0), disabled=True, key=f"dis_{index}_{idx_t}")
 
                             else:
                                 if st.session_state.action == "entrainer" :
@@ -2441,7 +2440,7 @@ elif st.session_state.etat == "connecte":
                                         "rep_attendue": rep_att
                                     })
                         else :
-                            for att in q["attentes"]:
+                            for att in q["valeur_fournie"]:
                                 idx_t = att["idx_tuple"]
                                 rep_u = reponses_user.get(idx_t, "").strip()
                                 rep_att = att["reponse_attendue"].strip()
