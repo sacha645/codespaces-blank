@@ -2775,7 +2775,7 @@ elif st.session_state.etat == "connecte":
 
 
 # --- On place l'autofocus ---
-placer_curseur(0)
+# placer_curseur(0)
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
