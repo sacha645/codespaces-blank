@@ -2252,7 +2252,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.erreurs_compteur = {}
                         st.session_state.erreurs_verbes_detail = []
                         st.session_state.quiz_liste_id = liste_id
-                        st.write("a")
+                        st.session_state.test2 = True
 
                     else :
                         # On vérifie si une sauvegarde existe en BDD
