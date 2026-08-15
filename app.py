@@ -1,3 +1,14 @@
+import streamlit.components.v1 as components
+import streamlit as st
+import sqlite3
+import random
+import bcrypt
+import json
+
+st.set_page_config(page_title="Réviseur", layout="wide")
+
+
+# --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
 with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
    st.caption("Affiche en temps réel le contenu de st.session_state")
@@ -10,15 +21,6 @@ with st.expander("🛠️ Console de débogage (Session State)", expanded=False)
        for key in list(st.session_state.keys()):
            del st.session_state[key]
        st.rerun()
-
-import streamlit.components.v1 as components
-import streamlit as st
-import sqlite3
-import random
-import bcrypt
-import json
-
-st.set_page_config(page_title="Réviseur", layout="wide")
 
 
 # --- BASE DE DONNÉES ---
@@ -206,6 +208,7 @@ def supprimer_compte(user_id):
     conn.close()
 
 init_db()
+
 
 # --- FONCTIONS BDD LISTES ET MOTS ---
 def recuperer_listes_utilisateur(user_id):
