@@ -2433,6 +2433,7 @@ elif st.session_state.etat == "connecte":
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
 
                     if valider:
+                        st.session_state.test2 = "chat"
                         pts_gagnes = 0.0
                         id_mot = q["id_mot"]
 
@@ -2493,7 +2494,6 @@ elif st.session_state.etat == "connecte":
                             "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
-                        st.session_state.test2 = "chat"
 
                         st.rerun()
 
