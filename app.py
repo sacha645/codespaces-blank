@@ -2225,7 +2225,7 @@ elif st.session_state.etat == "connecte":
                             if errs :
                                 questions.append({"id_mot" : id_m, 
                                                 "attentes" : [x[z] for z in range(1, 6) if z not in errs],
-                                                "valeur_fournie" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z]} for z in range(1, 6) if z in errs],
+                                                "valeur_fournie" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z in errs],
                                                 "verbe_tuple" : x})
                         
                         st.session_state.quiz_mots = questions
