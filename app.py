@@ -1,3 +1,16 @@
+# On utilise un expander pour garder l'interface propre
+with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+   st.caption("Affiche en temps réel le contenu de st.session_state")
+   
+   # Affiche l'état complet sous forme JSON/dictionnaire lisible
+   st.json(dict(st.session_state))
+   
+   # Optionnel : Bouton pour vider la session et recommencer à zéro
+   if st.button("🗑️ Vider le session_state"):
+       for key in list(st.session_state.keys()):
+           del st.session_state[key]
+       st.rerun()
+
 import streamlit.components.v1 as components
 import streamlit as st
 import sqlite3
@@ -2221,6 +2234,7 @@ elif st.session_state.etat == "connecte":
 
                             # Vérification de où est l'erreur
                             errs = [i for i in range(1, 6) if err_info.get(i, 0) >= 2]
+                            st.session.test = errs
 
                             if errs :
                                 questions.append({"id_mot" : id_m, 
@@ -2357,11 +2371,12 @@ elif st.session_state.etat == "connecte":
                     ligne_epaisse()
                     st.write("")
 
-                    if err_details:
+                    nb_err = sum(sum(x[i] >= 2 for i in range(1, 6)) for x in st.session_state.erreurs_compteur.values())
+                    if nb_err :
                         col_b1, col_b2, col_b3 = st.columns(3)
 
                         with col_b3:
-                            if st.button(f"🎯 Revoir mes erreurs ({sum(sum(x[i] >= 2 for i in range(1, 6)) for x in st.session_state.erreurs_compteur.values())})", use_container_width=True):
+                            if st.button(f"🎯 Revoir mes erreurs ({nb_err})", use_container_width=True):
                                 st.session_state.action = "err_entrainer"
                                 st.session_state.pop("quiz_mots", None)
                                 st.rerun()
@@ -2448,7 +2463,7 @@ elif st.session_state.etat == "connecte":
                                 if rep_u.lower() == rep_att.lower():
                                     pts_gagnes += 1
                                 else:
-                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 1
+                                    st.session_state.erreurs_compteur[id_mot][idx_t] += 2
                                     # Détail de l'erreur pour le bilan final
                                     st.session_state.erreurs_verbes_detail.append({
                                         "verbe": q["verbe_tuple"][1],
@@ -2756,16 +2771,3 @@ elif st.session_state.etat == "connecte":
 
 # --- On place l'autofocus ---
 placer_curseur(0)
-
-# On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-   st.caption("Affiche en temps réel le contenu de st.session_state")
-   
-   # Affiche l'état complet sous forme JSON/dictionnaire lisible
-   st.json(dict(st.session_state))
-   
-   # Optionnel : Bouton pour vider la session et recommencer à zéro
-   if st.button("🗑️ Vider le session_state"):
-       for key in list(st.session_state.keys()):
-           del st.session_state[key]
-       st.rerun()
