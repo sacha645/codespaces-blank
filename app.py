@@ -1864,7 +1864,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.total_depuis_fr = 0.0
                         st.session_state.erreurs_commises = []
                         st.session_state.quiz_liste_id = liste_id
-                        print("a")
+                        st.write("a")
                     else : 
                         partie_sauvee = charger_partie_sauvegardee(liste_id)
 
