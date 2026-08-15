@@ -1802,7 +1802,6 @@ elif st.session_state.etat == "connecte":
 
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer" or st.session_state.action == "err_entrainer":
-            st.session_state.test2 = False
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
             info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
@@ -2255,7 +2254,6 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_liste_id = liste_id
 
                     else :
-                        st.session_state.test2 = True
                         # On vérifie si une sauvegarde existe en BDD
                         partie_sauvee = charger_partie_sauvegardee(liste_id)
 
@@ -2305,16 +2303,6 @@ elif st.session_state.etat == "connecte":
 
                 questions = st.session_state.quiz_mots
                 index = st.session_state.quiz_index
-
-
-                # --- Déboggeur ---
-                # On utilise un expander pour garder l'interface propre
-                with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-                    st.caption("Affiche en temps réel le contenu de st.session_state")
-                    
-                    # Affiche l'état complet sous forme JSON/dictionnaire lisible
-                    st.json(dict(st.session_state))
-
 
                 # 2. VUE FINALE : BILAN ET SAUVEGARDE
                 if index >= len(questions):
@@ -2410,7 +2398,6 @@ elif st.session_state.etat == "connecte":
                             st.session_state.action = "entrainer"
                             st.rerun()
                     
-
                 # 3. VUE DE QUESTION EN COURS
                 else:
                     q = questions[index]
@@ -2506,6 +2493,7 @@ elif st.session_state.etat == "connecte":
                             "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                         }
                         sauvegarder_partie(user_id, liste_id, etat_a_sauver)
+                        st.session_state.test2 = True
 
                         st.rerun()
 
