@@ -1864,6 +1864,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.total_depuis_fr = 0.0
                         st.session_state.erreurs_commises = []
                         st.session_state.quiz_liste_id = liste_id
+                        print("a")
                     else : 
                         partie_sauvee = charger_partie_sauvegardee(liste_id)
 
@@ -2467,6 +2468,7 @@ elif st.session_state.etat == "connecte":
                                     pts_gagnes += 1
                                 else:
                                     st.session_state.erreurs_compteur[id_mot][idx_t] += 2
+
                                     # Détail de l'erreur pour le bilan final
                                     st.session_state.erreurs_verbes_detail.append({
                                         "verbe": q["verbe_tuple"][1],
