@@ -1799,9 +1799,10 @@ elif st.session_state.etat == "connecte":
 
             if not type_liste == "verbe" :
                 st.info("Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), laissez la case article vide et mettez un point d'exclamation (!) au début de la case \"Mot\".")
-            
+
         # CAS G : ENTRAÎNEMENT (🎯)
         elif st.session_state.action == "entrainer" or st.session_state.action == "err_entrainer":
+            st.session_state.test2 = False
             liste_id = st.session_state.liste_active_id
             listes_user = recuperer_listes_utilisateur(user_id)
             info_liste = next(((nom, type_l) for lid, nom, type_l in listes_user if lid == liste_id), ("Liste", "vocabulaire"))
