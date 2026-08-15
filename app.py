@@ -2237,7 +2237,7 @@ elif st.session_state.etat == "connecte":
 
                             # Vérification de où est l'erreur
                             errs = [i for i in range(1, 6) if err_info.get(i, 0) >= 2]
-                            st.session.test = errs
+                            st.session_state.test = errs
 
                             if errs :
                                 questions.append({"id_mot" : id_m, 
