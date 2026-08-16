@@ -2240,7 +2240,7 @@ elif st.session_state.etat == "connecte":
                         st.session_state.quiz_mots = questions
                         st.session_state.quiz_index = 0
                         st.session_state.score_verbes = 0.0
-                        st.session_state.total_verbes = sum((0.625 if x["tout_faux"] else 1) * len(x["attentes"]) for x in questions)
+                        st.session_state.total_verbes = sum((0.625 if x.get("tout_faux", False) else 1) * len(x["attentes"]) for x in questions)
                         st.session_state.erreurs_compteur = {}
                         st.session_state.erreurs_verbes_detail = []
                         st.session_state.quiz_liste_id = liste_id
