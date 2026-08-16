@@ -494,7 +494,6 @@ elif st.session_state.etat == "connecte":
                 if st.button("✅ Confirmer", type="primary", use_container_width=True):
                     # Validation du mot de passe actuel avec la BDD
                     if authentifier_connexion(username, mdp_actuel):
-                        
                         # Vérification supplémentaire si le nouveau mot de passe devait être confirmé
                         if mdp_modifie and confirm_mdp != st.session_state.temp_new_password:
                             st.error("Le nouveau mot de passe et sa confirmation ne correspondent pas.")
@@ -514,7 +513,7 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
                                 st.session_state.user = (final_username, user_id)
-                                st.session_state.action = "accueil"
+                                st.session_state.action = "liste"
                                 st.rerun()
                     else:
                         st.error("Le mot de passe actuel est incorrect.")
