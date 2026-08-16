@@ -623,7 +623,6 @@ def verifier_et_sauvegarder_hebdo():
         resultat = c.fetchone()
     except Exception:
         resultat = None
-    finally:
     
     doit_sauvegarder = False
     

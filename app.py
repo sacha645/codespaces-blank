@@ -4,29 +4,29 @@ t0 = time.time()
 from collections import Counter
 import streamlit as st
 import random
-print(f"Import : {time.time() - t0:.3f}s")
+st.write(f"Import : {time.time() - t0:.3f}s")
 
 t0 = time.time()
 from database import *
-print(f"datbase : {time.time() - t0:.3f}s")
+st.write(f"datbase : {time.time() - t0:.3f}s")
 
 t0 = time.time()
 from quiz_logic import *
-print(f"quiz logic : {time.time() - t0:.3f}s")
+st.write(f"quiz logic : {time.time() - t0:.3f}s")
 
 t0 = time.time()
 from views import *
-print(f"views : {time.time() - t0:.3f}s")
+st.write(f"views : {time.time() - t0:.3f}s")
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
 t0 = time.time()
 init_db()
-print(f"init db : {time.time() - t0:.3f}s")
+st.write(f"init db : {time.time() - t0:.3f}s")
 
 t0 = time.time()
 verifier_et_sauvegarder_hebdo()
-print(f"sauvegarde : {time.time() - t0:.3f}s")
+st.write(f"sauvegarde : {time.time() - t0:.3f}s")
 
 t0 = time.time()
 # --- APPARENCE ---
@@ -2051,7 +2051,7 @@ elif st.session_state.etat == "connecte":
 
 # --- On place l'autofocus ---
 placer_curseur(0)
-print(f"Page : {time.time() - t0:.3f}s")
+st.write(f"Page : {time.time() - t0:.3f}s")
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
