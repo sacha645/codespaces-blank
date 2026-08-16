@@ -2046,8 +2046,8 @@ elif st.session_state.etat == "connecte":
                         col_att.markdown("""<div style='text-align: center;'><u><b>Réponse attendue :</b></u></div>""", unsafe_allow_html=True)
 
                         for x, err in enumerate(erreurs, 1):
-                            c1, c2, c3 = st.columns([2, 2, 2])
                             st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+                            c1, c2, c3 = st.columns([2, 2, 2])
                             c1.markdown(f"""<div style='text-align: center;'>Traduction de <u><b>{err['question']}</b></u></div>""", unsafe_allow_html=True)
                             c2.markdown(f"""<div style='text-align: center;'>{err["reponse_user_html"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'>🟢 {err['reponse_attendue']}</div>""", unsafe_allow_html=True)
