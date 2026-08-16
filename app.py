@@ -528,7 +528,6 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
             # Forme choisie pour ce tour (0 à 4)
             idx_tirage = tirages_par_verbe[id_mot][tour]
             idx_tuple_fourni, nom_fourni = formes_infos[idx_tirage]
-            valeur_fournie = verbe[idx_tuple_fourni]
             
             # Les 4 autres formes à deviner
             attentes = []
@@ -543,7 +542,6 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
             question = {
                 "id_mot": id_mot,
                 "nom_fourni": nom_fourni,
-                "valeur_fournie": valeur_fournie,
                 "attentes": attentes,
                 "verbe_tuple": verbe
             }
@@ -2241,8 +2239,7 @@ elif st.session_state.etat == "connecte":
 
                             if errs :
                                 questions.append({"id_mot" : id_m, 
-                                                "attentes" : [x[z] for z in range(1, 6) if z not in errs],
-                                                "valeur_fournie" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z in errs],
+                                                "attentes" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z in errs], 
                                                 "verbe_tuple" : x})
                         
                         st.session_state.quiz_mots = questions
@@ -2420,83 +2417,57 @@ elif st.session_state.etat == "connecte":
                                     reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
 
                                 else :
-                                    st.text_input(f"{nom_f} :", value=q["valeur_fournie"], disabled=True, key=f"dis_{index}_{idx_t}")
-
-                            else :
-                                if idx_t in [att["idx_tuple"] for att in q["valeur_fournie"]] :
-                                    reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
-
-                                else :
-                                    st.text_input(f"{nom_f} :", value=q["attentes"].pop(0), disabled=True, key=f"dis_{index}_{idx_t}")   
+                                    st.text_input(f"{nom_f} :", value=q["verbe_tuple"][idx_t], disabled=True, key=f"dis_{index}_{idx_t}")
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
                         st.session_state.test2 = "chat1"
 
-                        if valider:
-                            st.session_state.test2 = "chat2"
-                            pts_gagnes = 0.0
-                            id_mot = q["id_mot"]
+                    if valider:
+                        st.session_state.test2 = "chat2"
+                        pts_gagnes = 0.0
+                        id_mot = q["id_mot"]
 
-                            if id_mot not in st.session_state.erreurs_compteur:
-                                st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+                        if id_mot not in st.session_state.erreurs_compteur:
+                            st.session_state.erreurs_compteur[id_mot] = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
-                            if st.session_state.action == "entrainer" :
-                                for att in q["attentes"]:
-                                    idx_t = att["idx_tuple"]
-                                    rep_u = reponses_user.get(idx_t, "").strip()
-                                    rep_att = att["reponse_attendue"].strip()
+                        for att in q["attentes"]:
+                            idx_t = att["idx_tuple"]
+                            rep_u = reponses_user.get(idx_t, "").strip()
+                            rep_att = att["reponse_attendue"].strip()
 
-                                    if rep_u.lower() == rep_att.lower():
-                                        pts_gagnes += 0.25
-                                    else:
-                                        st.session_state.erreurs_compteur[id_mot][idx_t] += 1
-                                        # Détail de l'erreur pour le bilan final
-                                        st.session_state.erreurs_verbes_detail.append({
-                                            "verbe": q["verbe_tuple"][1],
-                                            "forme": att["nom"],
-                                            "rep_user": rep_u,
-                                            "rep_attendue": rep_att
-                                        })
-                            else :
-                                for att in q["valeur_fournie"]:
-                                    idx_t = att["idx_tuple"]
-                                    rep_u = reponses_user.get(idx_t, "").strip()
-                                    rep_att = att["reponse_attendue"].strip()
+                            if rep_u.lower() == rep_att.lower():
+                                pts_gagnes += 0.25 if st.session_state.action == "entrainer" else 1
+                            else:
+                                st.session_state.erreurs_compteur[id_mot][idx_t] += 1 if st.session_state.action == "entrainer" else 2
+                                # Détail de l'erreur pour le bilan final
+                                st.session_state.erreurs_verbes_detail.append({
+                                    "verbe": q["verbe_tuple"][1],
+                                    "forme": att["nom"],
+                                    "rep_user": rep_u,
+                                    "rep_attendue": rep_att
+                                })
 
-                                    if rep_u.lower() == rep_att.lower():
-                                        pts_gagnes += 1
-                                    else:
-                                        st.session_state.erreurs_compteur[id_mot][idx_t] += 2
+                        st.session_state.score_verbes += pts_gagnes
 
-                                        # Détail de l'erreur pour le bilan final
-                                        st.session_state.erreurs_verbes_detail.append({
-                                            "verbe": q["verbe_tuple"][1],
-                                            "forme": att["nom"],
-                                            "rep_user": rep_u,
-                                            "rep_attendue": rep_att
-                                        })
+                        if st.session_state.action == "err_entrainer" :
+                            st.session_state.total_verbes += 1
+                        
+                        st.session_state.quiz_index += 1
 
-                            st.session_state.score_verbes += pts_gagnes
+                        # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
+                        etat_a_sauver = {
+                            "quiz_index": st.session_state.get("quiz_index", 0),
+                            "quiz_mots": st.session_state.get("quiz_mots", []),
+                            "score_verbes": st.session_state.get("score_verbes", 0.0),
+                            "total_verbes": st.session_state.get("total_verbes", 0.0),
+                            "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
+                            "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
+                            "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
+                        }
+                        sauvegarder_partie(user_id, liste_id, etat_a_sauver)
 
-                            if st.session_state.action == "err_entrainer" :
-                                st.session_state.total_verbes += 1
-                            
-                            st.session_state.quiz_index += 1
-
-                            # 💾 SAUVEGARDE AUTOMATIQUE À CHAQUE QUESTION VALIDÉE
-                            etat_a_sauver = {
-                                "quiz_index": st.session_state.get("quiz_index", 0),
-                                "quiz_mots": st.session_state.get("quiz_mots", []),
-                                "score_verbes": st.session_state.get("score_verbes", 0.0),
-                                "total_verbes": st.session_state.get("total_verbes", 0.0),
-                                "erreurs_compteur": st.session_state.get("erreurs_compteur", {}),
-                                "erreurs_verbes_detail": st.session_state.get("erreurs_verbes_detail", []),
-                                "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
-                            }
-                            sauvegarder_partie(user_id, liste_id, etat_a_sauver)
-
-                            st.rerun()
+                        st.rerun()
 
                     st.write("")
                     col_b2, col_b1 = st.columns(2)
@@ -2775,7 +2746,7 @@ elif st.session_state.etat == "connecte":
 
 
 # --- On place l'autofocus ---
-# placer_curseur(0)
+placer_curseur(0)
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
