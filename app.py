@@ -2436,7 +2436,7 @@ elif st.session_state.etat == "connecte":
                             v_tout_faux = q.get("tout_faux", False)
 
                             if rep_u.lower() == rep_att.lower():
-                                pts_gagnes += 0.25 if st.session_state.action == "entrainer" else 0.125 if v_tout_faux else 1
+                                pts_gagnes += 0.25 if st.session_state.action == "entrainer" else 0.625 if v_tout_faux else 1
 
                             else:
                                 st.session_state.erreurs_compteur[id_mot][idx_t] += 1 if st.session_state.action == "entrainer" else 2
