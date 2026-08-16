@@ -2048,7 +2048,7 @@ elif st.session_state.etat == "connecte":
                         for x, err in enumerate(erreurs, 1):
                             st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(f"""<div style='text-align: center;'>Traduction de <u><b>{err['question']}</b></u></div>""", unsafe_allow_html=True)
+                            c1.markdown(f"""<div style='text-align: center;'>Traduction de : <u><b>{err['question']}</b></u></div>""", unsafe_allow_html=True)
                             c2.markdown(f"""<div style='text-align: center;'>{err["reponse_user_html"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'>🟢 {err['reponse_attendue']}</div>""", unsafe_allow_html=True)
                             nb_err = x
@@ -2059,7 +2059,7 @@ elif st.session_state.etat == "connecte":
                         else : 
                             st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
                         
-
+                    st.write("")
                     ligne_epaisse()
                     st.write("")
 
@@ -2378,6 +2378,7 @@ elif st.session_state.etat == "connecte":
                         else :
                             st.write("### ❌ Récapitulatif des erreurs qu'il te reste à réviser")
                         st.markdown("<p style='text-align: center; color: #808495; font-size: 0.875rem;'>Voici les formes sur lesquelles tu t'es trompé(e) :</p>", unsafe_allow_html=True)
+
                         st.write("")
 
                         col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
@@ -2401,6 +2402,7 @@ elif st.session_state.etat == "connecte":
                         else :
                             st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
 
+                    st.write("")
                     ligne_epaisse()
                     st.write("")
 
