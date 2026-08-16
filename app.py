@@ -10,6 +10,9 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 
 init_db()
 
+verifier_et_sauvegarder_hebdo
+
+
 # --- APPARENCE ---
 # Centrer les éléments
 st.markdown(
@@ -49,29 +52,35 @@ if "toggle_focus" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 if st.session_state.etat == "connecte" : 
-    col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
+    if st.session_state.get("user", ("", "", False))[2] :
+        col_title, col_admin, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2, 2])
 
-    if "action" in st.session_state:
-        if st.session_state.action == "liste" :
+        with col_admin :
+            if st.button("Admin", use_container_width=True):
+                pass
 
-            with col_compte : 
-                if st.button("Profil", use_container_width=True):
-                    st.session_state.action = "compte"
-                    st.session_state.nb_lignes_mots = 2
-                    st.session_state.liste_active_id = None
-                    st.session_state.pop("mots_temp", None)
-                    st.session_state.pop("id_a_suppr", None)
-                    st.session_state.pop("liste_valide", None)
-                    st.rerun()
+    else :
+        col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
-            with col_signup:
-                if st.button("Déconnexion", use_container_width=True):
-                    for key in list(st.session_state.keys()):
-                        if key != "toggle_focus" :
-                            del st.session_state[key]
-                    st.rerun()
+    if st.session_state.get("action", None) :
+        with col_compte : 
+            if st.button("Profil", use_container_width=True):
+                st.session_state.action = "compte"
+                st.session_state.nb_lignes_mots = 2
+                st.session_state.liste_active_id = None
+                st.session_state.pop("mots_temp", None)
+                st.session_state.pop("id_a_suppr", None)
+                st.session_state.pop("liste_valide", None)
+                st.rerun()
 
-            with col_action:
+        with col_signup:
+            if st.button("Déconnexion", use_container_width=True):
+                for key in list(st.session_state.keys()):
+                    if key != "toggle_focus" :
+                        del st.session_state[key]
+                st.rerun()
+
+        with col_action:
                 if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
                     st.session_state.action = "supprimer"
                     st.session_state.action_suppr = "compte"
@@ -164,7 +173,7 @@ with col_title:
         st.rerun()
             
     if st.session_state.etat == "connecte":
-        username, user_id = st.session_state.user
+        username, user_id, admin = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
     
 ligne_epaisse()
@@ -221,9 +230,9 @@ elif st.session_state.etat == "connect":
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                succes, username, user_id = verifier_connexion(nom, mot_de_passe)
+                succes, username, user_id, admin = verifier_connexion(nom, mot_de_passe)
                 if succes :
-                    st.session_state.user = (username, user_id)
+                    st.session_state.user = (username, user_id, admin)
                     st.session_state.etat = "connecte"
                     st.rerun()
                 else:
@@ -388,7 +397,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
-    username, user_id = st.session_state.user
+    username, user_id, admin = st.session_state.user
 
     if "action" not in st.session_state:
         st.session_state.action = "liste"
@@ -512,7 +521,7 @@ elif st.session_state.etat == "connecte":
                                 # Nettoyage des données temporaires et retour accueil
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
-                                st.session_state.user = (final_username, user_id)
+                                st.session_state.user = (final_username, user_id, admin)
                                 st.session_state.action = "liste"
                                 st.rerun()
                     else:

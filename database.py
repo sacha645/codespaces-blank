@@ -1,8 +1,17 @@
-import sqlite3, bcrypt, json
+from datetime import datetime, timedelta
+import libsql_experimental as libsql
+import streamlit as st
+import sqlite3
+import bcrypt
+import json
+
 
 # --- BASE DE DONNÉES ---
+def get_connection():
+    return libsql.connect(database=st.secrets["TURSO_DATABASE_URL"], auth_token=st.secrets["TURSO_AUTH_TOKEN"])
+
 def init_db():
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     # 1. Table Utilisateurs
@@ -10,8 +19,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
+            password TEXT NOT NULL,
+            admin INTEGER NOT NULL DEFAULT 0        )
     ''')
     
     # 2. Table Listes (avec type_liste : 'vocabulaire' ou 'verbe')
@@ -81,7 +90,7 @@ def init_db():
     conn.close()
 
 def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("DROP TABLE IF EXISTS users")
     c.execute("DROP TABLE IF EXISTS listes")
@@ -99,12 +108,12 @@ def inscrire_utilisateur(username, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     try:
-        conn = sqlite3.connect("utilisateurs.db")
+        conn = get_connection()
         c = conn.cursor()
 
         c.execute("""
-            INSERT INTO users (username, password) 
-            VALUES (?, ?)
+            INSERT INTO users (username, password, admin) 
+            VALUES (?, ?, ?)
         """, (username, hashed_password))
 
         conn.commit()
@@ -117,22 +126,22 @@ def inscrire_utilisateur(username, password):
         return False
 
 def verifier_connexion(username, password):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
-    c.execute("SELECT id, username, password FROM users WHERE username = ?", (username,))
+    c.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
     user = c.fetchone()
     conn.close()
 
     if user:
-        user_id, db_username, db_password = user
+        user_id, db_username, db_password, admin = user
 
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return True, db_username, user_id
+            return True, db_username, user_id, admin
         
-    return False, None, None
+    return False, None, None, None
 
 def authentifier_connexion(username, password) :
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT password FROM users WHERE username = ?", (username,))
     user = c.fetchone()
@@ -147,7 +156,7 @@ def authentifier_connexion(username, password) :
     return False
 
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     try:
@@ -179,7 +188,7 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
         return False
 
 def supprimer_compte(user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM users WHERE id = ?", (user_id,))
@@ -189,7 +198,7 @@ def supprimer_compte(user_id):
 
 # --- LISTES ---
 def recuperer_listes_utilisateur(user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
     listes = c.fetchall()
@@ -197,7 +206,7 @@ def recuperer_listes_utilisateur(user_id):
     return listes
 
 def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
               (user_id, nom_liste, type_liste))
@@ -205,7 +214,7 @@ def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
     conn.close()
 
 def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("""
         INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
@@ -215,7 +224,7 @@ def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp=""
     conn.close()
 
 def recuperer_mots_liste(liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
     mots = c.fetchall()
@@ -223,7 +232,7 @@ def recuperer_mots_liste(liste_id):
     return mots
 
 def supprimer_liste(liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
@@ -231,7 +240,7 @@ def supprimer_liste(liste_id):
     conn.close()
 
 def renommer_liste(liste_id, nouveau_nom):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("UPDATE listes SET nom_liste = ? WHERE id = ?", (nouveau_nom, liste_id))
     conn.commit()
@@ -285,7 +294,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
 
     # 2. Insertion en BDD uniquement si le format est correct
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
     
@@ -318,7 +327,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     return True
 
 def importer_liste_par_id(liste_id_origine, nouvel_user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("SELECT nom_liste, type_liste FROM listes WHERE id = ?", (liste_id_origine,))
@@ -349,7 +358,7 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
 def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("SELECT id, username FROM users WHERE id = ?", (ami_user_id,))
@@ -439,7 +448,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         return 0, None
     
     # 3. Insertion en BDD uniquement si le format est correct
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
@@ -462,7 +471,7 @@ def obtenir_type_liste(liste_id):
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
     """
 
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT type_liste FROM listes WHERE id = ?", (liste_id,))
     resultat = c.fetchone()
@@ -473,7 +482,7 @@ def obtenir_type_liste(liste_id):
     return None
 
 def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     # On transforme le dictionnaire en chaîne de texte JSON
@@ -489,7 +498,7 @@ def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     conn.close()
 
 def charger_erreurs(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT erreurs_json FROM erreurs_listes WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     row = c.fetchone()
@@ -518,7 +527,7 @@ def charger_erreurs(user_id, liste_id):
 
 # --- GESTION DU MEILLEUR SCORE ---
 def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("SELECT score_vers_fr, score_depuis_fr FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
@@ -544,7 +553,7 @@ def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_de
     conn.close()
 
 def recuperer_score_liste(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("""
         SELECT score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr 
@@ -556,7 +565,7 @@ def recuperer_score_liste(user_id, liste_id):
     return score
 
 def reinitialiser_score_liste(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     conn.commit()
@@ -566,7 +575,7 @@ def reinitialiser_score_liste(user_id, liste_id):
 # --- Bouton pause ---
 def sauvegarder_partie(user_id, liste_id, donnees_dict):
     """Enregistre ou met à jour la progression d'un quiz sous forme de texte JSON."""
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     donnees_json = json.dumps(donnees_dict)
     c.execute('''
@@ -579,7 +588,7 @@ def sauvegarder_partie(user_id, liste_id, donnees_dict):
 
 def charger_partie_sauvegardee(liste_id):
     """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT donnees_json FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     row = c.fetchone()
@@ -590,8 +599,71 @@ def charger_partie_sauvegardee(liste_id):
 
 def supprimer_sauvegarde_partie(liste_id):
     """Supprime la sauvegarde d'un quiz (quand le quiz est terminé)."""
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     conn.commit()
     conn.close()
+
+
+# --- Sauvegarde ---
+def creer_sauvegarde_interne():
+    """Exporte l'intégralité des tables dans une table d'archivage."""
+    conn = get_connection()
+    c = conn.cursor()
+    
+    # 1. Création de la table de stockage des sauvegardes
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sauvegardes_bdd (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_sauvegarde TEXT NOT NULL,
+            contenu_json TEXT NOT NULL
+        )
+    ''')
+    
+    # 2. Récupération des données de chaque table
+    tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
+    export_donnees = {}
+    
+    for table in tables:
+        c.execute(f"SELECT * FROM {table}")
+        export_donnees[table] = c.fetchall()
+        
+    # 3. Enregistrement de l'instantané avec la date courante
+    date_actuelle = datetime.now().isoformat()
+    json_donnees = json.dumps(export_donnees)
+    
+    c.execute('''
+        INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
+        VALUES (?, ?)
+    ''', (date_actuelle, json_donnees))
+    
+    conn.commit()
+    conn.close()
+
+def verifier_et_sauvegarder_hebdo():
+    """Déclenche la sauvegarde automatique si la dernière date de plus de 7 jours."""
+    conn = get_connection()
+    c = conn.cursor()
+    
+    # Vérification de l'existence de la table et de la dernière date
+    try:
+        c.execute("SELECT date_sauvegarde FROM sauvegardes_bdd ORDER BY id DESC LIMIT 1")
+        resultat = c.fetchone()
+    except Exception:
+        resultat = None
+    finally:
+        conn.close()
+    
+    doit_sauvegarder = False
+    
+    if not resultat:
+        doit_sauvegarder = True
+    else:
+        derniere_date = datetime.fromisoformat(resultat[0])
+        # Compare si 7 jours ou plus se sont écoulés
+        if datetime.now() - derniere_date >= timedelta(days=7):
+            doit_sauvegarder = True
+            
+    if doit_sauvegarder:
+        creer_sauvegarde_interne()
