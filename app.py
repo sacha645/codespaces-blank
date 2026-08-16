@@ -10,7 +10,7 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 
 init_db()
 
-verifier_et_sauvegarder_hebdo
+verifier_et_sauvegarder_hebdo()
 
 
 # --- APPARENCE ---
