@@ -2052,6 +2052,9 @@ elif st.session_state.etat == "connecte":
                             c2.markdown(f"""<div style='text-align: center;'>{err["reponse_user_html"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'>🟢 {err['reponse_attendue']}</div>""", unsafe_allow_html=True)
                             nb_err = x
+
+                        st.write("")
+                        
                     else:
                         st.balloons()
                         if st.session_state.action == "entrainer" :
@@ -2059,7 +2062,6 @@ elif st.session_state.etat == "connecte":
                         else : 
                             st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
                         
-                    st.write("")
                     ligne_epaisse()
                     st.write("")
 
@@ -2395,6 +2397,8 @@ elif st.session_state.etat == "connecte":
                             c3.markdown(f"""<div style='text-align: center;'><span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span></div>""", unsafe_allow_html=True)
                             c4.markdown(f"""<div style='text-align: center;'>🟢 <code>{err['rep_attendue']}</code></div>""", unsafe_allow_html=True)
 
+                        st.write("")
+
                     else:
                         st.balloons()
                         if st.session_state.action == "entrainer" :
@@ -2402,7 +2406,6 @@ elif st.session_state.etat == "connecte":
                         else :
                             st.info("⭐ Félicitations ! Tu as corrigé toutes tes erreurs.")
 
-                    st.write("")
                     ligne_epaisse()
                     st.write("")
 
