@@ -1,36 +1,28 @@
 import time
 
-t0 = time.time()
 from collections import Counter
 import streamlit as st
 import random
-st.write(f"Import : {time.time() - t0:.3f}s")
 
 st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
-t0 = time.time()
 from database import *
-st.write(f"datbase : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
-t0 = time.time()
 from quiz_logic import *
-st.write(f"quiz logic : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
-t0 = time.time()
 from views import *
-st.write(f"views : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
-t0 = time.time()
 init_db()
-st.write(f"init db : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
-t0 = time.time()
 verifier_et_sauvegarder_hebdo()
-st.write(f"sauvegarde : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
-t0 = time.time()
 # --- APPARENCE ---
 # Centrer les éléments
 st.markdown(
@@ -2053,7 +2045,7 @@ elif st.session_state.etat == "connecte":
 
 # --- On place l'autofocus ---
 placer_curseur(0)
-st.write(f"Page : {time.time() - t0:.3f}s")
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
