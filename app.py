@@ -8,21 +8,6 @@ import json
 st.set_page_config(page_title="Réviseur", layout="wide")
 
 
-# --- Déboggeur ---
-# On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-   st.caption("Affiche en temps réel le contenu de st.session_state")
-   
-   # Affiche l'état complet sous forme JSON/dictionnaire lisible
-   st.json(dict(st.session_state))
-   
-   # Optionnel : Bouton pour vider la session et recommencer à zéro
-   if st.button("🗑️ Vider le session_state"):
-       for key in list(st.session_state.keys()):
-           del st.session_state[key]
-       st.rerun()
-
-
 # --- BASE DE DONNÉES ---
 def init_db():
     conn = sqlite3.connect("utilisateurs.db")
@@ -2330,9 +2315,14 @@ elif st.session_state.etat == "connecte":
                             anc_v, anc_tv, _, _ = score_actuel_bdd
                             st.markdown(f"""<div class="centre">🏆 <b>Meilleur score :</b> ⚡ <code>{anc_v:g}/{anc_tv:g}</code></div>""", unsafe_allow_html=True)
 
-                    st.write("")
+                        st.write("")
 
-                    st.markdown(f"""<div class="centre" style="margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
+                        st.markdown(f"""<div class="centre" style="margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
+
+                    else :
+                        st.write("")
+
+                        st.markdown(f"""<div class="centre" style="margin: 10px 0;"><span style="font-size: 1em; color: white;">⚡ Score :</span><div style="font-size: 2rem; font-weight: 500;">{s_v:g} / {t_v:g}</div></div>""", unsafe_allow_html=True)
 
                     # --- RECAPITULATIF DES ERREURS POUR VERBES ---
                     st.divider()
@@ -2415,15 +2405,16 @@ elif st.session_state.etat == "connecte":
                             if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
                                 reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
 
+                                if st.session_state.action == "err_entrainer" :
+                                    st.session_state.total_verbes += 1
+
                             else :
                                 st.text_input(f"{nom_f} :", value=q["verbe_tuple"][idx_t], disabled=True, key=f"dis_{index}_{idx_t}")
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
-                        st.session_state.test2 = "chat1"
 
                     if valider:
-                        st.session_state.test2 = "chat2"
                         pts_gagnes = 0.0
                         id_mot = q["id_mot"]
 
@@ -2448,9 +2439,6 @@ elif st.session_state.etat == "connecte":
                                 })
 
                         st.session_state.score_verbes += pts_gagnes
-
-                        if st.session_state.action == "err_entrainer" :
-                            st.session_state.total_verbes += 1
                         
                         st.session_state.quiz_index += 1
 
@@ -2749,8 +2737,8 @@ placer_curseur(0)
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
-with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-   st.caption("Affiche en temps réel le contenu de st.session_state")
+# with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+#    st.caption("Affiche en temps réel le contenu de st.session_state")
    
-   # Affiche l'état complet sous forme JSON/dictionnaire lisible
-   st.json(dict(st.session_state))
+#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+#    st.json(dict(st.session_state))
