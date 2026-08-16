@@ -87,6 +87,16 @@ def init_db():
             FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE
         )
     ''')
+
+    # 7. Table des sauvegardes BDD
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sauvegardes_bdd (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_sauvegarde TEXT NOT NULL,
+            contenu_json TEXT NOT NULL
+        )
+    ''')
+
     conn.commit()
 
 def reinitialiser_toutes_les_bdd():
@@ -584,15 +594,6 @@ def creer_sauvegarde_interne():
     conn = get_connection()
     c = conn.cursor()
     
-    # 1. Création de la table de stockage des sauvegardes
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS sauvegardes_bdd (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_sauvegarde TEXT NOT NULL,
-            contenu_json TEXT NOT NULL
-        )
-    ''')
-    
     # 2. Récupération des données de chaque table
     tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
     export_donnees = {}
@@ -612,6 +613,7 @@ def creer_sauvegarde_interne():
     
     conn.commit()
 
+@st.cache_data(ttl=86400)
 def verifier_et_sauvegarder_hebdo():
     """Déclenche la sauvegarde automatique si la dernière date de plus de 7 jours."""
     conn = get_connection()
