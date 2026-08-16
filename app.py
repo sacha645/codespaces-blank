@@ -534,6 +534,33 @@ def preparer_quiz_verbes_aleatoire(mots_verbes):
             
     return questions_finales
 
+def demeler_questions_erreurs(questions):
+    n = len(questions)
+
+    if n <= 2:
+        return questions
+
+    milieu = n // 2
+    i = 1
+
+    while i < len(questions):
+        # Si la question actuelle a le même mot que la précédente
+        if questions[i]["id_mot"] == questions[i - 1]["id_mot"]:
+            item_a_deplacer = questions.pop(i)
+
+            if i <= milieu:
+                # Envoi à la fin
+                questions.append(item_a_deplacer)
+            else:
+                # Envoi au début
+                questions.insert(0, item_a_deplacer)
+                i += 1
+        else:
+            # Pas de doublon : on avance normalement
+            i += 1
+
+    return questions
+
 def obtenir_type_liste(liste_id):
     """
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
@@ -2236,7 +2263,11 @@ elif st.session_state.etat == "connecte":
                                     questions.append({"id_mot" : id_m, 
                                                     "attentes" : [{"idx_tuple": z, "reponse_attendue": x[z], "nom" : formes_infos[z-1]} for z in range(1, 6) if z in errs], 
                                                     "verbe_tuple" : x})
-                        
+
+                        random.shuffle(questions)
+
+                        demeler_questions_erreurs(questions)
+
                         st.session_state.quiz_mots = questions
                         st.session_state.quiz_index = 0
                         st.session_state.score_verbes = 0.0
