@@ -2041,15 +2041,15 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_q, col_rep, col_att = st.columns([2, 2, 2])
-                        col_q.markdown("<div class="centre"><u>**Question posée :**</u></div>", unsafe_allow_html=True)
-                        col_rep.markdown("<div class="centre"><u>**Ta réponse:**</u></div>", unsafe_allow_html=True)
-                        col_att.markdown("<div class="centre"><u>**Réponse attendue :**</u></div>", unsafe_allow_html=True)
+                        col_q.markdown("""<div class="centre"><u>**Question posée :**</u></div>""", unsafe_allow_html=True)
+                        col_rep.markdown("""<div class="centre"><u>**Ta réponse:**</u></div>""", unsafe_allow_html=True)
+                        col_att.markdown("""<div class="centre"><u>**Réponse attendue :**</u></div>""", unsafe_allow_html=True)
 
                         for x, err in enumerate(erreurs, 1):
                             c1, c2, c3 = st.columns([2, 2, 2])
-                            c1.markdown(f"<div class="centre">Traduction de <u>**{err['question']}**</u></div>", unsafe_allow_html=True)
-                            c2.markdown(f"<div class="centre">{err["reponse_user_html"]}</div>", unsafe_allow_html=True)
-                            c3.markdown(f"<div class="centre">🟢 {err['reponse_attendue']}</div>", unsafe_allow_html=True)
+                            c1.markdown(f"""<div class="centre">Traduction de <u>**{err['question']}**</u></div>""", unsafe_allow_html=True)
+                            c2.markdown(f"""<div class="centre">{err["reponse_user_html"]}</div>""", unsafe_allow_html=True)
+                            c3.markdown(f"""<div class="centre">🟢 {err['reponse_attendue']}</div>""", unsafe_allow_html=True)
                             nb_err = x
                     else:
                         st.balloons()
