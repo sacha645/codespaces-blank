@@ -10,6 +10,7 @@ import json
 def get_connection():
     return libsql.connect(str(st.secrets["TURSO_DATABASE_URL"]),auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
 
+@st.cache_resource
 def init_db():
     conn = get_connection()
     c = conn.cursor()
