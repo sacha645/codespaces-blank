@@ -1,4 +1,5 @@
 import streamlit.components.v1 as components
+from collections import Counter
 import streamlit as st
 import sqlite3
 import random
@@ -2375,6 +2376,8 @@ elif st.session_state.etat == "connecte":
                     st.session_state.pop("erreurs_verbes_detail", None)
 
                     if err_details:
+                        err_details = [dict(dict_tuple) | {"nombre" : nb} for dict_tuple, nb in Counter(tuple(d.items()) for d in err_details).items()]
+
                         if st.session_state.action == "entrainer" :
                             st.write("### ❌ Récapitulatif des erreurs commises")
                         else :
@@ -2383,19 +2386,21 @@ elif st.session_state.etat == "connecte":
 
                         st.write("")
 
-                        col_v, col_f, col_rep, col_att = st.columns([2, 2, 2, 2])
+                        col_v, col_f, col_rep, col_att, col_nb = st.columns([2, 2, 2, 2, 2])
                         col_v.markdown("""<div style='text-align: center;'><u><b>Verbes :</b></u></div>""", unsafe_allow_html=True)
                         col_f.markdown("""<div style='text-align: center;'><u><b>Forme demandée :</b></u></div>""", unsafe_allow_html=True)
                         col_rep.markdown("""<div style='text-align: center;'><u><b>Ta réponse :</b></u></div>""", unsafe_allow_html=True)
                         col_att.markdown("""<div style='text-align: center;'><u><b>Réponse attendue :</b></u></div>""", unsafe_allow_html=True)
+                        col_att.markdown("""<div style='text-align: center;'><u><b>Nombre :</b></u></div>""", unsafe_allow_html=True)
 
                         for err in err_details :
                             st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
-                            c1, c2, c3, c4 = st.columns([2, 2, 2, 2])
+                            c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
                             c1.markdown(f"""<div style='text-align: center;'><b>{err['verbe']}</b></div>""", unsafe_allow_html=True)
                             c2.markdown(f"""<div style='text-align: center;'>{err["forme"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'><span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span></div>""", unsafe_allow_html=True)
                             c4.markdown(f"""<div style='text-align: center;'>🟢 <code>{err['rep_attendue']}</code></div>""", unsafe_allow_html=True)
+                            c5.markdown(f"""<div style='text-align: center;'>x{err["nombre"]}</div>""", unsafe_allow_html=True)
 
                         st.write("")
 
