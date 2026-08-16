@@ -1,10 +1,12 @@
 import time
-st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
+
 t0 = time.time()
 from collections import Counter
 import streamlit as st
 import random
 st.write(f"Import : {time.time() - t0:.3f}s")
+
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 
 t0 = time.time()
 from database import *
