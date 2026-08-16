@@ -1,5 +1,5 @@
 import time
-
+st.write(f"\n--- Nouveau clic / Rechargement : {time.strftime('%H:%M:%S')} ---")
 t0 = time.time()
 from collections import Counter
 import streamlit as st
