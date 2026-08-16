@@ -8,7 +8,7 @@ import json
 
 # --- BASE DE DONNÉES ---
 def get_connection():
-    return libsql.connect(database=st.secrets["TURSO_DATABASE_URL"], auth_token=st.secrets["TURSO_AUTH_TOKEN"])
+    return libsql.connect(url=st.secrets["TURSO_DATABASE_URL"], auth_token=st.secrets["TURSO_AUTH_TOKEN"])
 
 def init_db():
     conn = get_connection()
@@ -20,7 +20,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            admin INTEGER NOT NULL DEFAULT 0        )
+            admin INTEGER NOT NULL DEFAULT 0)
     ''')
     
     # 2. Table Listes (avec type_liste : 'vocabulaire' ou 'verbe')
