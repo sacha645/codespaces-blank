@@ -1633,7 +1633,7 @@ elif st.session_state.etat == "connecte":
 
                         for err in err_details :
                             st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
-                            c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
+                            c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 1])
                             c1.markdown(f"""<div style='text-align: center;'><b>{err['verbe']}</b></div>""", unsafe_allow_html=True)
                             c2.markdown(f"""<div style='text-align: center;'>{err["forme"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'><span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span></div>""", unsafe_allow_html=True)
