@@ -1625,11 +1625,11 @@ elif st.session_state.etat == "connecte":
                         st.write("")
 
                         col_v, col_f, col_rep, col_att, col_nb = st.columns([2, 2, 2, 2, 2])
-                        col_v.markdown("""<div style='text-align: center;'><u><b>Verbes :</b></u></div>""", unsafe_allow_html=True)
-                        col_f.markdown("""<div style='text-align: center;'><u><b>Forme demandée :</b></u></div>""", unsafe_allow_html=True)
-                        col_rep.markdown("""<div style='text-align: center;'><u><b>Ta réponse :</b></u></div>""", unsafe_allow_html=True)
-                        col_att.markdown("""<div style='text-align: center;'><u><b>Réponse attendue :</b></u></div>""", unsafe_allow_html=True)
-                        col_nb.markdown("""<div style='text-align: center;'><u><b>Nombre :</b></u></div>""", unsafe_allow_html=True)
+                        col_v.markdown("""<div style='text-align: center;'><u><b>Verbes&nbsp;:</b></u></div>""", unsafe_allow_html=True)
+                        col_f.markdown("""<div style='text-align: center;'><u><b>Forme demandée&nbsp;:</b></u></div>""", unsafe_allow_html=True)
+                        col_rep.markdown("""<div style='text-align: center;'><u><b>Ta réponse&nbsp;:</b></u></div>""", unsafe_allow_html=True)
+                        col_att.markdown("""<div style='text-align: center;'><u><b>Réponse attendue&nbsp;:</b></u></div>""", unsafe_allow_html=True)
+                        col_nb.markdown("""<div style='text-align: center;'><u><b>Nombre&nbsp;:</b></u></div>""", unsafe_allow_html=True)
 
                         for err in err_details :
                             st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
