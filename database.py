@@ -20,11 +20,12 @@ def mesurer_temps(func):
 
 # --- BASE DE DONNÉES ---
 @mesurer_temps
+@st.cache_resource
 def get_connection():
     return libsql.connect(str(st.secrets["TURSO_DATABASE_URL"]),auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
 
-@st.cache_resource
 @mesurer_temps
+@st.cache_resource
 def init_db():
     conn = get_connection()
     c = conn.cursor()
@@ -124,7 +125,7 @@ def reinitialiser_toutes_les_bdd():
     c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
     c.execute("DROP TABLE IF EXISTS erreurs_listes")
     conn.commit()
-
+    st.cache_data.clear()
 
 # --- Utilisateurs ---
 @mesurer_temps
@@ -143,11 +144,13 @@ def inscrire_utilisateur(username, password):
 
         conn.commit()
 
+        st.cache_data.clear()
+
         return True
     
     except sqlite3.IntegrityError:
         return False
-
+    
 @mesurer_temps
 def verifier_connexion(username, password):
     conn = get_connection()
@@ -205,11 +208,13 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
             
         conn.commit()
 
+        st.cache_data.clear()
+
         return True
         
     except sqlite3.IntegrityError:
         return False
-
+    
 @mesurer_temps
 def supprimer_compte(user_id):
     conn = get_connection()
@@ -217,10 +222,12 @@ def supprimer_compte(user_id):
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM users WHERE id = ?", (user_id,))
     conn.commit()
-
+    st.cache_data.clear()
+    
 
 # --- LISTES ---
 @mesurer_temps
+@st.cache_data(ttl=300)
 def recuperer_listes_utilisateur(user_id):
     conn = get_connection()
     c = conn.cursor()
@@ -235,6 +242,7 @@ def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
               (user_id, nom_liste, type_liste))
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
 def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
@@ -245,8 +253,10 @@ def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp=""
         VALUES (?, ?, ?, ?, ?, ?)
     """, (liste_id, inf_ou_mot.strip(), present.strip(), preterit.strip(), pp.strip(), traduction.strip()))
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
+@st.cache_data(ttl=300)
 def recuperer_mots_liste(liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -261,6 +271,7 @@ def supprimer_liste(liste_id):
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
 def renommer_liste(liste_id, nouveau_nom):
@@ -268,6 +279,7 @@ def renommer_liste(liste_id, nouveau_nom):
     c = conn.cursor()
     c.execute("UPDATE listes SET nom_liste = ? WHERE id = ?", (nouveau_nom, liste_id))
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
 def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
@@ -347,6 +359,8 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
                 
     conn.commit()
 
+    st.cache_data.clear()
+
     return True
 
 @mesurer_temps
@@ -377,6 +391,9 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
+
+    st.cache_data.clear()
+
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
 @mesurer_temps
@@ -411,6 +428,9 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
+
+    st.cache_data.clear()
+
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
 @mesurer_temps
@@ -483,10 +503,13 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
 
     conn.commit()
+
+    st.cache_data.clear()
     
     return True, None
 
 @mesurer_temps
+@st.cache_data(ttl=300)
 def obtenir_type_liste(liste_id):
     """
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
@@ -516,8 +539,10 @@ def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     ''', (user_id, liste_id, erreurs_texte))
     
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
+@st.cache_data(ttl=300)
 def charger_erreurs(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -571,8 +596,10 @@ def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_de
         """, (user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis))
         
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
+@st.cache_data(ttl=300)
 def recuperer_score_liste(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -590,6 +617,7 @@ def reinitialiser_score_liste(user_id, liste_id):
     c = conn.cursor()
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     conn.commit()
+    st.cache_data.clear()
 
 
 # --- Bouton pause ---
@@ -605,8 +633,10 @@ def sauvegarder_partie(user_id, liste_id, donnees_dict):
         ON CONFLICT(liste_id) DO UPDATE SET donnees_json = excluded.donnees_json
     ''', (user_id, liste_id, donnees_json))
     conn.commit()
+    st.cache_data.clear()
 
 @mesurer_temps
+@st.cache_data(ttl=300)
 def charger_partie_sauvegardee(liste_id):
     """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
     conn = get_connection()
@@ -625,7 +655,8 @@ def supprimer_sauvegarde_partie(liste_id):
     c = conn.cursor()
     c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     conn.commit()
-
+    st.cache_data.clear()
+    
 
 # --- Sauvegarde ---
 @mesurer_temps
