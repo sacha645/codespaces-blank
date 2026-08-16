@@ -8,7 +8,7 @@ import json
 
 # --- BASE DE DONNÉES ---
 def get_connection():
-    return libsql.connect(url=st.secrets["TURSO_DATABASE_URL"], auth_token=st.secrets["TURSO_AUTH_TOKEN"])
+    return libsql.connect(database=st.secrets["TURSO_DATABASE_URL"], auth_token=st.secrets["TURSO_AUTH_TOKEN"])
 
 def init_db():
     conn = get_connection()
