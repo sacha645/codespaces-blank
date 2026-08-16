@@ -112,8 +112,8 @@ def inscrire_utilisateur(username, password):
         c = conn.cursor()
 
         c.execute("""
-            INSERT INTO users (username, password, admin) 
-            VALUES (?, ?, ?)
+            INSERT INTO users (username, password) 
+            VALUES (?, ?)
         """, (username, hashed_password))
 
         conn.commit()
