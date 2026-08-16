@@ -2412,12 +2412,11 @@ elif st.session_state.etat == "connecte":
                         ]
 
                         for idx_t, nom_f in ordre_formes:
-                            if st.session_state.action == "entrainer" :
-                                if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
-                                    reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
+                            if idx_t in [att["idx_tuple"] for att in q["attentes"]]:
+                                reponses_user[idx_t] = st.text_input(f"{nom_f} :", key=f"inp_{index}_{idx_t}")
 
-                                else :
-                                    st.text_input(f"{nom_f} :", value=q["verbe_tuple"][idx_t], disabled=True, key=f"dis_{index}_{idx_t}")
+                            else :
+                                st.text_input(f"{nom_f} :", value=q["verbe_tuple"][idx_t], disabled=True, key=f"dis_{index}_{idx_t}")
 
                         st.write("")
                         valider = st.form_submit_button("Suivant 🚀", type="primary")
