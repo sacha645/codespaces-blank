@@ -5,12 +5,26 @@ import bcrypt
 import libsql
 import json
 
+import time
+import functools
+def mesurer_temps(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        t_debut = time.time()
+        resultat = func(*args, **kwargs)
+        t_fin = time.time()
+        duree = t_fin - t_debut
+        st.write(f"⏱️ **{func.__name__}** exécutée en `{duree:.4f}` s")
+        return resultat
+    return wrapper
 
 # --- BASE DE DONNÉES ---
+@mesurer_temps
 def get_connection():
     return libsql.connect(str(st.secrets["TURSO_DATABASE_URL"]),auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
 
 @st.cache_resource
+@mesurer_temps
 def init_db():
     conn = get_connection()
     c = conn.cursor()
@@ -99,6 +113,7 @@ def init_db():
 
     conn.commit()
 
+@mesurer_temps
 def reinitialiser_toutes_les_bdd():
     conn = get_connection()
     c = conn.cursor()
@@ -112,6 +127,7 @@ def reinitialiser_toutes_les_bdd():
 
 
 # --- Utilisateurs ---
+@mesurer_temps
 def inscrire_utilisateur(username, password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
@@ -132,6 +148,7 @@ def inscrire_utilisateur(username, password):
     except sqlite3.IntegrityError:
         return False
 
+@mesurer_temps
 def verifier_connexion(username, password):
     conn = get_connection()
     c = conn.cursor()
@@ -146,6 +163,7 @@ def verifier_connexion(username, password):
         
     return False, None, None, None
 
+@mesurer_temps
 def authentifier_connexion(username, password) :
     conn = get_connection()
     c = conn.cursor()
@@ -160,6 +178,7 @@ def authentifier_connexion(username, password) :
         
     return False
 
+@mesurer_temps
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
     conn = get_connection()
     c = conn.cursor()
@@ -191,6 +210,7 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
     except sqlite3.IntegrityError:
         return False
 
+@mesurer_temps
 def supprimer_compte(user_id):
     conn = get_connection()
     c = conn.cursor()
@@ -200,6 +220,7 @@ def supprimer_compte(user_id):
 
 
 # --- LISTES ---
+@mesurer_temps
 def recuperer_listes_utilisateur(user_id):
     conn = get_connection()
     c = conn.cursor()
@@ -207,6 +228,7 @@ def recuperer_listes_utilisateur(user_id):
     listes = c.fetchall()    
     return listes
 
+@mesurer_temps
 def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
     conn = get_connection()
     c = conn.cursor()
@@ -214,6 +236,7 @@ def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
               (user_id, nom_liste, type_liste))
     conn.commit()
 
+@mesurer_temps
 def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
     conn = get_connection()
     c = conn.cursor()
@@ -223,6 +246,7 @@ def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp=""
     """, (liste_id, inf_ou_mot.strip(), present.strip(), preterit.strip(), pp.strip(), traduction.strip()))
     conn.commit()
 
+@mesurer_temps
 def recuperer_mots_liste(liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -230,6 +254,7 @@ def recuperer_mots_liste(liste_id):
     mots = c.fetchall()
     return mots
 
+@mesurer_temps
 def supprimer_liste(liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -237,12 +262,14 @@ def supprimer_liste(liste_id):
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
     conn.commit()
 
+@mesurer_temps
 def renommer_liste(liste_id, nouveau_nom):
     conn = get_connection()
     c = conn.cursor()
     c.execute("UPDATE listes SET nom_liste = ? WHERE id = ?", (nouveau_nom, liste_id))
     conn.commit()
 
+@mesurer_temps
 def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     """
     Return des code d'erreur. Si pas d'erreur, return True :
@@ -322,6 +349,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
     return True
 
+@mesurer_temps
 def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn = get_connection()
     c = conn.cursor()
@@ -351,6 +379,7 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     conn.commit()
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
+@mesurer_temps
 def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     conn = get_connection()
     c = conn.cursor()
@@ -384,6 +413,7 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     conn.commit()
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
+@mesurer_temps
 def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichier):
     """
     Return des code d'erreur. Si pas d'erreur, return True :
@@ -456,6 +486,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     
     return True, None
 
+@mesurer_temps
 def obtenir_type_liste(liste_id):
     """
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
@@ -470,6 +501,7 @@ def obtenir_type_liste(liste_id):
         return resultat[0]
     return None
 
+@mesurer_temps
 def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     conn = get_connection()
     c = conn.cursor()
@@ -485,6 +517,7 @@ def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     
     conn.commit()
 
+@mesurer_temps
 def charger_erreurs(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -513,6 +546,7 @@ def charger_erreurs(user_id, liste_id):
 
 
 # --- GESTION DU MEILLEUR SCORE ---
+@mesurer_temps
 def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis):
     conn = get_connection()
     c = conn.cursor()
@@ -538,6 +572,7 @@ def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_de
         
     conn.commit()
 
+@mesurer_temps
 def recuperer_score_liste(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -549,6 +584,7 @@ def recuperer_score_liste(user_id, liste_id):
     score = c.fetchone()
     return score
 
+@mesurer_temps
 def reinitialiser_score_liste(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
@@ -557,6 +593,7 @@ def reinitialiser_score_liste(user_id, liste_id):
 
 
 # --- Bouton pause ---
+@mesurer_temps
 def sauvegarder_partie(user_id, liste_id, donnees_dict):
     """Enregistre ou met à jour la progression d'un quiz sous forme de texte JSON."""
     conn = get_connection()
@@ -569,6 +606,7 @@ def sauvegarder_partie(user_id, liste_id, donnees_dict):
     ''', (user_id, liste_id, donnees_json))
     conn.commit()
 
+@mesurer_temps
 def charger_partie_sauvegardee(liste_id):
     """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
     conn = get_connection()
@@ -580,6 +618,7 @@ def charger_partie_sauvegardee(liste_id):
         return json.loads(row[0])
     return None
 
+@mesurer_temps
 def supprimer_sauvegarde_partie(liste_id):
     """Supprime la sauvegarde d'un quiz (quand le quiz est terminé)."""
     conn = get_connection()
@@ -589,6 +628,7 @@ def supprimer_sauvegarde_partie(liste_id):
 
 
 # --- Sauvegarde ---
+@mesurer_temps
 def creer_sauvegarde_interne():
     """Exporte l'intégralité des tables dans une table d'archivage."""
     conn = get_connection()
@@ -614,6 +654,7 @@ def creer_sauvegarde_interne():
     conn.commit()
 
 @st.cache_data(ttl=86400)
+@mesurer_temps
 def verifier_et_sauvegarder_hebdo():
     """Déclenche la sauvegarde automatique si la dernière date de plus de 7 jours."""
     conn = get_connection()
