@@ -88,7 +88,6 @@ def init_db():
         )
     ''')
     conn.commit()
-    conn.close()
 
 def reinitialiser_toutes_les_bdd():
     conn = get_connection()
@@ -100,7 +99,6 @@ def reinitialiser_toutes_les_bdd():
     c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
     c.execute("DROP TABLE IF EXISTS erreurs_listes")
     conn.commit()
-    conn.close()
 
 
 # --- Utilisateurs ---
@@ -118,12 +116,10 @@ def inscrire_utilisateur(username, password):
         """, (username, hashed_password))
 
         conn.commit()
-        conn.close()
 
         return True
     
     except sqlite3.IntegrityError:
-        conn.close()
         return False
 
 def verifier_connexion(username, password):
@@ -131,7 +127,6 @@ def verifier_connexion(username, password):
     c = conn.cursor()
     c.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
     user = c.fetchone()
-    conn.close()
 
     if user:
         user_id, db_username, db_password, admin = user
@@ -146,7 +141,6 @@ def authentifier_connexion(username, password) :
     c = conn.cursor()
     c.execute("SELECT password FROM users WHERE username = ?", (username,))
     user = c.fetchone()
-    conn.close()
 
     if user:
         db_password = user[0]
@@ -181,11 +175,10 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
             )
             
         conn.commit()
-        conn.close()
+
         return True
         
     except sqlite3.IntegrityError:
-        conn.close()
         return False
 
 def supprimer_compte(user_id):
@@ -194,7 +187,6 @@ def supprimer_compte(user_id):
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM users WHERE id = ?", (user_id,))
     conn.commit()
-    conn.close()
 
 
 # --- LISTES ---
@@ -202,8 +194,7 @@ def recuperer_listes_utilisateur(user_id):
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
-    listes = c.fetchall()
-    conn.close()
+    listes = c.fetchall()    
     return listes
 
 def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
@@ -212,7 +203,6 @@ def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
               (user_id, nom_liste, type_liste))
     conn.commit()
-    conn.close()
 
 def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
     conn = get_connection()
@@ -222,14 +212,12 @@ def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp=""
         VALUES (?, ?, ?, ?, ?, ?)
     """, (liste_id, inf_ou_mot.strip(), present.strip(), preterit.strip(), pp.strip(), traduction.strip()))
     conn.commit()
-    conn.close()
 
 def recuperer_mots_liste(liste_id):
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
     mots = c.fetchall()
-    conn.close()
     return mots
 
 def supprimer_liste(liste_id):
@@ -238,14 +226,12 @@ def supprimer_liste(liste_id):
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
     conn.commit()
-    conn.close()
 
 def renommer_liste(liste_id, nouveau_nom):
     conn = get_connection()
     c = conn.cursor()
     c.execute("UPDATE listes SET nom_liste = ? WHERE id = ?", (nouveau_nom, liste_id))
     conn.commit()
-    conn.close()
 
 def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     """
@@ -323,7 +309,6 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
                 """, (liste_id, mot_complet, trad.strip()))
                 
     conn.commit()
-    conn.close()
 
     return True
 
@@ -335,7 +320,6 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     res = c.fetchone()
     
     if not res:
-        conn.close()
         return False, "Aucune liste trouvée avec cet ID."
     
     nom_liste_origine, type_liste = res
@@ -355,7 +339,6 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
-    conn.close()
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
 def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
@@ -365,13 +348,11 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
     c.execute("SELECT id, username FROM users WHERE id = ?", (ami_user_id,))
     ami = c.fetchone()
     if not ami:
-        conn.close()
         return False, "Aucun utilisateur trouvé avec cet ID."
     
     c.execute("SELECT nom_liste, type_liste FROM listes WHERE id = ?", (liste_id_origine,))
     res = c.fetchone()
     if not res:
-        conn.close()
         return False, "La liste d'origine n'existe plus."
     
     nom_liste, type_liste = res
@@ -391,7 +372,6 @@ def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
         
     conn.commit()
-    conn.close()
     return True, f"Liste partagée avec succès à {ami[1]} !"
 
 def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichier):
@@ -463,7 +443,6 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         """, (nouvelle_liste_id, mot_or, pres, pret, pp, trad))
 
     conn.commit()
-    conn.close()
     
     return True, None
 
@@ -476,7 +455,6 @@ def obtenir_type_liste(liste_id):
     c = conn.cursor()
     c.execute("SELECT type_liste FROM listes WHERE id = ?", (liste_id,))
     resultat = c.fetchone()
-    conn.close()
     
     if resultat:
         return resultat[0]
@@ -496,14 +474,12 @@ def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     ''', (user_id, liste_id, erreurs_texte))
     
     conn.commit()
-    conn.close()
 
 def charger_erreurs(user_id, liste_id):
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT erreurs_json FROM erreurs_listes WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     row = c.fetchone()
-    conn.close()
     
     if row and row[0]:
         data = json.loads(row[0])
@@ -551,7 +527,6 @@ def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_de
         """, (user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis))
         
     conn.commit()
-    conn.close()
 
 def recuperer_score_liste(user_id, liste_id):
     conn = get_connection()
@@ -562,7 +537,6 @@ def recuperer_score_liste(user_id, liste_id):
         WHERE user_id = ? AND liste_id = ?
     """, (user_id, liste_id))
     score = c.fetchone()
-    conn.close()
     return score
 
 def reinitialiser_score_liste(user_id, liste_id):
@@ -570,7 +544,6 @@ def reinitialiser_score_liste(user_id, liste_id):
     c = conn.cursor()
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     conn.commit()
-    conn.close()
 
 
 # --- Bouton pause ---
@@ -585,7 +558,6 @@ def sauvegarder_partie(user_id, liste_id, donnees_dict):
         ON CONFLICT(liste_id) DO UPDATE SET donnees_json = excluded.donnees_json
     ''', (user_id, liste_id, donnees_json))
     conn.commit()
-    conn.close()
 
 def charger_partie_sauvegardee(liste_id):
     """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
@@ -593,7 +565,7 @@ def charger_partie_sauvegardee(liste_id):
     c = conn.cursor()
     c.execute("SELECT donnees_json FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     row = c.fetchone()
-    conn.close()
+
     if row:
         return json.loads(row[0])
     return None
@@ -604,7 +576,6 @@ def supprimer_sauvegarde_partie(liste_id):
     c = conn.cursor()
     c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     conn.commit()
-    conn.close()
 
 
 # --- Sauvegarde ---
@@ -640,7 +611,6 @@ def creer_sauvegarde_interne():
     ''', (date_actuelle, json_donnees))
     
     conn.commit()
-    conn.close()
 
 def verifier_et_sauvegarder_hebdo():
     """Déclenche la sauvegarde automatique si la dernière date de plus de 7 jours."""
@@ -654,7 +624,6 @@ def verifier_et_sauvegarder_hebdo():
     except Exception:
         resultat = None
     finally:
-        conn.close()
     
     doit_sauvegarder = False
     
