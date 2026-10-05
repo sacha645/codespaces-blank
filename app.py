@@ -16,7 +16,7 @@ def get_connection():
     return libsql.connect(database=str(st.secrets["TURSO_DATABASE_URL"]), auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
 
 def get_connection_local() :
-    return get_connection_local()
+    return sqlite3.connect("utilisateurs.db")
 
 def creer_tables_operationnelles(c):
     """Crée les 6 tables de travail communes aux deux bases."""
