@@ -1042,7 +1042,6 @@ if "etat" not in st.session_state:
     st.session_state.etat = "none"
     init_db()
     init_db_local()
-    telecharger_donnees_utilisateur_depuis_turso()
 
 if "user" not in st.session_state:
     st.session_state.user = None
@@ -1237,6 +1236,7 @@ elif st.session_state.etat == "connect":
                 succes, username, user_id, admin = verifier_connexion(nom, mot_de_passe)
                 if succes :
                     st.session_state.user = (username, user_id, admin)
+                    telecharger_donnees_utilisateur_depuis_turso(username)
                     st.session_state.etat = "connecte"
                     st.rerun()
                 else:
