@@ -1,4 +1,5 @@
 import streamlit.components.v1 as components
+from datetime import datetime, timedelta
 from collections import Counter
 import streamlit as st
 import sqlite3
@@ -10,20 +11,25 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 
 
 # --- BASE DE DONNÉES ---
-def init_db():
-    conn = sqlite3.connect("utilisateurs.db")
-    c = conn.cursor()
+def get_connection():
+    return libsql.connect(str(st.secrets["TURSO_DATABASE_URL"]), auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
+
+def get_connection_local() :
+    return get_connection_local()
+
+def creer_tables_operationnelles(c):
+    """Crée les 6 tables de travail communes aux deux bases."""
     
     # 1. Table Utilisateurs
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
+            password TEXT NOT NULL,
+            admin INTEGER NOT NULL DEFAULT 0)
     ''')
     
-    # 2. Table Listes (avec type_liste : 'vocabulaire' ou 'verbe')
+    # 2. Table Listes
     c.execute('''
         CREATE TABLE IF NOT EXISTS listes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +40,7 @@ def init_db():
         )
     ''')
     
-    # 3. Table Mots (avec colonnes pour verbes)
+    # 3. Table Mots
     c.execute('''
         CREATE TABLE IF NOT EXISTS mots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +54,7 @@ def init_db():
         )
     ''')
 
-    # 4. Table Scores (Meilleurs scores par utilisateur et par liste)
+    # 4. Table Scores
     c.execute('''
         CREATE TABLE IF NOT EXISTS scores (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +70,7 @@ def init_db():
         )
     ''')
 
-    # 5. Table Sauvegardes d'entraînement (quiz en pause)
+    # 5. Table Sauvegardes d'entraînement
     c.execute('''
         CREATE TABLE IF NOT EXISTS sauvegardes_quiz (
             user_id INTEGER NOT NULL,
@@ -75,7 +81,7 @@ def init_db():
         )
     ''')
 
-    # 6. Table des erreurs enregistrées par liste et utilisateur
+    # 6. Table des erreurs
     c.execute('''
         CREATE TABLE IF NOT EXISTS erreurs_listes (
             user_id INTEGER NOT NULL,
@@ -86,18 +92,215 @@ def init_db():
             FOREIGN KEY (liste_id) REFERENCES listes (id) ON DELETE CASCADE
         )
     ''')
+
+def init_db():
+    """Initialise la structure globale sur Turso (avec la table sauvegardes_bdd)."""
+
+    conn = get_connection()
+    c = conn.cursor()
+
+    # 1. Users, Listes, Mots, Scores, Quiz, Erreurs...
+    creer_tables_operationnelles(c)
+    
+    # 7. Table des sauvegardes BDD globales (Turso uniquement)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sauvegardes_bdd (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_sauvegarde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            contenu_json TEXT NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
-def reinitialiser_toutes_les_bdd():
-    conn = sqlite3.connect("utilisateurs.db")
+def init_db_local():
+    """Initialise la base locale utilisateurs.db (légère, sans sauvegardes_bdd)."""
+
+    conn = get_connection_local()
     c = conn.cursor()
+
+    # 1 à 6. Tables nécessaires au fonctionnement quotidien
+    creer_tables_operationnelles(c)
+    
+    # Table de métadonnées pour suivre l'horodatage de synchro
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sync_info (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            last_sync TIMESTAMP
+        )
+    ''')
+
+    # Journal des updates de table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS table_updates (
+            table_name TEXT PRIMARY KEY,
+            last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            previous_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    tables_a_suivre = ['listes', 'mots', 'scores', 'sauvegardes_quiz', 'erreurs_listes']
+    for table in tables_a_suivre:
+        for action in ['INSERT', 'UPDATE', 'DELETE']:
+            trigger_name = f"trg_{table}_{action.lower()}"
+            sql_trigger = f'''
+                CREATE TRIGGER IF NOT EXISTS {trigger_name}
+                AFTER {action} ON {table}
+                BEGIN
+                    UPDATE table_updates 
+                    SET last_update = CURRENT_TIMESTAMP
+                    WHERE table_name = '{table}';
+                END;
+            '''
+            c.execute(sql_trigger)
+
+    conn.commit()
+    conn.close()
+
+def creer_sauvegarde_interne_turso():
+    """Exporte l'intégralité des tables métier sur Turso dans sauvegardes_bdd."""
+    conn = get_connection()
+    c = conn.cursor()
+    
+    # 1. S'assurer que la table d'archivage existe
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS sauvegardes_bdd (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_sauvegarde TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            contenu_json TEXT NOT NULL
+        )
+    ''')
+    
+    # 2. Récupération des données de chaque table
+    tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
+    export_donnees = {}
+    
+    for table in tables:
+        c.execute(f"SELECT * FROM {table}")
+        export_donnees[table] = c.fetchall()
+        
+    # 3. Enregistrement de l'instantané (la date est gérée automatiquement par CURRENT_TIMESTAMP ou passée manuellement)
+    date_actuelle = datetime.now().isoformat()
+    json_donnees = json.dumps(export_donnees)
+    
+    c.execute('''
+        INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
+        VALUES (?, ?)
+    ''', (date_actuelle, json_donnees))
+    
+    conn.commit()
+
+def telecharger_donnees_utilisateur_depuis_turso(username):
+    conn_turso = get_connection()
+    c_turso = conn_turso.cursor()
+
+    conn_local = get_connection_local()
+    c_local = conn_local.cursor()
+
+    c_turso.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
+    user = c_turso.fetchone()
+    if not user:
+        conn_turso.close()
+        conn_local.close()
+        return None
+    
+    user_id = user[0]
+
+    # 1. Utilisateur
+    c_local.execute("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?)", user)
+
+    # 2. Listes
+    c_turso.execute("SELECT id, user_id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
+    listes = c_turso.fetchall()
+    for liste in listes:
+        c_local.execute("INSERT OR REPLACE INTO listes VALUES (?, ?, ?, ?)", liste)
+        
+        # 3. Mots associés aux listes
+        liste_id = liste[0]
+        c_turso.execute("SELECT id, liste_id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
+        mots = c_turso.fetchall()
+        for mot in mots:
+            c_local.execute("INSERT OR REPLACE INTO mots VALUES (?, ?, ?, ?, ?, ?, ?)", mot)
+
+    # 4. Scores
+    c_turso.execute("SELECT id, user_id, liste_id, score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr FROM scores WHERE user_id = ?", (user_id,))
+    scores = c_turso.fetchall()
+    for score in scores:
+        c_local.execute("INSERT OR REPLACE INTO scores VALUES (?, ?, ?, ?, ?, ?, ?)", score)
+
+    # 5. Sauvegardes quiz
+    c_turso.execute("SELECT user_id, liste_id, donnees_json FROM sauvegardes_quiz WHERE user_id = ?", (user_id,))
+    sauvegardes = c_turso.fetchall()
+    for sg in sauvegardes:
+        c_local.execute("INSERT OR REPLACE INTO sauvegardes_quiz VALUES (?, ?, ?)", sg)
+
+    # 6. Erreurs
+    c_turso.execute("SELECT user_id, liste_id, erreurs_json FROM erreurs_listes WHERE user_id = ?", (user_id,))
+    erreurs = c_turso.fetchall()
+    for err in erreurs:
+        c_local.execute("INSERT OR REPLACE INTO erreurs_listes VALUES (?, ?, ?)", err)
+
+    # --- 7. Gestion de l'horodatage et déclenchement de sauvegarde Turso ---
+    c_turso.execute("SELECT MAX(date_sauvegarde) FROM sauvegardes_bdd")
+    row_date = c_turso.fetchone()
+    derniere_date_str = row_date[0] if row_date and row_date[0] else None
+
+    faire_sauvegarde = False
+
+    if derniere_date_str:
+        try:
+            # Traitement du format ISO ou SQL classique
+            derniere_date = datetime.fromisoformat(derniere_date_str)
+        except ValueError:
+            derniere_date = datetime.strptime(derniere_date_str, "%Y-%m-%d %H:%M:%S")
+
+        # Vérification si la sauvegarde date de plus de 7 jours (1 semaine)
+        if datetime.now() - derniere_date > timedelta(days=7):
+            faire_sauvegarde = True
+    else:
+        # Aucune sauvegarde présente sur Turso
+        faire_sauvegarde = True
+
+    # Si la sauvegarde est requise, on l'exécute sur Turso
+    if faire_sauvegarde:
+        creer_sauvegarde_interne_turso(conn_turso)
+
+        date_effective = datetime.now().isoformat()
+        c_local.execute("INSERT OR REPLACE INTO sync_info (id, last_sync) VALUES (1, ?)", (date_effective,))
+
+    conn_local.commit()
+    conn_turso.close()
+    conn_local.close()
+
+    return user_id
+
+def obtenir_tables_modifiees():
+    """Retourne la liste des tables dont last_update est plus récent que previous_update."""
+    conn = get_connection_local()
+    c = conn.cursor()
+
+    c.execute('''
+        SELECT table_name 
+        FROM table_updates 
+        WHERE last_update > previous_update
+    ''')
+
+    tables_a_sync = [row[0] for row in c.fetchall()]
+
+    return tables_a_sync
+
+def reinitialiser_toutes_les_bdd(conn):
+    c = conn.cursor()
+
     c.execute("DROP TABLE IF EXISTS users")
     c.execute("DROP TABLE IF EXISTS listes")
     c.execute("DROP TABLE IF EXISTS mots")
     c.execute("DROP TABLE IF EXISTS scores")
     c.execute("DROP TABLE IF EXISTS sauvegardes_quiz")
     c.execute("DROP TABLE IF EXISTS erreurs_listes")
+    c.execute("DROP TABLE IF EXISTS sauvegardes_bdd")
+
     conn.commit()
     conn.close()
 
@@ -106,12 +309,12 @@ def inscrire_utilisateur(username, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     try:
-        conn = sqlite3.connect("utilisateurs.db")
+        conn = get_connection()
         c = conn.cursor()
 
         c.execute("""
-            INSERT INTO users (username, password) 
-            VALUES (?, ?)
+            INSERT INTO users (username, password, admin) 
+            VALUES (?, ?, 0)
         """, (username, hashed_password))
 
         conn.commit()
@@ -124,22 +327,23 @@ def inscrire_utilisateur(username, password):
         return False
 
 def verifier_connexion(username, password):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
-    c.execute("SELECT id, username, password FROM users WHERE username = ?", (username,))
+
+    c.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
     user = c.fetchone()
     conn.close()
 
     if user:
-        user_id, db_username, db_password = user
+        user_id, db_username, db_password, admin = user
 
         if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
-            return True, db_username, user_id
+            return True, db_username, user_id, admin
         
-    return False, None, None
+    return False, None, None, None
 
 def authentifier_connexion(username, password) :
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     c.execute("SELECT password FROM users WHERE username = ?", (username,))
     user = c.fetchone()
@@ -154,7 +358,7 @@ def authentifier_connexion(username, password) :
     return False
 
 def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     
     try:
@@ -185,64 +389,78 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password):
         conn.close()
         return False
 
-def supprimer_compte(user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+def supprimer_compte(user_id, conn):
     c = conn.cursor()
+
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    
     conn.commit()
     conn.close()
 
 init_db()
+init_db_local()
 
 
 # --- FONCTIONS BDD LISTES ET MOTS ---
 def recuperer_listes_utilisateur(user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("SELECT id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
+
     listes = c.fetchall()
     conn.close()
     return listes
 
 def ajouter_liste(user_id, nom_liste, type_liste="vocabulaire"):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
               (user_id, nom_liste, type_liste))
+    
     conn.commit()
     conn.close()
 
 def ajouter_élément_liste(liste_id, inf_ou_mot, present="", preterit="", pp="", traduction=""):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("""
         INSERT INTO mots (liste_id, mot_original, present, preterit, participe_passe, traduction) 
         VALUES (?, ?, ?, ?, ?, ?)
     """, (liste_id, inf_ou_mot.strip(), present.strip(), preterit.strip(), pp.strip(), traduction.strip()))
+
     conn.commit()
     conn.close()
 
 def recuperer_mots_liste(liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("SELECT id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
     mots = c.fetchall()
+
     conn.close()
+ 
     return mots
 
-def supprimer_liste(liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+def supprimer_liste(liste_id, conn):
     c = conn.cursor()
+
     c.execute("PRAGMA foreign_keys = ON")
     c.execute("DELETE FROM listes WHERE id = ?", (liste_id,))
+    
     conn.commit()
     conn.close()
 
 def renommer_liste(liste_id, nouveau_nom):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+    
     c.execute("UPDATE listes SET nom_liste = ? WHERE id = ?", (nouveau_nom, liste_id))
+    
     conn.commit()
     conn.close()
 
@@ -294,7 +512,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
 
 
     # 2. Insertion en BDD uniquement si le format est correct
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     c.execute("DELETE FROM mots WHERE liste_id = ?", (liste_id,))
     
@@ -327,7 +545,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste):
     return True
 
 def importer_liste_par_id(liste_id_origine, nouvel_user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("SELECT nom_liste, type_liste FROM listes WHERE id = ?", (liste_id_origine,))
@@ -358,7 +576,7 @@ def importer_liste_par_id(liste_id_origine, nouvel_user_id):
     return True, f"Liste '{nouveau_nom}' importée avec succès !"
 
 def partager_liste_a_utilisateur(liste_id_origine, ami_user_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection()
     c = conn.cursor()
     
     c.execute("SELECT id, username FROM users WHERE id = ?", (ami_user_id,))
@@ -448,7 +666,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         return 0, None
     
     # 3. Insertion en BDD uniquement si le format est correct
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     
     c.execute("INSERT INTO listes (user_id, nom_liste, type_liste) VALUES (?, ?, ?)", 
@@ -567,9 +785,11 @@ def obtenir_type_liste(liste_id):
     Retourne le type d'une liste ('vocabulaire', 'verbes', etc.) à partir de son ID.
     """
 
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("SELECT type_liste FROM listes WHERE id = ?", (liste_id,))
+    
     resultat = c.fetchone()
     conn.close()
     
@@ -578,7 +798,7 @@ def obtenir_type_liste(liste_id):
     return None
 
 def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     
     # On transforme le dictionnaire en chaîne de texte JSON
@@ -594,8 +814,9 @@ def sauvegarder_erreurs(user_id, liste_id, dictionnaire_erreurs):
     conn.close()
 
 def charger_erreurs(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("SELECT erreurs_json FROM erreurs_listes WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
     row = c.fetchone()
     conn.close()
@@ -657,7 +878,7 @@ st.markdown(
 
 # --- GESTION DU MEILLEUR SCORE ---
 def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
     
     c.execute("SELECT score_vers_fr, score_depuis_fr FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
@@ -683,21 +904,25 @@ def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_de
     conn.close()
 
 def recuperer_score_liste(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("""
         SELECT score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr 
         FROM scores 
         WHERE user_id = ? AND liste_id = ?
     """, (user_id, liste_id))
     score = c.fetchone()
+
     conn.close()
+
     return score
 
-def reinitialiser_score_liste(user_id, liste_id):
-    conn = sqlite3.connect("utilisateurs.db")
+def reinitialiser_score_liste(user_id, liste_id, conn):
     c = conn.cursor()
+
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
+
     conn.commit()
     conn.close()
 
@@ -705,33 +930,40 @@ def reinitialiser_score_liste(user_id, liste_id):
 # --- Bouton pause ---
 def sauvegarder_partie(user_id, liste_id, donnees_dict):
     """Enregistre ou met à jour la progression d'un quiz sous forme de texte JSON."""
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     donnees_json = json.dumps(donnees_dict)
     c.execute('''
         INSERT INTO sauvegardes_quiz (user_id, liste_id, donnees_json)
         VALUES (?, ?, ?)
         ON CONFLICT(liste_id) DO UPDATE SET donnees_json = excluded.donnees_json
     ''', (user_id, liste_id, donnees_json))
+
     conn.commit()
     conn.close()
 
 def charger_partie_sauvegardee(liste_id):
     """Récupère les données sauvegardées d'un quiz pour une liste donnée."""
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local()
     c = conn.cursor()
+
     c.execute("SELECT donnees_json FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
     row = c.fetchone()
+    
     conn.close()
+    
     if row:
         return json.loads(row[0])
     return None
 
-def supprimer_sauvegarde_partie(liste_id):
+def supprimer_sauvegarde_partie(liste_id, conn):
     """Supprime la sauvegarde d'un quiz (quand le quiz est terminé)."""
-    conn = sqlite3.connect("utilisateurs.db")
+
     c = conn.cursor()
+
     c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
+    
     conn.commit()
     conn.close()
 
@@ -810,29 +1042,38 @@ if "toggle_focus" not in st.session_state:
 
 # --- BARRE DE NAVIGATION ---
 if st.session_state.etat == "connecte" : 
-    col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
+    is_col_admin = st.session_state.get("user", ("", "", False))[2]
+        
+    if is_col_admin :
+        col_title, col_admin, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2, 2])
 
-    if "action" in st.session_state:
-        if st.session_state.action == "liste" :
+    else :
+        col_title, col_compte, col_signup, col_action = st.columns([4, 2, 2, 2])
 
-            with col_compte : 
-                if st.button("Profil", use_container_width=True):
-                    st.session_state.action = "compte"
-                    st.session_state.nb_lignes_mots = 2
-                    st.session_state.liste_active_id = None
-                    st.session_state.pop("mots_temp", None)
-                    st.session_state.pop("id_a_suppr", None)
-                    st.session_state.pop("liste_valide", None)
-                    st.rerun()
+    if st.session_state.get("action", None) :
+        if is_col_admin :
+            with col_admin :
+                if st.button("Admin", use_container_width=True):
+                    pass
 
-            with col_signup:
-                if st.button("Déconnexion", use_container_width=True):
-                    for key in list(st.session_state.keys()):
-                        if key != "toggle_focus" :
-                            del st.session_state[key]
-                    st.rerun()
+        with col_compte : 
+            if st.button("Profil", use_container_width=True):
+                st.session_state.action = "compte"
+                st.session_state.nb_lignes_mots = 2
+                st.session_state.liste_active_id = None
+                st.session_state.pop("mots_temp", None)
+                st.session_state.pop("id_a_suppr", None)
+                st.session_state.pop("liste_valide", None)
+                st.rerun()
 
-            with col_action:
+        with col_signup:
+            if st.button("Déconnexion", use_container_width=True):
+                for key in list(st.session_state.keys()):
+                    if key != "toggle_focus" :
+                        del st.session_state[key]
+                st.rerun()
+
+        with col_action:
                 if st.button("🗑️ Supprimer mon compte", type="secondary", use_container_width=True):
                     st.session_state.action = "supprimer"
                     st.session_state.action_suppr = "compte"
@@ -925,7 +1166,7 @@ with col_title:
         st.rerun()
             
     if st.session_state.etat == "connecte":
-        username, user_id = st.session_state.user
+        username, user_id, admin = st.session_state.user
         st.caption(f"Connecté en tant que **{username}** (Ton ID : `{user_id}`)")
     
 ligne_epaisse()
@@ -982,9 +1223,9 @@ elif st.session_state.etat == "connect":
             valider = st.form_submit_button("Se connecter", type="primary")
 
             if valider:
-                succes, username, user_id = verifier_connexion(nom, mot_de_passe)
+                succes, username, user_id, admin = verifier_connexion(nom, mot_de_passe)
                 if succes :
-                    st.session_state.user = (username, user_id)
+                    st.session_state.user = (username, user_id, admin)
                     st.session_state.etat = "connecte"
                     st.rerun()
                 else:
@@ -1255,10 +1496,10 @@ elif st.session_state.etat == "connecte":
                 if st.button("✅ Confirmer", type="primary", use_container_width=True):
                     # Validation du mot de passe actuel avec la BDD
                     if authentifier_connexion(username, mdp_actuel):
-                        
                         # Vérification supplémentaire si le nouveau mot de passe devait être confirmé
                         if mdp_modifie and confirm_mdp != st.session_state.temp_new_password:
                             st.error("Le nouveau mot de passe et sa confirmation ne correspondent pas.")
+                            
                         else:
                             # Mise à jour en base de données
                             final_username = st.session_state.temp_new_username if pseudo_modifie else username
@@ -1275,7 +1516,7 @@ elif st.session_state.etat == "connecte":
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
                                 st.session_state.user = (final_username, user_id)
-                                st.session_state.action = "accueil"
+                                st.session_state.action = "liste"
                                 st.rerun()
                     else:
                         st.error("Le mot de passe actuel est incorrect.")
@@ -1792,7 +2033,8 @@ elif st.session_state.etat == "connecte":
                             st.session_state.nb_lignes_mots = 2
                             st.session_state.pop("mots_temp", None)
                             st.session_state.pop("id_a_suppr", None)
-                            reinitialiser_score_liste(user_id, liste_id)
+                            reinitialiser_score_liste(user_id, liste_id, get_connection())
+                            reinitialiser_score_liste(user_id, liste_id, get_connection_local())
                             st.rerun()
 
                         else :
@@ -1891,7 +2133,8 @@ elif st.session_state.etat == "connecte":
 
                             with col_c2:
                                 if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                    supprimer_sauvegarde_partie(liste_id)
+                                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                                    supprimer_sauvegarde_partie(liste_id, get_connection_local())
                                     st.session_state.choix_reprise = "nouveau"
                                     st.rerun()
 
@@ -1960,7 +2203,8 @@ elif st.session_state.etat == "connecte":
 
                 # 2. VUE FINALE : BILAN DU QUIZ ET SAUVEGARDE EN BDD
                 if index >= len(questions):
-                    supprimer_sauvegarde_partie(liste_id)
+                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                    supprimer_sauvegarde_partie(liste_id, get_connection_local())
 
                     s_v = st.session_state.score_vers_fr
                     t_v = st.session_state.total_vers_fr
@@ -2297,7 +2541,8 @@ elif st.session_state.etat == "connecte":
 
                             with col_c2:
                                 if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                    supprimer_sauvegarde_partie(liste_id)
+                                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                                    supprimer_sauvegarde_partie(liste_id, get_connection_local())
                                     st.session_state.choix_reprise = "nouveau"
                                     st.rerun()
 
@@ -2334,7 +2579,8 @@ elif st.session_state.etat == "connecte":
                 # 2. VUE FINALE : BILAN ET SAUVEGARDE
                 if index >= len(questions):
                     sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur)
-                    supprimer_sauvegarde_partie(liste_id)
+                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                    supprimer_sauvegarde_partie(liste_id, get_connection_local())
 
                     s_v = st.session_state.score_verbes
                     t_v = st.session_state.total_verbes
@@ -2395,7 +2641,8 @@ elif st.session_state.etat == "connecte":
 
                         for err in err_details :
                             st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
-                            c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 2])
+                            c1, c2, c3, c4, c5 = st.columns([2, 2, 2, 2, 1])
+                            
                             c1.markdown(f"""<div style='text-align: center;'><b>{err['verbe']}</b></div>""", unsafe_allow_html=True)
                             c2.markdown(f"""<div style='text-align: center;'>{err["forme"]}</div>""", unsafe_allow_html=True)
                             c3.markdown(f"""<div style='text-align: center;'><span style='color:red;'>{err['rep_user'] if err['rep_user'] else '(vide)'}</span></div>""", unsafe_allow_html=True)
@@ -2629,7 +2876,8 @@ elif st.session_state.etat == "connecte":
             with col_confirmer : 
                 if st.session_state.action_suppr == "compte":
                     if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
-                        supprimer_compte(user_id)
+                        supprimer_compte(user_id, get_connection())
+                        supprimer_compte(user_id, get_connection_local())
                         for key in list(st.session_state.keys()):
                             if key != "toggle_focus" :
                                 del st.session_state[key]
@@ -2637,7 +2885,8 @@ elif st.session_state.etat == "connecte":
 
                 elif st.session_state.action_suppr == "liste":
                     if st.button("🗑️ Oui, supprimer la liste", type="primary", use_container_width=True):
-                        supprimer_liste(liste_id)
+                        supprimer_liste(liste_id, get_connection())
+                        supprimer_liste(liste_id, get_connection_local())
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.pop("action_suppr", None)
@@ -2648,7 +2897,8 @@ elif st.session_state.etat == "connecte":
                         # A. Suppression de la sauvegarde BDD si elle existe
                         liste_id = st.session_state.get("liste_active_id")
                         if liste_id:
-                            supprimer_sauvegarde_partie(liste_id)
+                            supprimer_sauvegarde_partie(liste_id, get_connection())
+                            supprimer_sauvegarde_partie(liste_id, get_connection_local())
 
                         # B. Nettoyage explicite des variables de quiz dans st.session_state
                         clefs = [
@@ -2789,6 +3039,7 @@ elif st.session_state.etat == "connecte":
 # --- On place l'autofocus ---
 placer_curseur(0)
 
+print(obtenir_tables_modifiees())
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
