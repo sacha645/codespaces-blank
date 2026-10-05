@@ -1,4 +1,4 @@
-import libsql_experimental as libsql
+import libsql
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
 from collections import Counter
