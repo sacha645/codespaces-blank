@@ -3058,3 +3058,38 @@ with st.expander("🛠️ Console de débogage (Session State)", expanded=False)
    
     # Affiche l'état complet sous forme JSON/dictionnaire lisible
     st.json(dict(st.session_state))
+
+import streamlit as st
+import pandas as pd
+import sqlite3
+
+def afficher_debug_db_local():
+    st.subheader("🔍 Débogage Base de Données Locale")
+    
+    conn = sqlite3.connect("utilisateurs.db")
+    
+    # Affichage de table_updates
+    st.write("### ⏱️ Table `table_updates`")
+    try:
+        df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
+        st.dataframe(df_updates, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture de table_updates : {e}")
+
+    # Affichage de sync_info
+    st.write("### 🔄 Table `sync_info`")
+    try:
+        df_sync = pd.read_sql_query("SELECT * FROM sync_info", conn)
+        st.dataframe(df_sync, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture de sync_info : {e}")
+
+    # Affichage de tous les triggers
+    st.write("### ⚡ Triggers actifs")
+    try:
+        df_trg = pd.read_sql_query("SELECT name, tbl_name FROM sqlite_master WHERE type='trigger'", conn)
+        st.dataframe(df_trg, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur triggers : {e}")
+
+    conn.close()
