@@ -141,7 +141,7 @@ def init_db_local():
         )
     ''')
 
-    tables_a_suivre = ['listes', 'mots', 'scores', 'sauvegardes_quiz', 'erreurs_listes']
+    tables_a_suivre = ['users', 'listes', 'mots', 'scores', 'sauvegardes_quiz', 'erreurs_listes']
 
     for table in tables_a_suivre:
         c.execute('''
