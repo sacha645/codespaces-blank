@@ -294,8 +294,9 @@ def obtenir_tables_modifiees():
             SELECT table_name 
             FROM table_updates 
             WHERE last_update IS NOT NULL 
+              AND (previous_update IS NULL OR datetime(last_update) > datetime(previous_update))
         ''')
-
+        
         tables_a_sync = [row[0] for row in c.fetchall()]
         
     return tables_a_sync
@@ -3049,10 +3050,11 @@ elif st.session_state.etat == "connecte":
 placer_curseur(0)
 
 st.write(obtenir_tables_modifiees())
+
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
-# with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-#    st.caption("Affiche en temps réel le contenu de st.session_state")
+with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+    st.caption("Affiche en temps réel le contenu de st.session_state")
    
-#    # Affiche l'état complet sous forme JSON/dictionnaire lisible
-#    st.json(dict(st.session_state))
+    # Affiche l'état complet sous forme JSON/dictionnaire lisible
+    st.json(dict(st.session_state))
