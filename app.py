@@ -310,7 +310,7 @@ def inscrire_utilisateur(username, password):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     try:
-        conn = get_connection()
+        conn = get_connection_local()
         c = conn.cursor()
 
         c.execute("""
