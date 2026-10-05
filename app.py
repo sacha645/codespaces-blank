@@ -1,5 +1,6 @@
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
+import libsql_experimental as libsql
 from collections import Counter
 import streamlit as st
 import sqlite3
