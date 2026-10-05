@@ -13,7 +13,15 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 
 # --- BASE DE DONNÉES ---
 def get_connection():
-    return libsql.connect(str(st.secrets["TURSO_DATABASE_URL"]), auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
+    """Connexion légère via HTTP/WebSockets à Turso."""
+    url = str(st.secrets["TURSO_DATABASE_URL"])
+    token = str(st.secrets["TURSO_AUTH_TOKEN"])
+    
+    # Conversion de libsql:// en https:// si nécessaire pour le client léger
+    if url.startswith("libsql://"):
+        url = url.replace("libsql://", "https://")
+        
+    return libsql.create_client_sync(url=url, auth_token=token)
 
 def get_connection_local() :
     return get_connection_local()
