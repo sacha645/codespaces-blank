@@ -1,6 +1,6 @@
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
-import libsql_client as libsql
+import libsql_experimental as libsql
 from collections import Counter
 import streamlit as st
 import sqlite3
@@ -13,15 +13,7 @@ st.set_page_config(page_title="Réviseur", layout="wide")
 
 # --- BASE DE DONNÉES ---
 def get_connection():
-    """Connexion légère via HTTP/WebSockets à Turso."""
-    url = str(st.secrets["TURSO_DATABASE_URL"])
-    token = str(st.secrets["TURSO_AUTH_TOKEN"])
-    
-    # Conversion de libsql:// en https:// si nécessaire pour le client léger
-    if url.startswith("libsql://"):
-        url = url.replace("libsql://", "https://")
-        
-    return libsql.create_client_sync(url=url, auth_token=token)
+    return libsql.connect(database=str(st.secrets["TURSO_DATABASE_URL"]), auth_token=str(st.secrets["TURSO_AUTH_TOKEN"]))
 
 def get_connection_local() :
     return get_connection_local()
