@@ -3093,3 +3093,4 @@ def afficher_debug_db_local():
         st.error(f"Erreur triggers : {e}")
 
     conn.close()
+afficher_debug_db_local()
