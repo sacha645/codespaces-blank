@@ -294,9 +294,8 @@ def obtenir_tables_modifiees():
             SELECT table_name 
             FROM table_updates 
             WHERE last_update IS NOT NULL 
-              AND (previous_update IS NULL OR datetime(last_update) > datetime(previous_update))
         ''')
-        
+
         tables_a_sync = [row[0] for row in c.fetchall()]
         
     return tables_a_sync
