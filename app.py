@@ -142,6 +142,13 @@ def init_db_local():
     ''')
 
     tables_a_suivre = ['listes', 'mots', 'scores', 'sauvegardes_quiz', 'erreurs_listes']
+
+    for table in tables_a_suivre:
+        c.execute('''
+            INSERT OR IGNORE INTO table_updates (table_name, last_update, previous_update)
+            VALUES (?, NULL, NULL)
+        ''', (table,))
+        
     for table in tables_a_suivre:
         for action in ['INSERT', 'UPDATE', 'DELETE']:
             trigger_name = f"trg_{table}_{action.lower()}"
@@ -279,7 +286,7 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
 def obtenir_tables_modifiees():
     """Retourne la liste des tables dont last_update est plus récent que previous_update."""
     tables_a_sync = []
-    
+
     # Utilisation d'un context manager pour gérer la connexion
     with get_connection_local() as conn:
         c = conn.cursor()
@@ -291,8 +298,6 @@ def obtenir_tables_modifiees():
         ''')
         
         tables_a_sync = [row[0] for row in c.fetchall()]
-        
-        c.close()
         
     return tables_a_sync
 
