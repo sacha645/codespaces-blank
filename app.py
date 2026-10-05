@@ -1390,7 +1390,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
-    username, user_id, _ = st.session_state.user
+    username, user_id, admin = st.session_state.user
 
     if "action" not in st.session_state:
         st.session_state.action = "liste"
@@ -1515,7 +1515,7 @@ elif st.session_state.etat == "connecte":
                                 # Nettoyage des données temporaires et retour accueil
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
-                                st.session_state.user = (final_username, user_id)
+                                st.session_state.user = (final_username, user_id, admin)
                                 st.session_state.action = "liste"
                                 st.rerun()
                     else:
