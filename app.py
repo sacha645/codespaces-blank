@@ -1042,6 +1042,7 @@ if "etat" not in st.session_state:
     st.session_state.etat = "none"
     init_db()
     init_db_local()
+    telecharger_donnees_utilisateur_depuis_turso()
 
 if "user" not in st.session_state:
     st.session_state.user = None
