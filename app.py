@@ -278,17 +278,22 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
 
 def obtenir_tables_modifiees():
     """Retourne la liste des tables dont last_update est plus récent que previous_update."""
-    conn = get_connection_local()
-    c = conn.cursor()
-
-    c.execute('''
-        SELECT table_name 
-        FROM table_updates 
-        WHERE last_update > previous_update
-    ''')
-
-    tables_a_sync = [row[0] for row in c.fetchall()]
-
+    tables_a_sync = []
+    
+    # Utilisation d'un context manager pour gérer la connexion
+    with get_connection_local() as conn:
+        c = conn.cursor()
+        c.execute('''
+            SELECT table_name 
+            FROM table_updates 
+            WHERE last_update IS NOT NULL 
+              AND (previous_update IS NULL OR datetime(last_update) > datetime(previous_update))
+        ''')
+        
+        tables_a_sync = [row[0] for row in c.fetchall()]
+        
+        c.close()
+        
     return tables_a_sync
 
 def reinitialiser_toutes_les_bdd(conn):
