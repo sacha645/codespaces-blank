@@ -1391,7 +1391,7 @@ elif st.session_state.etat == "none" or (st.session_state.etat == "connecte" and
 
 # --- 4. ÉTAT : CONNECTE (Espace utilisateur) ---
 elif st.session_state.etat == "connecte":
-    username, user_id = st.session_state.user
+    username, user_id, _ = st.session_state.user
 
     if "action" not in st.session_state:
         st.session_state.action = "liste"
