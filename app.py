@@ -3039,7 +3039,7 @@ elif st.session_state.etat == "connecte":
 # --- On place l'autofocus ---
 placer_curseur(0)
 
-print(obtenir_tables_modifiees())
+st.write(obtenir_tables_modifiees())
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
 # with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
