@@ -1,10 +1,10 @@
-import libsql
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
 from collections import Counter
 import streamlit as st
 import sqlite3
 import random
+import libsql
 import bcrypt
 import json
 
@@ -398,9 +398,6 @@ def supprimer_compte(user_id, conn):
     
     conn.commit()
     conn.close()
-
-init_db()
-init_db_local()
 
 
 # --- FONCTIONS BDD LISTES ET MOTS ---
@@ -1033,6 +1030,8 @@ def placer_curseur(index=0):
 # --- INITIALISATION DU STATE ---
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
+    init_db()
+    init_db_local()
 
 if "user" not in st.session_state:
     st.session_state.user = None
