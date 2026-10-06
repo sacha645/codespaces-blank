@@ -273,7 +273,7 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
 
     # Si la sauvegarde est requise, on l'exécute sur Turso
     if faire_sauvegarde:
-        creer_sauvegarde_interne_turso(conn_turso)
+        creer_sauvegarde_interne_turso()
 
         date_effective = datetime.now().isoformat()
         c_local.execute("INSERT OR REPLACE INTO sync_info (id, last_sync) VALUES (1, ?)", (date_effective,))
