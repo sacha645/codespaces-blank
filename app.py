@@ -124,14 +124,6 @@ def init_db_local():
 
     # 1 à 6. Tables nécessaires au fonctionnement quotidien
     creer_tables_operationnelles(c)
-    
-    # Date sauvegarde de la BDD turso
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS sync_info (
-            id INTEGER PRIMARY KEY CHECK (id = 1),
-            last_sync TIMESTAMP
-        )
-    ''')
 
     # Journal des updates de table
     c.execute('''
@@ -217,38 +209,37 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     user_id = user[0]
 
     # 1. Utilisateur
-    c_local.execute("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?)", user)
+    c_local.execute("DELETE FROM users WHERE id = ?", (user_id,))
+
+    # 1. Utilisateur
+    c_local.execute("INSERT INTO users VALUES (?, ?, ?, ?)", user)
 
     # 2. Listes
     c_turso.execute("SELECT id, user_id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
     listes = c_turso.fetchall()
     for liste in listes:
-        c_local.execute("INSERT OR REPLACE INTO listes VALUES (?, ?, ?, ?)", liste)
+        c_local.execute("INSERT INTO listes VALUES (?, ?, ?, ?)", liste)
         
-        # 3. Mots associés aux listes
+        # 3. Mots associés
         liste_id = liste[0]
         c_turso.execute("SELECT id, liste_id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
         mots = c_turso.fetchall()
-        for mot in mots:
-            c_local.execute("INSERT OR REPLACE INTO mots VALUES (?, ?, ?, ?, ?, ?, ?)", mot)
+        c_local.executemany("INSERT INTO mots VALUES (?, ?, ?, ?, ?, ?, ?)", mots)
 
     # 4. Scores
     c_turso.execute("SELECT id, user_id, liste_id, score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr FROM scores WHERE user_id = ?", (user_id,))
     scores = c_turso.fetchall()
-    for score in scores:
-        c_local.execute("INSERT OR REPLACE INTO scores VALUES (?, ?, ?, ?, ?, ?, ?)", score)
+    c_local.executemany("INSERT INTO scores VALUES (?, ?, ?, ?, ?, ?, ?)", scores)
 
     # 5. Sauvegardes quiz
     c_turso.execute("SELECT user_id, liste_id, donnees_json FROM sauvegardes_quiz WHERE user_id = ?", (user_id,))
     sauvegardes = c_turso.fetchall()
-    for sg in sauvegardes:
-        c_local.execute("INSERT OR REPLACE INTO sauvegardes_quiz VALUES (?, ?, ?)", sg)
+    c_local.executemany("INSERT INTO sauvegardes_quiz VALUES (?, ?, ?)", sauvegardes)
 
     # 6. Erreurs
     c_turso.execute("SELECT user_id, liste_id, erreurs_json FROM erreurs_listes WHERE user_id = ?", (user_id,))
     erreurs = c_turso.fetchall()
-    for err in erreurs:
-        c_local.execute("INSERT OR REPLACE INTO erreurs_listes VALUES (?, ?, ?)", err)
+    c_local.executemany("INSERT INTO erreurs_listes VALUES (?, ?, ?)", erreurs)
 
     # --- 7. Gestion de l'horodatage et déclenchement de sauvegarde Turso ---
     c_turso.execute("SELECT MAX(date_sauvegarde) FROM sauvegardes_bdd")
@@ -274,9 +265,6 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     # Si la sauvegarde est requise, on l'exécute sur Turso
     if faire_sauvegarde:
         creer_sauvegarde_interne_turso()
-
-        date_effective = datetime.now().isoformat()
-        c_local.execute("INSERT OR REPLACE INTO sync_info (id, last_sync) VALUES (1, ?)", (date_effective,))
 
     conn_local.commit()
     conn_turso.close()
