@@ -2,6 +2,7 @@ import streamlit.components.v1 as components
 from datetime import datetime, timedelta
 from collections import Counter
 import streamlit as st
+import threading
 import sqlite3
 import random
 import libsql
@@ -124,7 +125,7 @@ def init_db_local():
     # 1 à 6. Tables nécessaires au fonctionnement quotidien
     creer_tables_operationnelles(c)
     
-    # Table de métadonnées pour suivre l'horodatage de synchro
+    # Date sauvegarde de la BDD turso
     c.execute('''
         CREATE TABLE IF NOT EXISTS sync_info (
             id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -146,11 +147,11 @@ def init_db_local():
     for table in tables_a_suivre:
         c.execute('''
             INSERT OR IGNORE INTO table_updates (table_name, last_update, previous_update)
-            VALUES (?, NULL, NULL)
+            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ''', (table,))
         
     for table in tables_a_suivre:
-        for action in ['INSERT', 'UPDATE', 'DELETE']:
+        for action in ['INSERT', 'UPDATE']:
             trigger_name = f"trg_{table}_{action.lower()}"
             sql_trigger = f'''
                 CREATE TRIGGER IF NOT EXISTS {trigger_name}
@@ -282,6 +283,66 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     conn_local.close()
 
     return user_id
+
+def synchroniser_tables_vers_turso():
+    """Effectue la synchronisation de la BDD locale vers Turso en tâche de fond."""
+    try:
+        tables_a_sync = obtenir_tables_modifiees()
+        if not tables_a_sync:
+            return  # Rien à synchroniser
+
+        conn_local = get_connection_local()
+        # Assure-toi d'avoir une fonction pour vous connecter à Turso
+        conn_turso = get_connection() 
+        
+        c_local = conn_local.cursor()
+        c_turso = conn_turso.cursor()
+
+        for table in tables_a_sync:
+            # 1. Récupération des données locales
+            c_local.execute(f"SELECT * FROM {table}")
+            rows = c_local.fetchall()
+            
+            # Récupération des noms de colonnes
+            c_local.execute(f"PRAGMA table_info({table})")
+            cols = [col[1] for col in c_local.fetchall()]
+            placeholders = ", ".join(["?"] * len(cols))
+            col_names = ", ".join(cols)
+
+            # 2. Envoi vers Turso (Remplace / Insère)
+            c_turso.executemany(
+                f"INSERT OR REPLACE INTO {table} ({col_names}) VALUES ({placeholders})", 
+                rows
+            )
+
+            # 3. Mettre à jour previous_update dans la BDD locale
+            c_local.execute('''
+                UPDATE table_updates 
+                SET previous_update = last_update 
+                WHERE table_name = ?
+            ''', (table,))
+
+        conn_turso.commit()
+        conn_local.commit()
+
+        conn_turso.close()
+        conn_local.close()
+
+    except Exception as e:
+        print(f"Erreur lors de la synchronisation en arrière-plan : {e}")
+
+    finally:
+        if conn_turso:
+            conn_turso.close()
+
+        if conn_local:
+            conn_local.close()
+
+def lancer_synchro_arriere_plan():
+    """Déclenche la synchronisation dans un thread séparé (non-bloquant)."""
+
+    thread = threading.Thread(target=synchroniser_tables_vers_turso, daemon=True)
+    thread.start()
 
 def obtenir_tables_modifiees():
     """Retourne la liste des tables dont last_update est plus récent que previous_update."""
@@ -3050,6 +3111,9 @@ elif st.session_state.etat == "connecte":
 # --- On place l'autofocus ---
 placer_curseur(0)
 
+# --- On lance la synchro en arrière plan ---
+lancer_synchro_arriere_plan()
+
 st.write(obtenir_tables_modifiees())
 
 # --- Déboggeur ---
@@ -3060,9 +3124,8 @@ with st.expander("🛠️ Console de débogage (Session State)", expanded=False)
     # Affiche l'état complet sous forme JSON/dictionnaire lisible
     st.json(dict(st.session_state))
 
-import streamlit as st
+
 import pandas as pd
-import sqlite3
 
 def afficher_debug_db_local():
     st.subheader("🔍 Débogage Base de Données Locale")
