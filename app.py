@@ -3167,7 +3167,7 @@ elif st.session_state.etat == "connecte":
 placer_curseur(0)
 
 
-st.write(obtenir_tables_modifiees(st.session_state.user[0]))
+st.write(obtenir_tables_modifiees())
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
