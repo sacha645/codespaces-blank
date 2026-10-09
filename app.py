@@ -1150,10 +1150,9 @@ def placer_curseur(index=0):
 
 
 # --- INITIALISATION DU STATE ---
-init_db()
-
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
+    init_db()
 
 if "user" not in st.session_state:
     st.session_state.user = None
