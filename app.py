@@ -199,6 +199,9 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     conn_local = get_connection_local()
     c_local = conn_local.cursor()
 
+    # 1. ACTIVATION OBLIGATOIRE des clés étrangères SQLite pour la suppression en cascade
+    c_local.execute("PRAGMA foreign_keys = ON;")
+
     c_turso.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
     user = c_turso.fetchone()
     if not user:
@@ -208,40 +211,46 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     
     user_id = user[0]
 
-    # 1. Utilisateur
+    # Purge en cascade : efface l'utilisateur ET toutes ses tables liées en local
     c_local.execute("DELETE FROM users WHERE id = ?", (user_id,))
 
     # 1. Utilisateur
-    c_local.execute("INSERT INTO users VALUES (?, ?, ?, ?)", user)
+    c_local.execute("INSERT OR REPLACE INTO users VALUES (?, ?, ?, ?)", user)
 
     # 2. Listes
     c_turso.execute("SELECT id, user_id, nom_liste, type_liste FROM listes WHERE user_id = ?", (user_id,))
     listes = c_turso.fetchall()
     for liste in listes:
-        c_local.execute("INSERT INTO listes VALUES (?, ?, ?, ?)", liste)
+        c_local.execute("INSERT OR REPLACE INTO listes VALUES (?, ?, ?, ?)", liste)
         
         # 3. Mots associés
         liste_id = liste[0]
         c_turso.execute("SELECT id, liste_id, mot_original, present, preterit, participe_passe, traduction FROM mots WHERE liste_id = ?", (liste_id,))
         mots = c_turso.fetchall()
-        c_local.executemany("INSERT INTO mots VALUES (?, ?, ?, ?, ?, ?, ?)", mots)
+        c_local.executemany("INSERT OR REPLACE INTO mots VALUES (?, ?, ?, ?, ?, ?, ?)", mots)
 
     # 4. Scores
     c_turso.execute("SELECT id, user_id, liste_id, score_vers_fr, total_vers_fr, score_depuis_fr, total_depuis_fr FROM scores WHERE user_id = ?", (user_id,))
     scores = c_turso.fetchall()
-    c_local.executemany("INSERT INTO scores VALUES (?, ?, ?, ?, ?, ?, ?)", scores)
+    c_local.executemany("INSERT OR REPLACE INTO scores VALUES (?, ?, ?, ?, ?, ?, ?)", scores)
 
     # 5. Sauvegardes quiz
     c_turso.execute("SELECT user_id, liste_id, donnees_json FROM sauvegardes_quiz WHERE user_id = ?", (user_id,))
     sauvegardes = c_turso.fetchall()
-    c_local.executemany("INSERT INTO sauvegardes_quiz VALUES (?, ?, ?)", sauvegardes)
+    c_local.executemany("INSERT OR REPLACE INTO sauvegardes_quiz VALUES (?, ?, ?)", sauvegardes)
 
     # 6. Erreurs
     c_turso.execute("SELECT user_id, liste_id, erreurs_json FROM erreurs_listes WHERE user_id = ?", (user_id,))
     erreurs = c_turso.fetchall()
-    c_local.executemany("INSERT INTO erreurs_listes VALUES (?, ?, ?)", erreurs)
+    c_local.executemany("INSERT OR REPLACE INTO erreurs_listes VALUES (?, ?, ?)", erreurs)
 
-    # --- 7. Gestion de l'horodatage et déclenchement de sauvegarde Turso ---
+    # 7. RÉALIGNEMENT DE LA SYNCHRO : annule le déclenchement intempestif des triggers
+    c_local.execute('''
+        UPDATE table_updates 
+        SET previous_update = last_update
+    ''')
+
+    # 8. Gestion de la sauvegarde hebdo Turso
     c_turso.execute("SELECT MAX(date_sauvegarde) FROM sauvegardes_bdd")
     row_date = c_turso.fetchone()
     derniere_date_str = row_date[0] if row_date and row_date[0] else None
@@ -269,8 +278,6 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     conn_local.commit()
     conn_turso.close()
     conn_local.close()
-
-    return user_id
 
 def synchroniser_tables_vers_turso():
     """Effectue la synchronisation de la BDD locale vers Turso en tâche de fond."""
