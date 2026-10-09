@@ -451,9 +451,8 @@ def inscrire_utilisateur(username, password):
         return False
 
 def verifier_connexion(username, password):
-    conn = get_connection_local(username)
+    conn = get_connection()
     c = conn.cursor()
-
     c.execute("SELECT id, username, password, admin FROM users WHERE username = ?", (username,))
     user = c.fetchone()
     conn.close()
