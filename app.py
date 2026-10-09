@@ -289,7 +289,7 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
 def synchroniser_tables_vers_turso(username):
     """Effectue la synchronisation de la BDD locale vers Turso en tâche de fond."""
     try:
-        tables_a_sync = obtenir_tables_modifiees()
+        tables_a_sync = obtenir_tables_modifiees(username)
         if not tables_a_sync:
             return  # Rien à synchroniser
 
@@ -3167,7 +3167,7 @@ elif st.session_state.etat == "connecte":
 placer_curseur(0)
 
 
-st.write(obtenir_tables_modifiees())
+st.write(obtenir_tables_modifiees(username))
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
