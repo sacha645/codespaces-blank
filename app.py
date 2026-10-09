@@ -1150,6 +1150,8 @@ def placer_curseur(index=0):
 
 
 # --- INITIALISATION DU STATE ---
+init_db()
+
 if "etat" not in st.session_state:
     st.session_state.etat = "none"
 
@@ -1163,9 +1165,6 @@ if "toggle_focus" not in st.session_state:
 # --- BARRE DE NAVIGATION ---
 if st.session_state.etat == "connecte" : 
     username, user_id, admin = st.session_state.user
-
-    init_db()
-    init_db_local(username)
 
     is_col_admin = st.session_state.get("user", ("", "", False))[2]
         
@@ -1351,6 +1350,7 @@ elif st.session_state.etat == "connect":
                 succes, username, user_id, admin = verifier_connexion(nom, mot_de_passe)
                 if succes :
                     st.session_state.user = (username, user_id, admin)
+                    init_db_local(username)
                     telecharger_donnees_utilisateur_depuis_turso(username)
                     st.session_state.etat = "connecte"
                     st.rerun()
