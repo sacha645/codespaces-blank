@@ -3159,8 +3159,13 @@ elif st.session_state.etat == "connecte":
                     st.divider()
 
     # --- On lance la synchro en arrière plan ---
-    if st.session_state.action != "entrainer" and st.session_state.action != "err_entrainer" and index < len(questions) :
+    if st.session_state.action in ("entrainer", "err_entrainer"):
+        if index < len(questions):
+            lancer_synchro_arriere_plan(username)
+            
+    else:
         lancer_synchro_arriere_plan(username)
+
 
 # --- On place l'autofocus ---
 placer_curseur(0)
