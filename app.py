@@ -617,10 +617,10 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste, username):
             if len(art.strip()) > 7 :
                 return 0
 
-            if not(0 < len(mot.strip()) <= 30) :
+            if not(0 < len(mot.strip()) <= 45) :
                 return 1
 
-            if not(0 < len(trad.strip()) <= 30) :
+            if not(0 < len(trad.strip()) <= 45) :
                 return 2
 
         else :
@@ -758,7 +758,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
         if is_voc and len(parts) == 2:
             mots_a_inserer.append((parts[0], "", "", "", parts[1]))
 
-            if not(0 < len(mots_a_inserer[-1][4].strip()) <= 30) :
+            if not(0 < len(mots_a_inserer[-1][4].strip()) <= 45) :
                 return 3, num_ligne 
 
 
@@ -771,7 +771,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
             if len(art.strip()) > 7 :
                 return 1, num_ligne
 
-            if not(0 < len(mot.strip()) <= 30) :
+            if not(0 < len(mot.strip()) <= 45) :
                 return 2, num_ligne 
             
         elif not is_voc and len(parts) == 5:
@@ -1886,12 +1886,12 @@ elif st.session_state.etat == "connecte":
                                     st.warning("Tous les articles ne sont pas valides ! (7 caractères max)")
                                     st.session_state.liste_valide = False
 
-                                if not(0 < len(ligne[1].strip()) <= 30) :
+                                if not(0 < len(ligne[1].strip()) <= 45) :
                                     st.warning("Tous les mots ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
 
-                                if not(0 < len(ligne[5].strip()) <= 30) :
+                                if not(0 < len(ligne[5].strip()) <= 45) :
                                     st.warning("Toutes les traductions ne sont pas valides ! (1 à 30 caractères max)")
                                     st.session_state.liste_valide = False
 
@@ -3165,7 +3165,7 @@ elif st.session_state.etat == "connecte":
 placer_curseur(0)
 
 
-st.write(obtenir_tables_modifiees())
+st.write(obtenir_tables_modifiees(username))
 
 # --- Déboggeur ---
 # On utilise un expander pour garder l'interface propre
