@@ -173,7 +173,7 @@ def init_db_local(username):
         )
     ''')
 
-    tables_a_suivre = ['users', 'listes', 'mots', 'scores', 'sauvegardes_quiz', 'erreurs_listes']
+    tables_a_suivre = ['users', 'listes', 'mots', 'scores', 'erreurs_listes']
 
     for table in tables_a_suivre:
         c.execute('''
@@ -318,10 +318,13 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
     conn_turso.close()
     conn_local.close()
 
-def synchroniser_tables_vers_turso(username):
+def synchroniser_tables_vers_turso(username, autre = None):
     """Effectue la synchronisation de la BDD locale vers Turso en tâche de fond."""
+    if autre is None:
+        autre = []
+
     try:
-        tables_a_sync = obtenir_tables_modifiees(username)
+        tables_a_sync = obtenir_tables_modifiees(username) + autre
         if not tables_a_sync:
             return  # Rien à synchroniser
 
@@ -1284,6 +1287,7 @@ with col_title:
                     }
 
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                    synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                     
                     for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_vers_fr", 
                                  "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
@@ -1301,6 +1305,7 @@ with col_title:
                     }
 
                     sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                    synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                     
                     clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                     for clef in clefs_a_supprimer:
@@ -2612,6 +2617,7 @@ elif st.session_state.etat == "connecte":
                             }
                             
                             sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                            synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                             
                             clefs_a_supprimer = [
                                 "quiz_mots", "quiz_index", "quiz_liste_id", 
@@ -2932,6 +2938,7 @@ elif st.session_state.etat == "connecte":
                             
                             # 2. Sauvegarde en BDD
                             sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                            synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                             
                             # 3. Nettoyage de la session active
                             clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
@@ -3193,11 +3200,7 @@ elif st.session_state.etat == "connecte":
                     st.divider()
 
     # --- On lance la synchro en arrière plan ---
-    if st.session_state.action in ("entrainer", "err_entrainer"):
-        if index < len(questions):
-            lancer_synchro_arriere_plan(username)
-
-    else:
+    if st.session_state.action not in ("entrainer", "err_entrainer"):
         lancer_synchro_arriere_plan(username)
 
 
