@@ -9,6 +9,7 @@ import libsql
 import bcrypt
 import queue
 import json
+import os
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
@@ -26,6 +27,37 @@ def get_connection_local(username: str):
     
     return conn
 
+def renommer_base_locale(ancien_username: str, nouveau_username: str):
+    """
+    Renomme le fichier de base de données d'un utilisateur 
+    ainsi que ses fichiers temporaires WAL/SHM associés.
+    """
+    ancien_db = f"db_{ancien_username}.db"
+    nouveau_db = f"db_{nouveau_username}.db"
+    
+    # Vérifie si le fichier source existe
+    if not os.path.exists(ancien_db):
+        print(f"⚠️ Le fichier {ancien_db} n'existe pas.")
+        return False
+
+    try:
+        # 1. Renommer le fichier principal de la base
+        os.rename(ancien_db, nouveau_db)
+        
+        # 2. Renommer les fichiers annexes du mode WAL s'ils existent
+        for extension in ("-wal", "-shm"):
+            ancien_annexe = ancien_db + extension
+            nouveau_annexe = nouveau_db + extension
+            if os.path.exists(ancien_annexe):
+                os.rename(ancien_annexe, nouveau_annexe)
+                
+        print(f"✅ Base renommée avec succès de {ancien_username} vers {nouveau_username}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Erreur lors du renommage du fichier : {e}")
+        return False
+    
 def creer_tables_operationnelles(c):
     """Crée les 6 tables de travail communes aux deux bases."""
     
@@ -1633,12 +1665,14 @@ elif st.session_state.etat == "connecte":
 
                             else :
                                 # Mise à jour de la session
+                                renommer_base_locale(username, final_username)
                                 username = final_username
 
                                 # Nettoyage des données temporaires et retour accueil
                                 st.session_state.pop("temp_new_username", None)
                                 st.session_state.pop("temp_new_password", None)
                                 st.session_state.user = (final_username, user_id, admin)
+
                                 st.session_state.action = "liste"
                                 st.rerun()
                     else:
@@ -3162,7 +3196,7 @@ elif st.session_state.etat == "connecte":
     if st.session_state.action in ("entrainer", "err_entrainer"):
         if index < len(questions):
             lancer_synchro_arriere_plan(username)
-            
+
     else:
         lancer_synchro_arriere_plan(username)
 
