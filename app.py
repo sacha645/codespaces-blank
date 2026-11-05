@@ -2224,9 +2224,8 @@ elif st.session_state.etat == "connecte":
                             st.session_state.pop("mots_temp", None)
                             st.session_state.pop("id_a_suppr", None)
 
-                            with st.spinner("Sauvegarde en cours..."):
-                                reinitialiser_score_liste(user_id, liste_id, get_connection())
-                                reinitialiser_score_liste(user_id, liste_id, get_connection_local(username))
+                            reinitialiser_score_liste(user_id, liste_id, get_connection())
+                            reinitialiser_score_liste(user_id, liste_id, get_connection_local(username))
 
                             st.rerun()
 
@@ -3098,7 +3097,7 @@ elif st.session_state.etat == "connecte":
                         with st.spinner("Supression de la partie en cours..."):
                             # A. Suppression de la sauvegarde BDD si elle existe
                             liste_id = st.session_state.get("liste_active_id")
-                            
+
                             if liste_id:
                                 supprimer_sauvegarde_partie(liste_id, get_connection())
                                 supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
