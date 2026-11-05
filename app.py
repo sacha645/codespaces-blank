@@ -10,6 +10,7 @@ import bcrypt
 import queue
 import json
 import os
+import time
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
