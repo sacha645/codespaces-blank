@@ -320,6 +320,9 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
 
 def synchroniser_tables_vers_turso(username, autre = None):
     """Effectue la synchronisation de la BDD locale vers Turso en tâche de fond."""
+    
+    time.sleep(0.5)
+    
     if autre is None:
         autre = []
 
@@ -2964,7 +2967,7 @@ elif st.session_state.etat == "connecte":
 
             st.write("")
 
-            tab_direct, tab_id = st.tabs(["📋 Obtenir l'ID de la liste", "👤 Envoyer à un ami"])
+            tab_direct, tab_id = st.tabs(["👤 Envoyer à un ami", "📋 Obtenir l'ID de la liste"])
             
             with tab_id:
                 st.write("")
@@ -3202,6 +3205,7 @@ elif st.session_state.etat == "connecte":
     # --- On lance la synchro en arrière plan ---
     if st.session_state.action not in ("entrainer", "err_entrainer"):
         lancer_synchro_arriere_plan(username)
+
 
 
 # --- On place l'autofocus ---
