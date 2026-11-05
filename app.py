@@ -1244,9 +1244,14 @@ if st.session_state.etat == "connecte" :
 
         with col_signup:
             if st.button("Déconnexion", use_container_width=True):
-                for key in list(st.session_state.keys()):
-                    if key != "toggle_focus" :
-                        del st.session_state[key]
+                with st.spinner("Déconnexion en cours..."):
+                    # Optionnel : petite pause pour laisser le temps de voir le spinner si besoin
+                    # time.sleep(0.3) 
+                    
+                    for key in list(st.session_state.keys()):
+                        if key != "toggle_focus":
+                            del st.session_state[key]
+                            
                 st.rerun()
 
         with col_action:
@@ -1304,8 +1309,9 @@ with col_title:
                         "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                     }
 
-                    sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
-                    synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
+                    with st.spinner("Sauvegarde de la partie en cours..."):
+                        sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                        synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                     
                     for clef in ["quiz_mots", "quiz_index", "quiz_liste_id", "score_vers_fr", 
                                  "total_vers_fr", "score_depuis_fr", "total_depuis_fr", "erreurs_commises"]:
@@ -1322,8 +1328,9 @@ with col_title:
                         "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                     }
 
-                    sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
-                    synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
+                    with st.spinner("Sauvegarde de la partie en cours..."):
+                        sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                        synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                     
                     clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
                     for clef in clefs_a_supprimer:
@@ -2216,8 +2223,11 @@ elif st.session_state.etat == "connecte":
                             st.session_state.nb_lignes_mots = 2
                             st.session_state.pop("mots_temp", None)
                             st.session_state.pop("id_a_suppr", None)
-                            reinitialiser_score_liste(user_id, liste_id, get_connection())
-                            reinitialiser_score_liste(user_id, liste_id, get_connection_local(username))
+
+                            with st.spinner("Sauvegarde en cours..."):
+                                reinitialiser_score_liste(user_id, liste_id, get_connection())
+                                reinitialiser_score_liste(user_id, liste_id, get_connection_local(username))
+
                             st.rerun()
 
                         else :
@@ -2636,9 +2646,10 @@ elif st.session_state.etat == "connecte":
                                 "erreurs_commises": st.session_state.get("erreurs_commises", []),
                                 "type" : "normal" if st.session_state.get("action") == "entrainer" else "erreur"
                             }
-                            
-                            sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
-                            synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
+
+                            with st.spinner("Sauvegarde de la partie en cours..."):
+                                sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                                synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                             
                             clefs_a_supprimer = [
                                 "quiz_mots", "quiz_index", "quiz_liste_id", 
@@ -2958,8 +2969,9 @@ elif st.session_state.etat == "connecte":
                             }
                             
                             # 2. Sauvegarde en BDD
-                            sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
-                            synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
+                            with st.spinner("Sauvegarde de la partie en cours..."):
+                               sauvegarder_partie(user_id, liste_id, etat_a_sauver, username)
+                               synchroniser_tables_vers_turso(username, ["sauvegardes_quiz"])
                             
                             # 3. Nettoyage de la session active
                             clefs_a_supprimer = ["quiz_mots", "quiz_index", "quiz_liste_id", "score_verbes", "total_verbes", "erreurs_compteur", "erreurs_verbes_detail"]
@@ -3061,8 +3073,10 @@ elif st.session_state.etat == "connecte":
             with col_confirmer : 
                 if st.session_state.action_suppr == "compte":
                     if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
-                        supprimer_compte(user_id, get_connection())
-                        supprimer_compte(user_id, get_connection_local(username))
+                        with st.spinner("Supression du compte en cours..."):
+                            supprimer_compte(user_id, get_connection())
+                            supprimer_compte(user_id, get_connection_local(username))
+                        
                         for key in list(st.session_state.keys()):
                             if key != "toggle_focus" :
                                 del st.session_state[key]
@@ -3070,8 +3084,10 @@ elif st.session_state.etat == "connecte":
 
                 elif st.session_state.action_suppr == "liste":
                     if st.button("🗑️ Oui, supprimer la liste", type="primary", use_container_width=True):
-                        supprimer_liste(liste_id, get_connection())
-                        supprimer_liste(liste_id, get_connection_local(username))
+                        with st.spinner("Supression en cours..."):
+                            supprimer_liste(liste_id, get_connection())
+                            supprimer_liste(liste_id, get_connection_local(username))
+                        
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
                         st.session_state.pop("action_suppr", None)
@@ -3079,25 +3095,28 @@ elif st.session_state.etat == "connecte":
 
                 elif st.session_state.action_suppr == "abandon" or st.session_state.action_suppr == "abandon2" :
                     if st.button("💥 Oui, abandonner", type="primary", use_container_width=True):
-                        # A. Suppression de la sauvegarde BDD si elle existe
-                        liste_id = st.session_state.get("liste_active_id")
-                        if liste_id:
-                            supprimer_sauvegarde_partie(liste_id, get_connection())
-                            supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
+                        with st.spinner("Supression de la partie en cours..."):
+                            # A. Suppression de la sauvegarde BDD si elle existe
+                            liste_id = st.session_state.get("liste_active_id")
+                            
+                            if liste_id:
+                                supprimer_sauvegarde_partie(liste_id, get_connection())
+                                supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
 
-                        # B. Nettoyage explicite des variables de quiz dans st.session_state
-                        clefs = [
-                            "quiz_mots", "quiz_index", "quiz_liste_id", 
-                            "score_vers_fr", "total_vers_fr", "score_depuis_fr", "total_depuis_fr", 
-                            "score_verbes", "total_verbes", "erreurs_commises", 
-                            "erreurs_compteur", "erreurs_verbes_detail", "abandon_en_cours", "action_suppr"
-                        ]
-                        for clef in clefs:
-                            st.session_state.pop(clef, None)
+                            # B. Nettoyage explicite des variables de quiz dans st.session_state
+                            clefs = [
+                                "quiz_mots", "quiz_index", "quiz_liste_id", 
+                                "score_vers_fr", "total_vers_fr", "score_depuis_fr", "total_depuis_fr", 
+                                "score_verbes", "total_verbes", "erreurs_commises", 
+                                "erreurs_compteur", "erreurs_verbes_detail", "abandon_en_cours", "action_suppr"
+                            ]
+                            for clef in clefs:
+                                st.session_state.pop(clef, None)
 
-                        # C. Retour à la liste des listes
-                        st.session_state.action = "liste"
-                        st.session_state.liste_active_id = None
+                            # C. Retour à la liste des listes
+                            st.session_state.action = "liste"
+                            st.session_state.liste_active_id = None
+
                         st.rerun()
 
             with col_annuler :
