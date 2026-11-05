@@ -1034,6 +1034,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Grossir les spinners
+st.markdown("""
+    <style>
+    /* Augmente la taille du texte et centre le spinner */
+    .stSpinner > div {
+        font-size: 1.5rem !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 
 # --- GESTION DU MEILLEUR SCORE ---
 def enregistrer_meilleur_score(user_id, liste_id, s_vers, t_vers, s_depuis, t_depuis, username):
