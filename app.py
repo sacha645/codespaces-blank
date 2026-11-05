@@ -3345,12 +3345,20 @@ import pandas as pd
 def afficher_debug_db_local():
     st.subheader("🔍 Débogage Base de Données Locale")
     
-    conn = sqlite3.connect("utilisateurs.db")
+    conn = get_connection_local(username)
     
     # Affichage de table_updates
     st.write("### ⏱️ Table `table_updates`")
     try:
         df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
+        st.dataframe(df_updates, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture de table_updates : {e}")
+
+    # Affichage de table_updates_supr
+    st.write("### ⏱️ Table `table_updates_suppr`")
+    try:
+        df_updates = pd.read_sql_query("SELECT * FROM table_updates_suppr", conn)
         st.dataframe(df_updates, use_container_width=True)
     except Exception as e:
         st.error(f"Erreur lors de la lecture de table_updates : {e}")
