@@ -3204,7 +3204,8 @@ elif st.session_state.etat == "connecte":
                     st.divider()
 
     # --- On lance la synchro en arrière plan ---
-    if st.session_state.action not in ("entrainer", "err_entrainer"):
+if st.session_state.action not in ("entrainer", "err_entrainer"):
+    with st.spinner("Lancement de la synchronisation..."):
         lancer_synchro_arriere_plan(username)
 
 
