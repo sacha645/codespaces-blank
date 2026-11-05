@@ -190,6 +190,10 @@ def init_db_local(username):
             INSERT OR IGNORE INTO table_updates (table_name, last_update, previous_update)
             VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ''', (table,))
+        c.execute('''
+            INSERT OR IGNORE INTO table_updates_suppr (table_name, last_update, previous_update)
+            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ''', (table,))
 
         for action in ['INSERT', 'UPDATE']:
             # 1. Triggers standard pour INSERT et UPDATE
@@ -205,18 +209,18 @@ def init_db_local(username):
             '''
             c.execute(sql_trigger)
 
-            # 2. Trigger spécial et dédié pour DELETE
-            trigger_name_delete = f"trg_{table}_delete"
-            sql_trigger_delete = f'''
-                CREATE TRIGGER IF NOT EXISTS {trigger_name_delete}
-                AFTER DELETE ON {table}
-                BEGIN
-                    UPDATE table_updates_suppr 
-                    SET last_update = CURRENT_TIMESTAMP
-                    WHERE table_name = '{table}';
-                END;
-            '''
-            c.execute(sql_trigger_delete)
+        # 2. Trigger spécial et dédié pour DELETE
+        trigger_name = f"trg_{table}_delete"
+        sql_trigger = f'''
+            CREATE TRIGGER IF NOT EXISTS {trigger_name}
+            AFTER DELETE ON {table}
+            BEGIN
+                UPDATE table_updates_suppr 
+                SET last_update = CURRENT_TIMESTAMP
+                WHERE table_name = '{table}';
+            END;
+        '''
+        c.execute(sql_trigger)
 
     conn.commit()
     conn.close()
