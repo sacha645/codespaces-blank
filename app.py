@@ -355,7 +355,7 @@ def synchroniser_tables_vers_turso(username, autre = None):
         autre = []
 
     try:
-        tables_a_sync = obtenir_tables_modifiees(username)
+        tables_a_sync = obtenir_tables_suppr(username)
 
         if tables_a_sync:
             conn_local = get_connection_local(username)
