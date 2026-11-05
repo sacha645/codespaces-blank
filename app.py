@@ -1390,8 +1390,11 @@ elif st.session_state.etat == "connect":
                 succes, username, user_id, admin = verifier_connexion(nom, mot_de_passe)
                 if succes :
                     st.session_state.user = (username, user_id, admin)
-                    init_db_local(username)
-                    telecharger_donnees_utilisateur_depuis_turso(username)
+
+                    with st.spinner("Connexion et téléchargement de vos données en cours..."):
+                        init_db_local(username)
+                        telecharger_donnees_utilisateur_depuis_turso(username)
+
                     st.session_state.etat = "connecte"
                     st.rerun()
                 else:
@@ -3205,9 +3208,7 @@ elif st.session_state.etat == "connecte":
 
     # --- On lance la synchro en arrière plan ---
     if st.session_state.action not in ("entrainer", "err_entrainer"):
-        with st.spinner("Lancement de la synchronisation..."):
-            lancer_synchro_arriere_plan(username)
-
+        lancer_synchro_arriere_plan(username)
 
 
 # --- On place l'autofocus ---
