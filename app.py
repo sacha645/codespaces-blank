@@ -459,7 +459,7 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
             c.execute(f"SELECT * FROM {table}")
             export_securite[table] = c.fetchall()
 
-        date_secu = datetime.now().isoforat()
+        date_secu = datetime.now().isoformat()
         c.execute('''
             INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
             VALUES (?, ?)
