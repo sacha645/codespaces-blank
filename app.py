@@ -456,7 +456,7 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
             c.execute(f"SELECT * FROM {table}")
             export_securite[table] = c.fetchall()
 
-        date_secu = f"{datetime.now().isoformat()} (Auto-backup avant restauration #{sauvegarde_id})"
+        date_secu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         c.execute('''
             INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
             VALUES (?, ?)
@@ -3215,7 +3215,7 @@ elif st.session_state.etat == "connecte":
             else:
                 for bdd_id, date_sauv, contenu_json in sauvegardes:
                     # Chaque sauvegarde a son propre menu déroulant (expander)
-                    with st.expander(f"📦 Sauvegarde #{bdd_id} — {datetime.fromisoformat(date_sauv.split(' ')[0]).strftime('%d/%m/%y - %H:%M:%S')}"):
+                    with st.expander(f"📦 Sauvegarde #{bdd_id} — {datetime.strptime(date_sauv[:19], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%y - %H:%M:%S')}"):
                         col_info, col_action = st.columns([3, 1])
 
                         with col_info:
