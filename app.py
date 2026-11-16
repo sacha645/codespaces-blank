@@ -2096,7 +2096,9 @@ elif st.session_state.etat == "connecte":
                     c5.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
+                    n = 0
                     for mot in mots:
+                        n += 1
                         id_m, inf, pres, pret, pp, trad = mot
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
