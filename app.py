@@ -456,7 +456,7 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
             c.execute(f"SELECT * FROM {table}")
             export_securite[table] = c.fetchall()
 
-        date_secu = f"{datetime.now().isoformat()} (Auto-backup avant restauration #{sauvegarde_id})"
+        date_secu = datetime.now().isoformat()
         c.execute('''
             INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
             VALUES (?, ?)
