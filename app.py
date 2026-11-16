@@ -2155,7 +2155,7 @@ elif st.session_state.etat == "connecte":
                             trad_disp = trad
 
                         cm0, cm1, cm2 = st.columns([5, 47.5, 47.5])
-                        cm0.markdown(, unsafe_allow_html=True)
+                        cm0.markdown(n, unsafe_allow_html=True)
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
                         cm2.markdown(trad_disp, unsafe_allow_html=True)
 
