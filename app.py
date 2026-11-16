@@ -2155,10 +2155,14 @@ elif st.session_state.etat == "connecte":
                             trad_disp = trad
 
                         cm0, cm1, cm2 = st.columns([5, 47.5, 47.5])
+                        # cm0 reste aligné normalement (à gauche par défaut)
                         cm0.markdown(n, unsafe_allow_html=True)
-                        cm1.markdown(mot_disp, unsafe_allow_html=True)
-                        cm2.markdown(trad_disp, unsafe_allow_html=True)
 
+                        # cm1 : on force le texte à se centrer
+                        cm1.markdown(f"<div style='text-align: center;'>{mot_disp}</div>", unsafe_allow_html=True)
+
+                        # cm2 : on force aussi le texte à se centrer
+                        cm2.markdown(f"<div style='text-align: center;'>{trad_disp}</div>", unsafe_allow_html=True)
             ligne_epaisse()
             st.write("")
 
