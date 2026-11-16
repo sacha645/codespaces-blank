@@ -3230,8 +3230,12 @@ elif st.session_state.etat == "connecte":
                             # key unique obligatoire dans une boucle Streamlit
                             if st.button("Restaurer", key=f"btn_restore_{bdd_id}", type="secondary"):
                                 try:
-                                    with st.spinner(f"Sauvegarde de sécurité et restauration de #{bdd_id}..."):
+                                    with st.spinner(f"Sauvegarde de sécurité et restauration de #{bdd_id}...") :
                                         restaurer_sauvegarde_turso(bdd_id)
+
+                                    with st.spinner(f"téléchargement de vos données en cours de vos anciennes données... #{bdd_id}...") :
+                                        telecharger_donnees_utilisateur_depuis_turso(username)
+
                                     st.success(f"Base restaurée sur la version #{bdd_id} ! (Une sauvegarde de sécurité a été créée).")
                                     st.rerun()
                                 except Exception as e:
