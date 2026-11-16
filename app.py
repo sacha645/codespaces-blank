@@ -1231,6 +1231,7 @@ if st.session_state.etat == "connecte" :
             with col_admin :
                 if st.button("Admin", use_container_width=True):
                     st.session_state.action = "admin"
+                    st.rerun()
                     pass
 
         with col_compte : 
