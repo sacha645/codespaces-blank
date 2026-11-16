@@ -2117,12 +2117,16 @@ elif st.session_state.etat == "connecte":
                             col.markdown(txt_html, unsafe_allow_html=True)
                             has_errors += k
                 else:
-                    c_m1, c_m2 = st.columns(2)
+                    c_m0, c_m1, c_m2 = st.columns([5, 47.5, 47.5])
+                    c_m0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
                     c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
                     c_m2.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
+                    n = 0
                     for mot in mots:
+                        n += 1
+                        
                         id_m, mot_or, _, _, _, trad = mot
 
                         # Supprime les éventuels "!"
@@ -2150,7 +2154,8 @@ elif st.session_state.etat == "connecte":
                         else :
                             trad_disp = trad
 
-                        cm1, cm2 = st.columns(2)
+                        cm0, cm1, cm2 = st.columns([5, 47.5, 47.5])
+                        cm0.markdown(, unsafe_allow_html=True)
                         cm1.markdown(mot_disp, unsafe_allow_html=True)
                         cm2.markdown(trad_disp, unsafe_allow_html=True)
 
