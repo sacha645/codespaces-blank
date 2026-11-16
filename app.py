@@ -2087,7 +2087,8 @@ elif st.session_state.etat == "connecte":
                 has_errors = 0
 
                 if type_liste == "verbe":
-                    c1, c2, c3, c4, c5 = st.columns(5)
+                    c0, c1, c2, c3, c4, c5 = st.columns([10, 18, 18, 18, 18, 18])
+                    c0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
                     c1.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
                     c2.markdown("<u>**Présent :**</u>", unsafe_allow_html=True)
                     c3.markdown("<u>**Prétérit :**</u>", unsafe_allow_html=True)
@@ -2096,7 +2097,7 @@ elif st.session_state.etat == "connecte":
                     st.write("")
 
                     for mot in mots:
-                        id_m, inf, pres, pret, pp, trad = mot
+                        n, (id_m, inf, pres, pret, pp, trad) = enumerate(mot, 1)
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
                         def fmt_v(texte, idx_f):
@@ -2105,7 +2106,10 @@ elif st.session_state.etat == "connecte":
                                 return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>", 1
                             return texte, 0
 
-                        cols = st.columns(5)
+                        cols = st.columns([10, 18, 18, 18, 18, 18])
+
+                        cols[0].write(str(n))
+
                         elements = [(inf, 1), (pres, 2), (pret, 3), (pp, 4), (trad, 5)]
 
                         for col, (texte, idx) in zip(cols, elements):
