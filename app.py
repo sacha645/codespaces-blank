@@ -1097,11 +1097,9 @@ st.markdown(
     }
     
     .centre {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
     }
     
     .stSpinner > div {
@@ -2115,8 +2113,8 @@ elif st.session_state.etat == "connecte":
                 else:
                     c_m0, c_m1, c_m2 = st.columns([5, 47.5, 47.5])
                     c_m0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
-                    c_m1.markdown("<u class = 'center'>**Mot :**</u>", unsafe_allow_html=True)
-                    c_m2.markdown("<u class = 'center'>**Traduction :**</u>", unsafe_allow_html=True)
+                    c_m1.markdown("<u style='text-align: center;'>**Mot :**</u>", unsafe_allow_html=True)
+                    c_m2.markdown("<u style='text-align: center;'>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
                     n = 0
@@ -2155,10 +2153,10 @@ elif st.session_state.etat == "connecte":
                         cm0.markdown(n, unsafe_allow_html=True)
 
                         # cm1 : on force le texte à se centrer
-                        cm1.markdown(f"<div class = 'center'>{mot_disp}</div>", unsafe_allow_html=True)
+                        cm1.markdown(f"<div style='text-align: center;'>{mot_disp}</div>", unsafe_allow_html=True)
 
                         # cm2 : on force aussi le texte à se centrer
-                        cm2.markdown(f"<div class = 'center'>{trad_disp}</div>", unsafe_allow_html=True)
+                        cm2.markdown(f"<div style='text-align: center;'>{trad_disp}</div>", unsafe_allow_html=True)
             ligne_epaisse()
             st.write("")
 
