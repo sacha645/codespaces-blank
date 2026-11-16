@@ -2083,11 +2083,11 @@ elif st.session_state.etat == "connecte":
                 if type_liste == "verbe":
                     c0, c1, c2, c3, c4, c5 = st.columns([10, 18, 18, 18, 18, 18])
                     c0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
-                    c1.markdown("<u>**Infinitif :**</u>", unsafe_allow_html=True)
-                    c2.markdown("<u>**Présent :**</u>", unsafe_allow_html=True)
-                    c3.markdown("<u>**Prétérit :**</u>", unsafe_allow_html=True)
-                    c4.markdown("<u>**Participe Passé :**</u>", unsafe_allow_html=True)
-                    c5.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
+                    c1.markdown("<div style='text-align: center;'><u><b>Infinitif :</b></u></div>", unsafe_allow_html=True)
+                    c2.markdown("<div style='text-align: center;'><u><b>Présent :</b></u></div>", unsafe_allow_html=True)
+                    c3.markdown("<div style='text-align: center;'><u><b>Prétérit :</b></u></div>", unsafe_allow_html=True)
+                    c4.markdown("<div style='text-align: center;'><u><b>Participe Passé :</b></u></div>", unsafe_allow_html=True)
+                    c5.markdown("<div style='text-align: center;'><u><b>Traduction :</b></u></div>", unsafe_allow_html=True)
                     st.write("")
 
                     n = 0
@@ -2099,8 +2099,16 @@ elif st.session_state.etat == "connecte":
                         def fmt_v(texte, idx_f):
                             is_err = isinstance(errs, dict) and errs.get(idx_f, 0) >= 2
                             if is_err:
-                                return f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>", 1
-                            return texte, 0
+                                valeur_formatee = f"<span style='color: #FF4B4B; font-weight: bold;'>{texte}</span>"
+                            else:
+                                valeur_formatee = str(texte)
+                                    
+                            if idx_f == 0:
+                                html = texte
+                            else:
+                                html = f"<div style='text-align: center;'>{valeur_formatee}</div>"
+
+                            return html, (1 if is_err else 0)
 
                         cols = st.columns([10, 18, 18, 18, 18, 18])
 
@@ -2110,11 +2118,12 @@ elif st.session_state.etat == "connecte":
                             txt_html, k = fmt_v(texte, idx)
                             col.markdown(txt_html, unsafe_allow_html=True)
                             has_errors += k
+
                 else:
                     c_m0, c_m1, c_m2 = st.columns([5, 47.5, 47.5])
                     c_m0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
-                    c_m1.markdown("<div class='centre'><u style='text-align: center;'><b>Mot :</b></u></div>", unsafe_allow_html=True)
-                    c_m2.markdown("<div class='centre'><u style='text-align: center;'><b>Traduction :</b></u></div>", unsafe_allow_html=True)
+                    c_m1.markdown("<div><u style='text-align: center;'><b>Mot :</b></u></div>", unsafe_allow_html=True)
+                    c_m2.markdown("<div><u style='text-align: center;'><b>Traduction :</b></u></div>", unsafe_allow_html=True)
                     st.write("")
 
                     n = 0
