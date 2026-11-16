@@ -174,15 +174,6 @@ def init_db_local(username):
         )
     ''')
 
-    # Journal des updates de table spécial supressions
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS table_updates_suppr (
-            table_name TEXT PRIMARY KEY,
-            last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            previous_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-
     tables_a_suivre = ['users', 'listes', 'mots', 'scores', 'erreurs_listes']
 
     for table in tables_a_suivre:
@@ -190,13 +181,9 @@ def init_db_local(username):
             INSERT OR IGNORE INTO table_updates (table_name, last_update, previous_update)
             VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         ''', (table,))
-        c.execute('''
-            INSERT OR IGNORE INTO table_updates_suppr (table_name, last_update, previous_update)
-            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ''', (table,))
-
+        
+    for table in tables_a_suivre:
         for action in ['INSERT', 'UPDATE']:
-            # 1. Triggers standard pour INSERT et UPDATE
             trigger_name = f"trg_{table}_{action.lower()}"
             sql_trigger = f'''
                 CREATE TRIGGER IF NOT EXISTS {trigger_name}
@@ -208,19 +195,6 @@ def init_db_local(username):
                 END;
             '''
             c.execute(sql_trigger)
-
-        # 2. Trigger spécial et dédié pour DELETE
-        trigger_name = f"trg_{table}_delete"
-        sql_trigger = f'''
-            CREATE TRIGGER IF NOT EXISTS {trigger_name}
-            AFTER DELETE ON {table}
-            BEGIN
-                UPDATE table_updates_suppr 
-                SET last_update = CURRENT_TIMESTAMP
-                WHERE table_name = '{table}';
-            END;
-        '''
-        c.execute(sql_trigger)
 
     conn.commit()
     conn.close()
@@ -316,11 +290,6 @@ def telecharger_donnees_utilisateur_depuis_turso(username):
         SET previous_update = last_update
     ''')
 
-    c_local.execute('''
-        UPDATE table_updates_suppr 
-        SET previous_update = last_update
-    ''')
-
     # 8. Gestion de la sauvegarde hebdo Turso
     c_turso.execute("SELECT MAX(date_sauvegarde) FROM sauvegardes_bdd")
     row_date = c_turso.fetchone()
@@ -359,45 +328,6 @@ def synchroniser_tables_vers_turso(username, autre = None):
         autre = []
 
     try:
-        tables_a_sync = obtenir_tables_suppr(username)
-
-        if tables_a_sync:
-            conn_local = get_connection_local(username)
-            conn_turso = get_connection() 
-            
-            c_local = conn_local.cursor()
-            c_turso = conn_turso.cursor()
-
-            for table in tables_a_sync:
-                # 1. Récupération des données locales
-                c_local.execute(f"SELECT * FROM {table}")
-                rows = c_local.fetchall()
-
-                # SÉCURITÉ : Si la table locale est vide par erreur, on ne vide pas Turso !
-                if not rows and table != "tables_qui_peuvent_etre_vides":
-                    return  # On annule la synchro de cette table pour protéger le cloud
-
-                # 2. Récupération des noms de colonnes
-                c_local.execute(f"PRAGMA table_info({table})")
-                cols = [col[1] for col in c_local.fetchall()]
-                placeholders = ", ".join(["?"] * len(cols))
-                col_names = ", ".join(cols)
-
-                # 3. Nettoyage et réinsertion sécurisés
-                c_turso.execute(f"DELETE FROM {table}")
-                c_turso.executemany(
-                    f"INSERT INTO {table} ({col_names}) VALUES ({placeholders})", 
-                    rows
-                )
-
-                # 4. Mettre à jour previous_update dans la BDD locale
-                c_local.execute('''
-                    UPDATE table_updates_suppr 
-                    SET previous_update = last_update 
-                    WHERE table_name = ?
-                ''', (table,))
-
-
         tables_a_sync = obtenir_tables_modifiees(username) + autre
         if not tables_a_sync:
             return  # Rien à synchroniser
@@ -413,19 +343,19 @@ def synchroniser_tables_vers_turso(username, autre = None):
             c_local.execute(f"SELECT * FROM {table}")
             rows = c_local.fetchall()
             
-            # 2. Récupération des noms de colonnes
+            # Récupération des noms de colonnes
             c_local.execute(f"PRAGMA table_info({table})")
             cols = [col[1] for col in c_local.fetchall()]
             placeholders = ", ".join(["?"] * len(cols))
             col_names = ", ".join(cols)
 
-            # 3. Envoi vers Turso (Remplace / Insère)
+            # 2. Envoi vers Turso (Remplace / Insère)
             c_turso.executemany(
                 f"INSERT OR REPLACE INTO {table} ({col_names}) VALUES ({placeholders})", 
                 rows
             )
 
-            # 4. Mettre à jour previous_update dans la BDD locale
+            # 3. Mettre à jour previous_update dans la BDD locale
             c_local.execute('''
                 UPDATE table_updates 
                 SET previous_update = last_update 
@@ -513,27 +443,6 @@ def obtenir_tables_modifiees(username):
         c.execute('''
             SELECT table_name 
             FROM table_updates 
-            WHERE last_update IS NOT NULL 
-            AND (previous_update IS NULL OR datetime(last_update) > datetime(previous_update))
-        ''')
-        tables_a_sync = [row[0] for row in c.fetchall()]
-        
-    finally:
-        conn.close()
-        
-    return tables_a_sync
-
-def obtenir_tables_suppr(username):
-    """Retourne la liste des tables dont last_update est plus récent que previous_update."""
-    tables_a_sync = []
-
-    conn = get_connection_local(username)
-    
-    try:
-        c = conn.cursor()
-        c.execute('''
-            SELECT table_name 
-            FROM table_updates_suppr 
             WHERE last_update IS NOT NULL 
             AND (previous_update IS NULL OR datetime(last_update) > datetime(previous_update))
         ''')
@@ -642,8 +551,7 @@ def modifier_profil_bdd(user_id, nouveau_username, nouveau_password, username):
         conn.close()
         return False
 
-def supprimer_compte(user_id, username):
-    conn = get_connection_local(username)
+def supprimer_compte(user_id, conn):
     c = conn.cursor()
 
     c.execute("PRAGMA foreign_keys = ON")
@@ -697,8 +605,7 @@ def recuperer_mots_liste(liste_id, username):
  
     return mots
 
-def supprimer_liste(liste_id, username):
-    conn = get_connection_local(username)
+def supprimer_liste(liste_id, conn):
     c = conn.cursor()
 
     c.execute("PRAGMA foreign_keys = ON")
@@ -1184,8 +1091,7 @@ def recuperer_score_liste(user_id, liste_id, username):
 
     return score
 
-def reinitialiser_score_liste(user_id, liste_id, username):
-    conn = get_connection_local(username)
+def reinitialiser_score_liste(user_id, liste_id, conn):
     c = conn.cursor()
 
     c.execute("DELETE FROM scores WHERE user_id = ? AND liste_id = ?", (user_id, liste_id))
@@ -1224,10 +1130,9 @@ def charger_partie_sauvegardee(liste_id, username):
         return json.loads(row[0])
     return None
 
-def supprimer_sauvegarde_partie(liste_id, username):
+def supprimer_sauvegarde_partie(liste_id, conn):
     """Supprime la sauvegarde d'un quiz (quand le quiz est terminé)."""
 
-    conn = get_connection_local(username)
     c = conn.cursor()
 
     c.execute("DELETE FROM sauvegardes_quiz WHERE liste_id = ?", (liste_id,))
@@ -2318,7 +2223,10 @@ elif st.session_state.etat == "connecte":
                             st.session_state.nb_lignes_mots = 2
                             st.session_state.pop("mots_temp", None)
                             st.session_state.pop("id_a_suppr", None)
-                            reinitialiser_score_liste(user_id, liste_id, username)
+
+                            with st.spinner("Sauvegarde en cours..."):
+                                reinitialiser_score_liste(user_id, liste_id, get_connection())
+                                reinitialiser_score_liste(user_id, liste_id, get_connection_local(username))
 
                             st.rerun()
 
@@ -2418,7 +2326,8 @@ elif st.session_state.etat == "connecte":
 
                             with col_c2:
                                 if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                    supprimer_sauvegarde_partie(liste_id, username)
+                                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                                    supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
                                     st.session_state.choix_reprise = "nouveau"
                                     st.rerun()
 
@@ -2487,7 +2396,8 @@ elif st.session_state.etat == "connecte":
 
                 # 2. VUE FINALE : BILAN DU QUIZ ET SAUVEGARDE EN BDD
                 if index >= len(questions):
-                    supprimer_sauvegarde_partie(liste_id, username)
+                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                    supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
 
                     s_v = st.session_state.score_vers_fr
                     t_v = st.session_state.total_vers_fr
@@ -2826,7 +2736,8 @@ elif st.session_state.etat == "connecte":
 
                             with col_c2:
                                 if st.button("🔄 Recommencer à zéro", type="secondary", use_container_width=True):
-                                    supprimer_sauvegarde_partie(liste_id, username)
+                                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                                    supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
                                     st.session_state.choix_reprise = "nouveau"
                                     st.rerun()
 
@@ -2863,7 +2774,8 @@ elif st.session_state.etat == "connecte":
                 # 2. VUE FINALE : BILAN ET SAUVEGARDE
                 if index >= len(questions):
                     sauvegarder_erreurs(user_id, liste_id, st.session_state.erreurs_compteur, username)
-                    supprimer_sauvegarde_partie(liste_id, username)
+                    supprimer_sauvegarde_partie(liste_id, get_connection())
+                    supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
 
                     s_v = st.session_state.score_verbes
                     t_v = st.session_state.total_verbes
@@ -3162,8 +3074,8 @@ elif st.session_state.etat == "connecte":
                 if st.session_state.action_suppr == "compte":
                     if st.button("🗑️ Oui, supprimer mon compte", type="primary", use_container_width=True):
                         with st.spinner("Supression du compte en cours..."):
-                            supprimer_compte(user_id, username)
-                        
+                            supprimer_compte(user_id, get_connection())
+                            supprimer_compte(user_id, get_connection_local(username))
                         for key in list(st.session_state.keys()):
                             if key != "toggle_focus" :
                                 del st.session_state[key]
@@ -3172,7 +3084,8 @@ elif st.session_state.etat == "connecte":
                 elif st.session_state.action_suppr == "liste":
                     if st.button("🗑️ Oui, supprimer la liste", type="primary", use_container_width=True):
                         with st.spinner("Supression en cours..."):
-                            supprimer_liste(liste_id, username)
+                            supprimer_liste(liste_id, get_connection())
+                            supprimer_liste(liste_id, get_connection_local(username))
                         
                         st.session_state.action = "liste"
                         st.session_state.liste_active_id = None
@@ -3181,27 +3094,25 @@ elif st.session_state.etat == "connecte":
 
                 elif st.session_state.action_suppr == "abandon" or st.session_state.action_suppr == "abandon2" :
                     if st.button("💥 Oui, abandonner", type="primary", use_container_width=True):
-                        with st.spinner("Supression de la partie en cours..."):
-                            # A. Suppression de la sauvegarde BDD si elle existe
-                            liste_id = st.session_state.get("liste_active_id")
+                        # A. Suppression de la sauvegarde BDD si elle existe
+                        liste_id = st.session_state.get("liste_active_id")
+                        if liste_id:
+                            supprimer_sauvegarde_partie(liste_id, get_connection())
+                            supprimer_sauvegarde_partie(liste_id, get_connection_local(username))
 
-                            if liste_id:
-                                supprimer_sauvegarde_partie(liste_id, username)
+                        # B. Nettoyage explicite des variables de quiz dans st.session_state
+                        clefs = [
+                            "quiz_mots", "quiz_index", "quiz_liste_id", 
+                            "score_vers_fr", "total_vers_fr", "score_depuis_fr", "total_depuis_fr", 
+                            "score_verbes", "total_verbes", "erreurs_commises", 
+                            "erreurs_compteur", "erreurs_verbes_detail", "abandon_en_cours", "action_suppr"
+                        ]
+                        for clef in clefs:
+                            st.session_state.pop(clef, None)
 
-                            # B. Nettoyage explicite des variables de quiz dans st.session_state
-                            clefs = [
-                                "quiz_mots", "quiz_index", "quiz_liste_id", 
-                                "score_vers_fr", "total_vers_fr", "score_depuis_fr", "total_depuis_fr", 
-                                "score_verbes", "total_verbes", "erreurs_commises", 
-                                "erreurs_compteur", "erreurs_verbes_detail", "abandon_en_cours", "action_suppr"
-                            ]
-                            for clef in clefs:
-                                st.session_state.pop(clef, None)
-
-                            # C. Retour à la liste des listes
-                            st.session_state.action = "liste"
-                            st.session_state.liste_active_id = None
-
+                        # C. Retour à la liste des listes
+                        st.session_state.action = "liste"
+                        st.session_state.liste_active_id = None
                         st.rerun()
 
             with col_annuler :
@@ -3349,20 +3260,12 @@ import pandas as pd
 def afficher_debug_db_local():
     st.subheader("🔍 Débogage Base de Données Locale")
     
-    conn = get_connection_local(username)
+    conn = sqlite3.connect("utilisateurs.db")
     
     # Affichage de table_updates
     st.write("### ⏱️ Table `table_updates`")
     try:
         df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
-        st.dataframe(df_updates, use_container_width=True)
-    except Exception as e:
-        st.error(f"Erreur lors de la lecture de table_updates : {e}")
-
-    # Affichage de table_updates_supr
-    st.write("### ⏱️ Table `table_updates_suppr`")
-    try:
-        df_updates = pd.read_sql_query("SELECT * FROM table_updates_suppr", conn)
         st.dataframe(df_updates, use_container_width=True)
     except Exception as e:
         st.error(f"Erreur lors de la lecture de table_updates : {e}")
