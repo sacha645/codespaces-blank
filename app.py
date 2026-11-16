@@ -1097,9 +1097,11 @@ st.markdown(
     }
     
     .centre {
-    text-align: center;
-    align-items: center;
-    justify-content: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
     
     .stSpinner > div {
