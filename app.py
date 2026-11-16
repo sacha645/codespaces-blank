@@ -3261,24 +3261,36 @@ import pandas as pd
 
 def afficher_debug_db_local():
     st.subheader("🔍 Débogage Base de Données Locale")
-    
-    conn = sqlite3.connect("utilisateurs.db")
+
+    with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
+        st.caption("Affiche en temps réel le contenu de st.session_state")
+        
+        # Affiche l'état complet sous forme JSON/dictionnaire lisible
+        st.json(dict(st.session_state))
+        
+        # Optionnel : Bouton pour vider la session et recommencer à zéro
+        if st.button("🗑️ Vider le session_state"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+
+    # conn = sqlite3.connect("utilisateurs.db")
     
     # Affichage de table_updates
-    st.write("### ⏱️ Table `table_updates`")
-    try:
-        df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
-        st.dataframe(df_updates, use_container_width=True)
-    except Exception as e:
-        st.error(f"Erreur lors de la lecture de table_updates : {e}")
+    # st.write("### ⏱️ Table `table_updates`")
+    # try:
+    #     df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
+    #     st.dataframe(df_updates, use_container_width=True)
+    # except Exception as e:
+    #     st.error(f"Erreur lors de la lecture de table_updates : {e}")
 
     # Affichage de tous les triggers
-    st.write("### ⚡ Triggers actifs")
-    try:
-        df_trg = pd.read_sql_query("SELECT name, tbl_name FROM sqlite_master WHERE type='trigger'", conn)
-        st.dataframe(df_trg, use_container_width=True)
-    except Exception as e:
-        st.error(f"Erreur triggers : {e}")
+    # st.write("### ⚡ Triggers actifs")
+    # try:
+    #     df_trg = pd.read_sql_query("SELECT name, tbl_name FROM sqlite_master WHERE type='trigger'", conn)
+    #     st.dataframe(df_trg, use_container_width=True)
+    # except Exception as e:
+    #     st.error(f"Erreur triggers : {e}")
 
-    conn.close()
+    # conn.close()
 afficher_debug_db_local()
