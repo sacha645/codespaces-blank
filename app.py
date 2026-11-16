@@ -432,6 +432,64 @@ def lancer_synchro_arriere_plan(username, manager=synchro_manager):
     """Déclenche la synchronisation via le gestionnaire injecté en argument."""
     manager.demander_synchro(username)
 
+def restaurer_sauvegarde_turso(sauvegarde_id):
+    """
+    Crée une sauvegarde de sécurité de l'état actuel, puis restaure la sauvegarde choisie.
+    Si une erreur survient, tout est annulé (y compris la sauvegarde de sécurité).
+    """
+    conn = get_connection()
+    c = conn.cursor()
+
+    # 1. Récupération de la sauvegarde cible
+    c.execute("SELECT contenu_json FROM sauvegardes_bdd WHERE id = ?", (sauvegarde_id,))
+    res = c.fetchone()
+    if not res:
+        raise ValueError(f"Aucune sauvegarde trouvée avec l'ID {sauvegarde_id}.")
+    donnees_a_restaurer = json.loads(res[0])
+
+    tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
+
+    try:
+        # --- ÉTAPE A : Sauvegarde de sécurité (dans la même transaction) ---
+        export_securite = {}
+        for table in tables:
+            c.execute(f"SELECT * FROM {table}")
+            export_securite[table] = c.fetchall()
+
+        date_secu = f"{datetime.now().isoformat()} (Auto-backup avant restauration #{sauvegarde_id})"
+        c.execute('''
+            INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
+            VALUES (?, ?)
+        ''', (date_secu, json.dumps(export_securite)))
+
+        # --- ÉTAPE B : Restauration de l'ancienne BDD ---
+        c.execute("PRAGMA foreign_keys = OFF;")
+
+        for table in reversed(tables):
+            c.execute(f"DELETE FROM {table}")
+            c.execute("DELETE FROM sqlite_sequence WHERE name = ?", (table,))
+
+        for table in tables:
+            lignes = donnees_a_restaurer.get(table, [])
+            if lignes:
+                nb_colonnes = len(lignes[0])
+                placeholders = ", ".join(["?"] * nb_colonnes)
+                valeurs = [tuple(ligne) for ligne in lignes]
+                c.executemany(f"INSERT INTO {table} VALUES ({placeholders})", valeurs)
+
+        c.execute("PRAGMA foreign_keys = ON;")
+
+        # --- ÉTAPE C : Validation globale ---
+        # Si on arrive ici sans erreur, la sauvegarde de sécurité ET la restauration sont validées
+        conn.commit()
+        return True
+
+    except Exception as e:
+        # En cas d'erreur, on annule tout : la BDD reste intacte et l'auto-backup est annulé
+        conn.rollback()
+        c.execute("PRAGMA foreign_keys = ON;")
+        raise e
+    
 def obtenir_tables_modifiees(username):
     """Retourne la liste des tables dont last_update est plus récent que previous_update."""
     tables_a_sync = []
@@ -1232,7 +1290,6 @@ if st.session_state.etat == "connecte" :
                 if st.button("Admin", use_container_width=True):
                     st.session_state.action = "admin"
                     st.rerun()
-                    pass
 
         with col_compte : 
             if st.button("Profil", use_container_width=True):
@@ -3132,7 +3189,56 @@ elif st.session_state.etat == "connecte":
                     st.session_state.pop("action_suppr", None)
                     st.rerun()
 
-        # CAS J : VUE NORMALE (AFFICHAGE DES LISTES)
+        # CAS J : Pannel Admin
+        elif st.session_state.action == "admin":
+            st.header("🛠️ Panneau d'administration — Sauvegardes Turso")
+            st.warning("⚠️ Assurez-vous qu'aucun utilisateur n'est actif avant de restaurer une base de données.")
+
+            # Bouton pour créer une sauvegarde manuelle à tout moment
+            if st.button("➕ Créer une nouvelle sauvegarde maintenant", type="primary"):
+                with st.spinner("Sauvegarde en cours sur Turso..."):
+                    creer_sauvegarde_interne_turso()
+                st.success("Sauvegarde créée avec succès !")
+                st.rerun()
+
+            st.divider()
+            st.subheader("Historique des sauvegardes (de la plus récente à la plus ancienne)")
+
+            conn = get_connection()
+            c = conn.cursor()
+            # On récupère les sauvegardes triées par ID décroissant (plus récente en haut)
+            c.execute("SELECT id, date_sauvegarde, contenu_json FROM sauvegardes_bdd ORDER BY id DESC")
+            sauvegardes = c.fetchall()
+
+            if not sauvegardes:
+                st.info("Aucune sauvegarde disponible pour le moment.")
+            else:
+                for bdd_id, date_sauv, contenu_json in sauvegardes:
+                    # Chaque sauvegarde a son propre menu déroulant (expander)
+                    with st.expander(f"📦 Sauvegarde #{bdd_id} — {date_sauv}"):
+                        col_info, col_action = st.columns([3, 1])
+
+                        with col_info:
+                            try:
+                                apercu = json.loads(contenu_json)
+                                stats = " | ".join([f"**{t}** : {len(lignes)}" for t, lignes in apercu.items()])
+                                st.markdown(f"Contenu : {stats}")
+                            except Exception:
+                                st.caption("Aperçu indisponible")
+
+                        with col_action:
+                            # key unique obligatoire dans une boucle Streamlit
+                            if st.button("Restaurer", key=f"btn_restore_{bdd_id}", type="secondary"):
+                                try:
+                                    with st.spinner(f"Sauvegarde de sécurité et restauration de #{bdd_id}..."):
+                                        restaurer_sauvegarde_turso(bdd_id)
+                                    st.success(f"Base restaurée sur la version #{bdd_id} ! (Une sauvegarde de sécurité a été créée).")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Échec de la restauration (aucune modification appliquée) : {e}")
+
+
+        # CAS K : VUE NORMALE (AFFICHAGE DES LISTES)
         else:
             st.write("")
 
@@ -3261,36 +3367,24 @@ import pandas as pd
 
 def afficher_debug_db_local():
     st.subheader("🔍 Débogage Base de Données Locale")
-
-    with st.expander("🛠️ Console de débogage (Session State)", expanded=False):
-        st.caption("Affiche en temps réel le contenu de st.session_state")
-        
-        # Affiche l'état complet sous forme JSON/dictionnaire lisible
-        st.json(dict(st.session_state))
-        
-        # Optionnel : Bouton pour vider la session et recommencer à zéro
-        if st.button("🗑️ Vider le session_state"):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
-
-    # conn = sqlite3.connect("utilisateurs.db")
+    
+    conn = sqlite3.connect("utilisateurs.db")
     
     # Affichage de table_updates
-    # st.write("### ⏱️ Table `table_updates`")
-    # try:
-    #     df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
-    #     st.dataframe(df_updates, use_container_width=True)
-    # except Exception as e:
-    #     st.error(f"Erreur lors de la lecture de table_updates : {e}")
+    st.write("### ⏱️ Table `table_updates`")
+    try:
+        df_updates = pd.read_sql_query("SELECT * FROM table_updates", conn)
+        st.dataframe(df_updates, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture de table_updates : {e}")
 
     # Affichage de tous les triggers
-    # st.write("### ⚡ Triggers actifs")
-    # try:
-    #     df_trg = pd.read_sql_query("SELECT name, tbl_name FROM sqlite_master WHERE type='trigger'", conn)
-    #     st.dataframe(df_trg, use_container_width=True)
-    # except Exception as e:
-    #     st.error(f"Erreur triggers : {e}")
+    st.write("### ⚡ Triggers actifs")
+    try:
+        df_trg = pd.read_sql_query("SELECT name, tbl_name FROM sqlite_master WHERE type='trigger'", conn)
+        st.dataframe(df_trg, use_container_width=True)
+    except Exception as e:
+        st.error(f"Erreur triggers : {e}")
 
-    # conn.close()
+    conn.close()
 afficher_debug_db_local()
