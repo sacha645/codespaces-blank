@@ -1230,6 +1230,7 @@ if st.session_state.etat == "connecte" :
         if is_col_admin :
             with col_admin :
                 if st.button("Admin", use_container_width=True):
+                    st.session_state.action = "admin"
                     pass
 
         with col_compte : 
