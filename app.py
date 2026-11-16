@@ -449,6 +449,7 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
 
     tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
 
+    backup_id = None
     try:
         c.execute("BEGIN")
 
@@ -458,7 +459,7 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
             c.execute(f"SELECT * FROM {table}")
             export_securite[table] = c.fetchall()
 
-        date_secu = datetime.now().isoformat()
+        date_secu = datetime.now().isoforat()
         c.execute('''
             INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
             VALUES (?, ?)
@@ -3236,7 +3237,7 @@ elif st.session_state.etat == "connecte":
                             except Exception:
                                 st.caption("Aperçu indisponible")
 
-                        with col_action:
+                        with col_restore :
                             # key unique obligatoire dans une boucle Streamlit
                             if st.button("Restaurer", key=f"btn_restore_{bdd_id}", type="secondary"):
                                 try:
@@ -3248,6 +3249,7 @@ elif st.session_state.etat == "connecte":
 
                                     st.success(f"Base restaurée sur la version #{bdd_id} ! (Une sauvegarde de sécurité a été créée).")
                                     st.rerun()
+                                    
                                 except Exception as e:
                                     st.error(f"Échec de la restauration (aucune modification appliquée) : {e}")
 
