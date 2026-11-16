@@ -11,8 +11,6 @@ import queue
 import json
 import os
 import time
-import csv
-import io
 
 st.set_page_config(page_title="Réviseur", layout="wide")
 
@@ -705,7 +703,7 @@ def remplacer_mots_liste(liste_id, nouveaux_mots, type_liste, username):
     """
 
     # 1. Analyse et validation préalable du fichier
-    is_voc = (type_liste == "vocabulaire")
+    is_voc = True if type_liste == "vocabulaire" else False
     last_ligne = list(nouveaux_mots)[-1]
 
     toutes_lignes_visibles_remplies = True
@@ -855,23 +853,15 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
 
     lignes = contenu_fichier.splitlines()
     mots_a_inserer = []
-    is_voc = (type_liste == "vocabulaire")
+    is_voc = True if type_liste == "vocabulaire" else False
     
     # 1. Analyse et validation préalable du fichier
-    for num_ligne, ligne in enumerate(lignes, 1):
+    for num_ligne, ligne in enumerate(lignes, 1) :
         ligne = ligne.strip()
         if not ligne:
             continue
         
-        # Utilisation de csv.reader pour tolérer des virgules si elles sont entre guillemets
-        lecteur_csv = csv.reader(io.StringIO(ligne), delimiter=',', skipinitialspace=True)
-        try:
-            parts = next(lecteur_csv)
-        except StopIteration:
-            continue
-            
-        # Nettoyage des espaces superflus sur chaque morceau
-        parts = [p.strip() for p in parts]
+        parts = [p.strip() for p in ligne.split(",")]
         
         # Vérification stricte : exactement 2 colonnes pour vocabulaire, 5 pour verbes t si les mot font la bonne taille
         if is_voc and len(parts) == 2:
