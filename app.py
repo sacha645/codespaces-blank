@@ -1101,15 +1101,7 @@ st.markdown(
     align-items: center;
     justify-content: center;
     }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Grossir les spinners
-st.markdown("""
-    <style>
-    /* Augmente la taille du texte et centre le spinner */
+    
     .stSpinner > div {
         font-size: 1.5rem !important;
         display: flex;
@@ -1118,7 +1110,9 @@ st.markdown("""
         padding: 2rem;
     }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # --- GESTION DU MEILLEUR SCORE ---
@@ -2119,8 +2113,8 @@ elif st.session_state.etat == "connecte":
                 else:
                     c_m0, c_m1, c_m2 = st.columns([5, 47.5, 47.5])
                     c_m0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
-                    c_m1.markdown("<u>**Mot :**</u>", unsafe_allow_html=True)
-                    c_m2.markdown("<u>**Traduction :**</u>", unsafe_allow_html=True)
+                    c_m1.markdown("<u class = 'center'>**Mot :**</u>", unsafe_allow_html=True)
+                    c_m2.markdown("<u class = 'center'>**Traduction :**</u>", unsafe_allow_html=True)
                     st.write("")
 
                     n = 0
@@ -2159,10 +2153,10 @@ elif st.session_state.etat == "connecte":
                         cm0.markdown(n, unsafe_allow_html=True)
 
                         # cm1 : on force le texte à se centrer
-                        cm1.markdown(f"<div style='text-align: center;'>{mot_disp}</div>", unsafe_allow_html=True)
+                        cm1.markdown(f"<div class = 'center'>{mot_disp}</div>", unsafe_allow_html=True)
 
                         # cm2 : on force aussi le texte à se centrer
-                        cm2.markdown(f"<div style='text-align: center;'>{trad_disp}</div>", unsafe_allow_html=True)
+                        cm2.markdown(f"<div class = 'center'>{trad_disp}</div>", unsafe_allow_html=True)
             ligne_epaisse()
             st.write("")
 
