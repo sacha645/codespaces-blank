@@ -2113,8 +2113,8 @@ elif st.session_state.etat == "connecte":
                 else:
                     c_m0, c_m1, c_m2 = st.columns([5, 47.5, 47.5])
                     c_m0.markdown("<u>**n° :**</u>", unsafe_allow_html=True)
-                    c_m1.markdown("<u class='centre'>**Mot :**</u>", unsafe_allow_html=True)
-                    c_m2.markdown("<div class='centre'><u style='text-align: center;'>**Traduction :**</u></div>", unsafe_allow_html=True)
+                    c_m1.markdown("<div class='centre'><u style='text-align: center;'><b>Mot :</b></u></div>", unsafe_allow_html=True)
+                    c_m2.markdown("<div class='centre'><u style='text-align: center;'><b>Traduction :</b></u></div>", unsafe_allow_html=True)
                     st.write("")
 
                     n = 0
