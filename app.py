@@ -450,6 +450,8 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
     tables = ["users", "listes", "mots", "scores", "sauvegardes_quiz", "erreurs_listes"]
 
     try:
+        c.execute("BEGIN")
+
         # --- ÉTAPE A : Sauvegarde de sécurité (dans la même transaction) ---
         export_securite = {}
         for table in tables:
@@ -461,6 +463,8 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
             INSERT INTO sauvegardes_bdd (date_sauvegarde, contenu_json)
             VALUES (?, ?)
         ''', (date_secu, json.dumps(export_securite)))
+
+        backup_id = c.lastrowid
 
         # --- ÉTAPE B : Restauration de l'ancienne BDD ---
         c.execute("PRAGMA foreign_keys = OFF;")
@@ -487,6 +491,12 @@ def restaurer_sauvegarde_turso(sauvegarde_id):
     except Exception as e:
         # En cas d'erreur, on annule tout : la BDD reste intacte et l'auto-backup est annulé
         conn.rollback()
+        if backup_id is not None:
+            try:
+                c.execute("DELETE FROM sauvegardes_bdd WHERE id = ?", (backup_id,))
+                conn.commit()
+            except Exception:
+                pass
         c.execute("PRAGMA foreign_keys = ON;")
         raise e
     
@@ -3216,7 +3226,7 @@ elif st.session_state.etat == "connecte":
                 for bdd_id, date_sauv, contenu_json in sauvegardes:
                     # Chaque sauvegarde a son propre menu déroulant (expander)
                     with st.expander(f"📦 Sauvegarde #{bdd_id} — {datetime.fromisoformat(date_sauv.split(' ')[0]).strftime('%d/%m/%y - %H:%M:%S')}"):
-                        col_info, col_action = st.columns([3, 1])
+                        col_info, col_restore, col_delete = st.columns([3, 1, 1])
 
                         with col_info:
                             try:
@@ -3240,6 +3250,12 @@ elif st.session_state.etat == "connecte":
                                     st.rerun()
                                 except Exception as e:
                                     st.error(f"Échec de la restauration (aucune modification appliquée) : {e}")
+
+                        with col_delete:
+                            if st.button("Supprimer", key=f"btn_delete_{bdd_id}", type="secondary"):
+                                c.execute("DELETE FROM sauvegardes_bdd WHERE id = ?", (bdd_id,))
+                                conn.commit()
+                                st.rerun()
 
 
         # CAS K : VUE NORMALE (AFFICHAGE DES LISTES)
