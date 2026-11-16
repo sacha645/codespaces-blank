@@ -848,6 +848,7 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
     - 2 : mot inexistant ou trop long (voc)
     - 3 : traduction inexistante ou trop long (voc)
     - 4 : forme manquante ou trop longue (verbe)
+    - 5 : séparateur de trop ou manquant
     """
 
     lignes = contenu_fichier.splitlines()
@@ -869,7 +870,6 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
             if not(0 < len(mots_a_inserer[-1][4].strip()) <= 45) :
                 return 3, num_ligne 
 
-
             colonne_mot = mots_a_inserer[-1][0].strip()
             if " " in colonne_mot and "!" not in colonne_mot[0] :
                 art, mot = colonne_mot.split(" ", 1)
@@ -888,6 +888,9 @@ def importer_liste_depuis_fichier(user_id, nom_liste, type_liste, contenu_fichie
             for x in mots_a_inserer[-1] :
                 if not(0 < len(x.strip()) <= 30) :
                     return 4, num_ligne
+
+        else :
+            return 5, num_ligne
 
     # 2. Si aucun mot n'est valide (mauvais format/séparateur), on n'insère rien en BDD
     if not mots_a_inserer:
@@ -1844,7 +1847,7 @@ elif st.session_state.etat == "connecte":
                 else:
                     st.info("**Format attendu :** `article mot, traduction en français` (un mot par ligne)  \n\n"
                             "**IMPORTANT :**  \n"
-                            "- L'article est facultatif  \n"
+                            "- L'article est facultatif, et dois faire 7 caractères maximum \n"
                             "- Si l'un de vos mots de vocabulaire utilise des espaces qui ne servent pas à séparer l'article du mot (comme dans une expression, par exemple), il faut mettre un point d'exclamation (!) au début de la ligne.")
 
                 fichier_uploade = st.file_uploader("Choisis un fichier .txt", type=["txt"], accept_multiple_files=False)
@@ -1882,6 +1885,9 @@ elif st.session_state.etat == "connecte":
 
                             elif succes == 4 :
                                 st.error(f"L'une des formes du verbe est manquante ou trop longue ! Elle doit faire entre 1 et 30 caractères max.   \nProblème ligne : {pb}")
+
+                            elif succes == 5 :
+                                st.error(f"Un séparateur de trop, ou manquant, a été détecté sur cette ligne.   \nProblème ligne : {pb}") 
 
             st.write("")
             ligne_epaisse()
