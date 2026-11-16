@@ -2097,7 +2097,7 @@ elif st.session_state.etat == "connecte":
                     st.write("")
 
                     for mot in mots:
-                        n, (id_m, inf, pres, pret, pp, trad) = enumerate(mot, 1)
+                        id_m, inf, pres, pret, pp, trad = mot
                         errs = compteur_err.get(id_m, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0})
                         
                         def fmt_v(texte, idx_f):
@@ -2108,9 +2108,7 @@ elif st.session_state.etat == "connecte":
 
                         cols = st.columns([10, 18, 18, 18, 18, 18])
 
-                        cols[0].write(str(n))
-
-                        elements = [(inf, 1), (pres, 2), (pret, 3), (pp, 4), (trad, 5)]
+                        elements = [(n, 0), (inf, 1), (pres, 2), (pret, 3), (pp, 4), (trad, 5)]
 
                         for col, (texte, idx) in zip(cols, elements):
                             txt_html, k = fmt_v(texte, idx)
